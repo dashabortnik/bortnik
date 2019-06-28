@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Contact List</title>
+    <link rel="shortcut icon" href="#" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js"></script>
+
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+    <div class="container">
+        <h1 class="text-light"><a  class="text-decoration-none" href="/">Contact List</a></h1>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+                aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" onclick="openContactForm()">CREATE</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="openEditForm(navigate)">EDIT</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="deleteContact()">DELETE</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="sendEmail()">SEND EMAIL</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div id="myDiv"></div>
+<div id="trash"></div>
+<footer id="sticky-footer" class="py-4 bg-dark text-white-50 flex-shrink-0 fixed-bottom">
+    <div class="container text-center">
+        <small>Bortnik Darya | iTechArt Students Lab</small>
+    </div>
+</footer>
+<script src="./js/handler.js"></script>
+</body>
+</html>
+
+<!--Mustache template for the main page. Displays a table with all contacts.-->
+
+<script id="mainTableTemplate" type="text/template">
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered table-hover">
+            <thead class="bg-light">
+            <tr>
+                <th class="align-middle text-center">Check</th>
+                <th class="align-middle text-center">Full name</th>
+                <th class="align-middle text-center">Birthday</th>
+                <th class="align-middle text-center">Address</th>
+                <th class="align-middle text-center">Workplace</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {{#.}}
+            <tr>
+                <td class="align-middle text-center"><input type="checkbox" name="#" value="?" class="check" id="{{id}}"></td>
+                <td class="align-middle"><a href="contacts/{{& id}}" onclick="navigate(this.getAttribute('href'), retrieveImage);">{{surname}}
+                    {{name}}
+                    {{patronymic}}</a></td>
+                <td class="align-middle">{{birthday}}</td>
+                <td class="align-middle">{{address.country}}, {{address.city}}, {{address.street}}</td>
+                <td class="align-middle">{{workplace}}</td>
+            </tr>
+            {{/.}}
+            </tbody>
+        </table>
+    </div>
+</script>
+
+<!--Mustache template for the contact page. Displays a table with detailed info about the chosen contact.-->
+
+<script id="contactTemplate" type="text/template">
+    <span class="rounded float-right col-6 col-md-4 text-center"> <img
+            src="{{^photoLink}}https://clck.ru/Gbg5h{{/photoLink}}" class="img-fluid img-thumbnail avatar">
+        <!--{{& photoLink}}-->
+    </span>
+    <table class="table table-sm table-bordered table-hover col-12 col-md-8">
+        <tbody>
+        <tr>
+            <th class="bg-light">Surname</th>
+            <td>{{surname}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Name</th>
+            <td>{{name}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Patronymic</th>
+            <td>{{patronymic}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Birthday</th>
+            <td>{{birthday}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Gender</th>
+            <td>{{gender}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Nationality</th>
+            <td>{{nationality}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Marital status</th>
+            <td>{{maritalStatus}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Website</th>
+            <td>{{website}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Email</th>
+            <td>{{email}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Workplace</th>
+            <td>{{workplace}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Address</th>
+            <td>{{address.country}},{{address.city}},{{address.street}},{{address.postcode}}</td>
+        </tr>
+        </tbody>
+    </table>
+    <h2>Telephone numbers</h2>
+    <table>
+        <thead class="bg-light">
+        <tr>
+            <th class="align-middle text-center">Check</th>
+            <th class="align-middle text-center">Phone number</th>
+            <th class="align-middle text-center">Phone type</th>
+            <th class="align-middle text-center">Comment</th>
+        </tr>
+        </thead>
+
+    </table>
+
+</script>
+
+<!--Mustache template for the form of a new contact. Allows to fill in data, upload a picture and submit data.-->
+
+<script id="newContactTemplate" type="text/template">
+    <form enctype="multipart/form-data" method="post" id="contactInfo">
+    <span class="rounded float-right col-6 col-md-4 text-center">
+        <img src="https://clck.ru/Gbg5h" class="img-fluid img-thumbnail">
+        <input type="file" name="photoLink">
+    </span>
+        <table class="table table-bordered table-sm table-hover col-12 col-md-8">
+            <tbody>
+            <tr>
+                <th class="bg-light">Surname</th>
+                <td><input type="text" name="surname" required></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Name</th>
+                <td><input type="text" name="name" required></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Patronymic</th>
+                <td><input type="text" name="patronymic" ></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Birthday</th>
+                <td><input type="date" name="birthday" min="1900-01-01" required></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Gender</th>
+                <td>
+                    <select name="gender">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th class="bg-light">Nationality</th>
+                <td><input type="text" name="nationality"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Marital status</th>
+                <td>
+                    <select name="marital">
+                        <option value="single">Single</option>
+                        <option value="married">Married</option>
+                        <option value="divorced">Divorced</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th class="bg-light">Website</th>
+                <td><input type="url" name="website"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Email</th>
+                <td><input type="email" name="email"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Workplace</th>
+                <td><input type="text" name="workplace"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Country</th>
+                <td><input type="text" name="country"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">City</th>
+                <td><input type="text" name="city"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Address</th>
+                <td><input type="text" name="street"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Postcode</th>
+                <td><input type="text" name="postcode"></td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="d-flex justify-content-around flex-wrap">
+            <button type="submit" class="btn btn-success col-md-5">Submit</button>
+            <button type="button" class="btn btn-secondary col-md-5" onclick="history.back()">Cancel</button>
+        </div>
+    </form>
+</script>
+
+<!--Edit contact template - every field has a default value taken from db and user can edit them-->
+
+<script id="editContactTemplate" type="text/template">
+    <form enctype="multipart/form-data" method="post" id="editedContact">
+        <input type="hidden" name="_method" value="PUT">
+    <span class="rounded float-right col-6 col-md-4 text-center">
+        <img src="https://clck.ru/Gbg5h" class="img-fluid img-thumbnail avatar">
+        <input type="file" name="photoLink">
+    </span>
+        <table class="table table-bordered table-sm table-hover col-12 col-md-8">
+            <tbody>
+            <tr>
+                <th class="bg-light">Surname</th>
+                <td><input type="text" name="surname" value="{{surname}}" required></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Name</th>
+                <td><input type="text" name="name" value="{{name}}" required></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Patronymic</th>
+                <td><input type="text" name="patronymic" value="{{patronymic}}"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Birthday</th>
+                <td><input type="date" name="birthday" min="1900-01-01" value="{{birthday}}" required></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Gender</th>
+                <td>
+                    <select name="gender" value="{{gender}}">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th class="bg-light">Nationality</th>
+                <td><input type="text" name="nationality" value="{{nationality}}"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Marital status</th>
+                <td>
+                    <select name="marital" value="{{maritalStatus}}">
+                        <option value="single">Single</option>
+                        <option value="married">Married</option>
+                        <option value="divorced">Divorced</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th class="bg-light">Website</th>
+                <td><input type="url" name="website" value="{{website}}"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Email</th>
+                <td><input type="email" name="email" value="{{email}}"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Workplace</th>
+                <td><input type="text" name="workplace" value="{{workplace}}"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Country</th>
+                <td><input type="text" name="country" value="{{address.country}}"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">City</th>
+                <td><input type="text" name="city" value="{{address.city}}"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Address</th>
+                <td><input type="text" name="street" value="{{address.street}}"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Postcode</th>
+                <td><input type="text" name="postcode" value="{{address.postcode}}"></td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="d-flex justify-content-around flex-wrap">
+            <button class="btn btn-success col-md-5" id="submitButton">Submit</button>
+            <button type="button" class="btn btn-secondary col-md-5" onclick="history.back()">Cancel</button>
+           <!-- type="submit" onsubmit="event.preventDefault(); event.stopPropagation();" -->
+        </div>
+    </form>
+</script>
