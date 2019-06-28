@@ -165,7 +165,7 @@ public class CreateContactAction implements BaseAction {
         if (receivedContact!=null) {
             Contact fullContact = contactService.save(receivedContact);
             System.out.println("HEYYYYYY" + fullContact.toString());
-            response.setContentType("application/json");
+            response.setHeader("Content-Type", "application/json; charset=UTF-8");
             ObjectMapper mapper = new ObjectMapper();
             mapper.setDateFormat(df);
             try (PrintWriter out = response.getWriter()){

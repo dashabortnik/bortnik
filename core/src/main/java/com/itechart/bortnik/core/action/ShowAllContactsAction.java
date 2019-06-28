@@ -24,7 +24,7 @@ public class ShowAllContactsAction implements BaseAction {
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        response.setContentType("application/json");
+        response.setHeader("Content-Type", "application/json; charset=UTF-8");
 
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
 

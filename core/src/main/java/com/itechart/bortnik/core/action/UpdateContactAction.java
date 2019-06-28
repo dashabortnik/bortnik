@@ -163,7 +163,7 @@ public class UpdateContactAction implements BaseAction{
         if (updatedContact!=null) {
             Contact fullContact = contactService.update(updatedContact);
             System.out.println("UPD CONTACT: " + fullContact.toString());
-            response.setContentType("application/json");
+            response.setHeader("Content-Type", "application/json; charset=UTF-8");
             ObjectMapper mapper = new ObjectMapper();
             mapper.setDateFormat(df);
             try (PrintWriter out = response.getWriter()){

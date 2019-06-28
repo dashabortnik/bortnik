@@ -26,7 +26,6 @@ public class Controller {
         actions.put("DELETE_\\/", "DELETECONTACT");
         actions.put("DELETE_\\/\\d+", "DELETECONTACT");
         actions.put("GET_\\/emails", "GETALLEMAILS");
-        //ADD MORE ACTIONS
         //urls with and without /?
         //.+\/img\/.*\.jpg
     }

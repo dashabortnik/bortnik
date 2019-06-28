@@ -53,6 +53,7 @@ public class PhoneDaoImpl implements PhoneDao {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println("TELEPHONES:" + phones.toString());
         return phones;
     }
 

@@ -1,6 +1,7 @@
 package com.itechart.bortnik.core.service;
 
 import com.itechart.bortnik.core.domain.Contact;
+import com.itechart.bortnik.core.domain.dto.FullContactDTO;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -10,7 +11,7 @@ public interface ContactService extends BaseEntityService<Contact>{
 
     List<Contact> findAllContacts();
     List<Contact> findContactsByCriteria(Contact search);
-    Contact findContactById(int id);
+    FullContactDTO findContactById(int id);
     List<Contact> findContactByBirthday(Date birthday);
 
 }

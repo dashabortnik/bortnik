@@ -50,6 +50,7 @@ public class AttachmentDaoImpl implements AttachmentDao {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println("ATTACHMENTS:" + attachments.toString());
         return attachments;
     }
 
