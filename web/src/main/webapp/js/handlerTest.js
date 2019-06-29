@@ -231,6 +231,7 @@ function deleteContact() {
     console.log("Current pathname is --- " + currentPath);
     var idArray = [];
     if (new RegExp("^(\\/contacts)$").test(currentPath)) {
+        //checkboxes are checked and delete button is pressed
         console.log("General case");
         var checked = document.querySelectorAll(".check:checked");
         console.log("CHECKED OBJECT---" + checked);
@@ -238,6 +239,7 @@ function deleteContact() {
             idArray.push(checked[i].id);
         }
     } else if (new RegExp("^(\\/contacts\\/\\d+)$").test(currentPath)) {
+        //delete button pressed on the page of individual contact
         console.log("Particular case");
         idArray.push(currentPath.split("/")[2]);
     }

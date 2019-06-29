@@ -5,6 +5,7 @@
     <title>Contact List</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js" charset="utf-8"></script>
 
 </head>
@@ -34,7 +35,20 @@
         </div>
     </div>
 </nav>
+<!--empty div for page info-->
 <div class="overflow-auto" id="myDiv"></div>
+
+<!-- Trigger/Open The Modal -->
+<button id="myBtn" class="hidden">Open Modal</button>
+
+<!-- The Modal -->
+<div id="myModal" class="modal">
+    <!-- Modal content -->
+    <div class="modal-content">
+        <p>Some text in the Modal..</p>
+    </div>
+</div>
+
 <footer id="sticky-footer" class="py-4 bg-dark text-white-50 flex-shrink-0 fixed-bottom">
     <div class="container text-center">
         <small>Bortnik Darya | iTechArt Students Lab</small>
@@ -262,6 +276,29 @@
             </tr>
             </tbody>
         </table>
+        <h2>Telephone numbers</h2>
+        <table class="table table-sm table-bordered table-hover">
+            <thead class="bg-light">
+            <tr class="bg-light">
+                <th class="align-middle text-center">Check</th>
+                <th class="align-middle text-center">Country code</th>
+                <th class="align-middle text-center">Operator code</th>
+                <th class="align-middle text-center">Phone number</th>
+                <th class="align-middle text-center">Phone type</th>
+                <th class="align-middle text-center">Comment</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td><input type="checkbox" name="#" value="?" class="check"
+                           id="{{phoneId3}}"></td>                                               <!--FIX ID-->
+                <td><input type="text" name="countryCode"></td>
+                <td><input type="text" name="operatorCode"></td>
+                <td><input type="text" name="phoneNumber"></td>
+                <td><input type="text" name="phoneType"></td>
+                <td><input type="text" name="comment"></td>
+            </tr>
+            </tbody>
         <div class="d-flex justify-content-around flex-wrap">
             <button type="submit" class="btn btn-success col-md-5">Submit</button>
             <button type="button" class="btn btn-secondary col-md-5" onclick="history.back()">Cancel</button>
