@@ -1,0 +1,98 @@
+<!--Mustache template for the contact page. Displays a table with detailed info about the chosen contact.-->
+
+    <span class="rounded float-right col-6 col-md-4 text-center">
+        <img class="img-fluid img-thumbnail avatar">
+    </span>
+    <table class="table table-sm table-bordered table-hover col-12 col-md-8">
+        <tbody>
+        <tr>
+            <th class="bg-light">Surname</th>
+            <td>{{contact.surname}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Name</th>
+            <td>{{contact.name}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Patronymic</th>
+            <td>{{contact.patronymic}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Birthday</th>
+            <td>{{contact.birthday}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Gender</th>
+            <td>{{contact.gender}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Nationality</th>
+            <td>{{contact.nationality}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Marital status</th>
+            <td>{{contact.maritalStatus}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Website</th>
+            <td>{{contact.website}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Email</th>
+            <td>{{contact.email}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Workplace</th>
+            <td>{{contact.workplace}}</td>
+        </tr>
+        <tr>
+            <th class="bg-light">Address</th>
+            <td>{{contact.address.country}},{{contact.address.city}},
+                {{contact.address.street}},{{contact.address.postcode}}</td>
+        </tr>
+        </tbody>
+    </table>
+    <h2>Telephone numbers</h2>
+    <table class="table table-sm table-bordered table-hover">
+        <thead class="bg-light">
+        <tr class="bg-light">
+            <th class="align-middle text-center">Check</th>
+            <th class="align-middle text-center">Phone number</th>
+            <th class="align-middle text-center">Phone type</th>
+            <th class="align-middle text-center">Comment</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#phoneList}}
+        <tr>
+            <td><input type="checkbox" name="#" value="?" class="check"
+                       id="{{phoneId}}"></td>
+            <td>{{countryCode}}{{operatorCode}}{{phoneNumber}}</td>
+            <td>{{phoneType}}</td>
+            <td>{{comment}}</td>
+        </tr>
+        {{/phoneList}}
+        </tbody>
+    </table>
+    <h2>Attachments</h2>
+    <table class="table table-sm table-bordered table-hover">
+        <thead class="bg-light">
+        {{#attachmentList}}
+        <tr class="bg-light">
+            <th class="align-middle text-center">Check</th>
+            <th class="align-middle text-center">Attachment</th>
+            <th class="align-middle text-center">Download link</th>
+            <th class="align-middle text-center">Comment</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><input type="checkbox" name="#" value="?" class="check"
+                       id="{{attachmentId}}"></td>
+            <td>{{attachmentName}}, {{uploadDate}}</td>
+            <td>{{attachmentLink}}</td>
+            <td>{{comment}}</td>
+        </tr>
+        {{/attachmentList}}
+        </tbody>
+    </table>

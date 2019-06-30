@@ -9,6 +9,7 @@
     <servlet-name>ContactServlet</servlet-name>
     <servlet-class>com.itechart.bortnik.web.servlets.ContactServlet</servlet-class>
   </servlet>
+
   <servlet-mapping>
     <servlet-name>ContactServlet</servlet-name>
     <url-pattern>/contacts/*</url-pattern>

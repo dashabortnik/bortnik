@@ -1,0 +1,121 @@
+<!--Mustache template for the form of a new contact. Allows to fill in data, upload a picture and submit data.-->
+
+    <form enctype="multipart/form-data" method="post" id="contactInfo">
+    <span class="rounded float-right col-6 col-md-4 text-center">
+        <img class="img-fluid img-thumbnail">
+        <input type="file" name="photoLink">
+    </span>
+        <table class="table table-bordered table-sm table-hover col-12 col-md-8">
+            <tbody>
+            <tr>
+                <th class="bg-light">Surname</th>
+                <td><input type="text" name="surname"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Name</th>
+                <td><input type="text" name="name"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Patronymic</th>
+                <td><input type="text" name="patronymic"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Birthday</th>
+                <td><input type="date" name="birthday" min="1900-01-01"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Gender</th>
+                <td>
+                    <select name="gender" id="gender">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th class="bg-light">Nationality</th>
+                <td><input type="text" name="nationality"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Marital status</th>
+                <td>
+                    <select name="marital" id="marital">
+                        <option value="single">Single</option>
+                        <option value="married">Married</option>
+                        <option value="divorced">Divorced</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th class="bg-light">Website</th>
+                <td><input type="url" name="website"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Email</th>
+                <td><input type="email" name="email"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Workplace</th>
+                <td><input type="text" name="workplace"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Country</th>
+                <td><input type="text" name="country"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">City</th>
+                <td><input type="text" name="city"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Address</th>
+                <td><input type="text" name="street"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Postcode</th>
+                <td><input type="text" name="postcode"></td>
+            </tr>
+            </tbody>
+        </table>
+        <h2>Telephone numbers</h2>
+        <button class="btn btn-outline-success" id="createPhone">Create</button>
+        <table class="table table-sm table-bordered table-hover">
+            <thead class="bg-light">
+                <tr class="bg-light">
+                    <th class="align-middle text-center">Country code</th>
+                    <th class="align-middle text-center">Operator code</th>
+                    <th class="align-middle text-center">Phone number</th>
+                    <th class="align-middle text-center">Phone type</th>
+                    <th class="align-middle text-center">Comment</th>
+                </tr>
+            </thead>
+            <tbody>
+                <td class="align-middle text-center"><input type="text" name="countryCode"></td>
+                <td class="align-middle text-center"><input type="text" name="operatorCode"></td>
+                <td class="align-middle text-center"><input type="text" name="phoneNumber"></td>
+                <td class="align-middle text-center"><input type="text" name="phoneType"></td>
+                <td class="align-middle text-center"><input type="text" name="comment"></td>
+            </tbody>
+        </table>
+        <h2>Attachments</h2>
+        <button class="btn btn-outline-success" id="createAttachment">Create</button>
+            <table class="table table-sm table-bordered table-hover">
+                <thead class="bg-light">
+                <tr class="bg-light">
+                    <th class="align-middle text-center">Attachment</th>
+                    <th class="align-middle text-center">Comment</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td class="align-middle text-center"><input type="file"
+                           id="avatar" name="attachment"></td>
+
+                    <td class="align-middle text-center"><input type="text" name="comment"></td>
+                </tr>
+                </tbody>
+            </table>
+        <div class="d-flex justify-content-around flex-wrap">
+            <button type="submit" class="btn btn-success col-md-5">Submit</button>
+            <button type="button" class="btn btn-secondary col-md-5" onclick="history.back()">Cancel</button>
+        </div>
+    </form>

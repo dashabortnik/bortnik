@@ -19,7 +19,7 @@ public class Controller {
         actions.put("POST_\\/", "CREATECONTACT");
         actions.put("GET_\\/\\d+", "GETCONTACTBYID");
         actions.put("PUT_\\/\\d+\\/edit-form", "UPDATECONTACT");               //UPDATE BAD FIX edit-form
-        actions.put("GET_\\/contacts/new-form", "NEWCONTACTFORM");
+        //actions.put("GET_\\/contacts/new-form", "NEWCONTACTFORM");
         actions.put("GET_\\/image", "GETIMAGEFORCONTACT");
         actions.put("GET_\\/\\d+\\/edit-form", "EDITCONTACTFORM");
         actions.put("DELETE_", "DELETECONTACT");

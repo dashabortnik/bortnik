@@ -1,0 +1,137 @@
+<!--Edit contact template - every field has a default value taken from db and user can edit them-->
+
+    <form enctype="multipart/form-data" method="post" id="editedContact">
+        <input type="hidden" name="_method" value="PUT">
+        <span class="rounded float-right col-6 col-md-4 text-center">
+        <img src="https://clck.ru/Gbg5h" class="img-fluid img-thumbnail avatar">
+        <input type="file" name="photoLink">
+    </span>
+        <table class="table table-bordered table-sm table-hover col-12 col-md-8">
+            <tbody>
+            <tr>
+                <th class="bg-light">Surname</th>
+                <td><input type="text" name="surname" value="{{contact.surname}}"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Name</th>
+                <td><input type="text" name="name" value="{{contact.name}}"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Patronymic</th>
+                <td><input type="text" name="patronymic" value="{{contact.patronymic}}"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Birthday</th>
+                <td><input type="date" name="birthday" min="1900-01-01" value="{{contact.birthday}}" required></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Gender</th>
+                <td>
+                    <select name="gender" id="gender">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th class="bg-light">Nationality</th>
+                <td><input type="text" name="nationality" value="{{contact.nationality}}"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Marital status</th>
+                <td>
+                    <select name="marital" id="marital">
+                        <option value="single">Single</option>
+                        <option value="married">Married</option>
+                        <option value="divorced">Divorced</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th class="bg-light">Website</th>
+                <td><input type="url" name="website" value="{{contact.website}}"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Email</th>
+                <td><input type="email" name="email" value="{{contact.email}}"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Workplace</th>
+                <td><input type="text" name="workplace" value="{{contact.workplace}}"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Country</th>
+                <td><input type="text" name="country" value="{{contact.address.country}}"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">City</th>
+                <td><input type="text" name="city" value="{{contact.address.city}}"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Address</th>
+                <td><input type="text" name="street" value="{{contact.address.street}}"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Postcode</th>
+                <td><input type="text" name="postcode" value="{{contact.address.postcode}}"></td>
+            </tr>
+            </tbody>
+        </table>
+        <h2>Telephone numbers</h2>
+        <!-- Trigger/Open The Modal -->
+        <button type="button" class="btn btn-outline-success" id="myBtn">Add new phone</button>
+
+
+        <table class="table table-sm table-bordered table-hover">
+            <thead class="bg-light">
+            <tr class="bg-light">
+                <th class="align-middle text-center">Check</th>
+                <th class="align-middle text-center">Country code</th>
+                <th class="align-middle text-center">Operator code</th>
+                <th class="align-middle text-center">Phone number</th>
+                <th class="align-middle text-center">Phone type</th>
+                <th class="align-middle text-center">Comment</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{#phoneList}}
+            <tr>
+                <td><input type="checkbox" name="#" value="?" class="check"
+                           id="{{phoneId}}"></td>
+                <td><input type="text" name="countryCode" value="{{countryCode}}"></td>
+                <td><input type="text" name="operatorCode" value="{{operatorCode}}"></td>
+                <td><input type="text" name="phoneNumber" value="{{phoneNumber}}"></td>
+                <td><input type="text" name="phoneType" value="{{phoneType}}"></td>
+                <td><input type="text" name="comment" value="{{comment}}"></td>
+            </tr>
+            {{/phoneList}}
+            </tbody>
+        </table>
+        <h2>Attachments</h2>
+            <table class="table table-sm table-bordered table-hover">
+                <thead class="bg-light">
+                {{#attachmentList}}
+                <tr class="bg-light">
+                    <th class="align-middle text-center">Check</th>
+                    <th class="align-middle text-center">Attachment</th>
+                    <th class="align-middle text-center">Download link</th>
+                    <th class="align-middle text-center">Comment</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td><input type="checkbox" name="#" value="?" class="check"
+                               id="{{attachmentId}}"></td>
+                    <td>{{attachmentName}}, {{uploadDate}}</td>
+                    <td>{{attachmentLink}}</td>
+                    <td>{{comment}}</td>
+                </tr>
+                {{/attachmentList}}
+                </tbody>
+            </table>
+        <div class="d-flex justify-content-around flex-wrap">
+            <button class="btn btn-success col-md-5" id="submitButton">Submit</button>
+            <button type="button" class="btn btn-secondary col-md-5" onclick="history.back()">Cancel</button>
+            <!-- type="submit" onsubmit="event.preventDefault(); event.stopPropagation();" -->
+        </div>
+    </form>

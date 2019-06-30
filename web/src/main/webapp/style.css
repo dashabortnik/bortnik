@@ -2,6 +2,7 @@ body {
     font-family: Arial, Verdana,  sans-serif; /* Семейство шрифтов */
     background-color: #f0f0f0; /* Цвет фона веб-страницы */
     color: #333; /* Цвет основного текста */
+
 }
 
 /* The Modal (background) */
@@ -35,4 +36,6 @@ body {
     display:none;
 }*/
 
-
+#contDiv {
+    overflow: scroll;
+}
