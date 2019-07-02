@@ -47,7 +47,7 @@ function navigate(link, callback) {
     })
     //fetch template
     const template = fetch(tmpl).then(response => response.text());
-    Promise.all([data, template])
+    return Promise.all([data, template])
         .then(response => {
             let resolvedData = response[0];
             let resolvedTemplate = response[1];
@@ -60,11 +60,12 @@ function navigate(link, callback) {
         }).catch(function (err) {
         alert("Unable to render page with data");
     }).then(function () {
+        history.pushState(null, title, link);
         setSelectElementValue("gender", gender);
         setSelectElementValue("marital", marital);
         callback(photoLink);
     })
-    history.pushState(null, title, link);
+
 }
 
 function displayContact(link, callback) {
@@ -94,7 +95,7 @@ function displayContact(link, callback) {
     })
     //fetch template
     const template = fetch(tmpl).then(response => response.text());
-    Promise.all([data, template])
+    return Promise.all([data, template])
         .then(response => {
             let resolvedData = response[0];
             let resolvedTemplate = response[1];
@@ -228,9 +229,19 @@ function openEditForm() {
         let modal = document.getElementById("myModal");
         // Get the button that opens the modal
         let btn = document.getElementById("createPhone");
+        let resetBtn = document.getElementById("resetPhone");
+        let newPhoneTable = document.getElementById("newPhoneTable");
         // When the user clicks the button, open the modal
         btn.onclick = function () {
             modal.style.display = "flex";
+        }
+
+        resetBtn.onclick = function(){
+            for (let i = 0; i < newPhoneTable.rows.length; i++){
+                // assign empty string into every input in the table
+                newPhoneTable.rows[i].cells[1].firstChild.value = "";
+            }
+                modal.style.display = "none";
         }
         // When the user clicks anywhere outside of the modal, close it
         window.onclick = function (event) {

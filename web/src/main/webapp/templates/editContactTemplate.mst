@@ -3,7 +3,7 @@
     <form enctype="multipart/form-data" method="post" id="editedContact">
         <input type="hidden" name="_method" value="PUT">
         <span class="rounded float-right col-6 col-md-4 text-center">
-        <img src="https://clck.ru/Gbg5h" class="img-fluid img-thumbnail avatar">
+        <img src="" class="img-fluid img-thumbnail avatar">
         <input type="file" name="photoLink">
     </span>
         <table class="table table-bordered table-sm table-hover col-12 col-md-8">
@@ -79,13 +79,37 @@
         </table>
         <h2>Telephone numbers</h2>
         <button type="button" class="btn btn-outline-success" id="createPhone">Create</button>
-        <!-- Trigger/Open The Modal
-                        <button type="button" class="btn btn-outline-success" id="myBtn">Add new phone</button>-->
-
         <div id="myModal" class="modal">
             <div class="modal-content">
-                <p>Some text in the Modal..</p>
-            </div>
+                <table class="table table-sm table-bordered table-hover" id="newPhoneTable">
+                    <tbody>
+                        <tr>
+                            <th class="align-middle text-center">Country code</th>
+                            <td><input type="text" name="countryCode"></td>
+                        </tr>
+                        <tr>
+                            <th class="align-middle text-center">Operator code</th>
+                            <td><input type="text" name="operatorCode"></td>
+                        </tr>
+                        <tr>
+                            <th class="align-middle text-center">Phone number</th>
+                            <td><input type="text" name="phoneNumber"></td>
+                        </tr>
+                        <tr>
+                            <th class="align-middle text-center">Phone type</th>
+                            <td><input type="text" name="phoneType"></td>
+                        </tr>
+                        <tr>
+                            <th class="align-middle text-center">Comment</th>
+                            <td><input type="text" name="comment"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="d-flex justify-content-around flex-wrap">
+                    <button type="button" class="btn btn-outline-success" id="savePhone">Save</button>
+                    <button type="button" class="btn btn-outline-warning" id="resetPhone">Reset</button>
+                </div>
+           </div>
         </div>
         <table class="table table-sm table-bordered table-hover">
             <thead class="bg-light">
