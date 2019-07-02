@@ -67,7 +67,7 @@ function navigate(link, callback) {
     history.pushState(null, title, link);
 }
 
-function displayContact(link, callback){
+function displayContact(link, callback) {
     event.preventDefault();
     event.stopPropagation();
     let tmpl = "/templates/contactTemplate.mst";
@@ -197,9 +197,10 @@ function openEditForm() {
     var checkedId;
     let path = window.location.pathname;
 
-        var prom = Promise.resolve().then(function (res) {
+    var prom = Promise.resolve()
+        .then(function (res) {
             if (path.match(new RegExp("\\/contacts\\/\\d+"))) {
-                checkedId = path.split("/")[2];
+                checkedId = path.split("/")[1];
                 console.log("ID---" + checkedId);
             } else {
                 var checked = document.querySelectorAll(".check:checked");
@@ -217,71 +218,69 @@ function openEditForm() {
                 console.log("BUILT LINK:" + link);
             }
         }).catch(function (err) {
-            console.log(err.message); //выведет сообщение "не удалось выполнить..."
-        }).then(function (res) {
-            navigate(link, retrieveImage);
-
-
-
-        }).then(function (res) {
-            //FOR DISPLAY OF MODAL WINDOW
-            // Get the modal
-            let modal = document.getElementById("myModal");
-            // Get the button that opens the modal
-            let btn = document.getElementById("myBtn");
-            // When the user clicks the button, open the modal
-            btn.onclick = function () {
-                modal.style.display = "flex";
-            }
-            // When the user clicks anywhere outside of the modal, close it
-            window.onclick = function (event) {
-                if (event.target === modal) {
-                    modal.style.display = "none";
-                }
-            }
-        }).then(function (res) {
-            submitEditForm(checkedId);
-        }).catch(function (err) {
-            console.log(err.message); //выведет сообщение "не удалось выполнить..."
+            console.log(err.message);
+        }).then(function () {
+            return navigate(link, retrieveImage);
         })
+    prom.then(function () {
+        //FOR DISPLAY OF MODAL WINDOW
+        // Get the modal
+        let modal = document.getElementById("myModal");
+        // Get the button that opens the modal
+        let btn = document.getElementById("createPhone");
+        // When the user clicks the button, open the modal
+        btn.onclick = function () {
+            modal.style.display = "flex";
+        }
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function (event) {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        }
+    }).then(function (res) {
+        submitEditForm(checkedId);
+    }).catch(function (err) {
+        console.log(err.message); //выведет сообщение "не удалось выполнить..."
+    })
 }
 
 function submitEditForm(checkedId) {
-        console.log("submit method here");
-        var editedForm;
+    console.log("submit method here");
+    var editedForm;
 
-        window.addEventListener('load', function () {
-            editedForm = document.getElementById("editedContact");
-            editedForm.addEventListener("submit", function (e) {
-                document.getElementById("submitButton").addEventListener("click", function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log("I got the form:" + editedForm.innerText);
-                    var editedFormData = new FormData(this);
-                    console.log("Edited form data---" + editedFormData);
-                    console.log("ID WILL BE---" + checkedId);
-                    var fetchLink = "/contacts/" + checkedId;
-                    fetch(fetchLink, {
-                        method: 'POST',
-                        body: editedFormData,
-                    }).then(function (response) {
-                        return response.json();
-                    }).then(function (myJson) {
-                        let tmpl = document.getElementById("contactTemplate").innerHTML;
-                        let html = Mustache.to_html(tmpl, myJson);
-                        document.getElementById("myDiv").innerHTML = "";
-                        let container = document.getElementById("myDiv");
-                        container.innerHTML = html;
+    window.addEventListener('load', function () {
+        editedForm = document.getElementById("editedContact");
+        editedForm.addEventListener("submit", function (e) {
+            document.getElementById("submitButton").addEventListener("click", function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log("I got the form:" + editedForm.innerText);
+                var editedFormData = new FormData(this);
+                console.log("Edited form data---" + editedFormData);
+                console.log("ID WILL BE---" + checkedId);
+                var fetchLink = "/contacts/" + checkedId;
+                fetch(fetchLink, {
+                    method: 'POST',
+                    body: editedFormData,
+                }).then(function (response) {
+                    return response.json();
+                }).then(function (myJson) {
+                    let tmpl = document.getElementById("contactTemplate").innerHTML;
+                    let html = Mustache.to_html(tmpl, myJson);
+                    document.getElementById("myDiv").innerHTML = "";
+                    let container = document.getElementById("myDiv");
+                    container.innerHTML = html;
 
-                    }).catch(function (error) {
-                        console.error("ERROR on updating a contact" + error);
-                    })
-
+                }).catch(function (error) {
+                    console.error("ERROR on updating a contact" + error);
                 })
-            });
 
-        })
+            })
+        });
 
-    }
+    })
+
+}
 
 

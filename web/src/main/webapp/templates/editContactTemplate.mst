@@ -78,10 +78,15 @@
             </tbody>
         </table>
         <h2>Telephone numbers</h2>
-        <!-- Trigger/Open The Modal -->
-        <button type="button" class="btn btn-outline-success" id="myBtn">Add new phone</button>
+        <button type="button" class="btn btn-outline-success" id="createPhone">Create</button>
+        <!-- Trigger/Open The Modal
+                        <button type="button" class="btn btn-outline-success" id="myBtn">Add new phone</button>-->
 
-
+        <div id="myModal" class="modal">
+            <div class="modal-content">
+                <p>Some text in the Modal..</p>
+            </div>
+        </div>
         <table class="table table-sm table-bordered table-hover">
             <thead class="bg-light">
             <tr class="bg-light">
