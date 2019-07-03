@@ -230,24 +230,73 @@ function openEditForm() {
         // Get the button that opens the modal
         let btn = document.getElementById("createPhone");
         let resetBtn = document.getElementById("resetPhone");
+        let saveBtn = document.getElementById("savePhone");
         let newPhoneTable = document.getElementById("newPhoneTable");
         // When the user clicks the button, open the modal
         btn.onclick = function () {
             modal.style.display = "flex";
         }
 
-        resetBtn.onclick = function(){
-            for (let i = 0; i < newPhoneTable.rows.length; i++){
-                // assign empty string into every input in the table
-                newPhoneTable.rows[i].cells[1].firstChild.value = "";
-            }
-                modal.style.display = "none";
-        }
+        resetBtn.onclick = function(){resetTable(newPhoneTable, modal)};
+
         // When the user clicks anywhere outside of the modal, close it
         window.onclick = function (event) {
             if (event.target === modal) {
                 modal.style.display = "none";
             }
+        }
+
+        saveBtn.onclick = function(){
+            //get filled in values from popup window
+            let newCountryCode = document.getElementById("newCountryCode").value;
+            let newOperatorCode = document.getElementById("newOperatorCode").value;
+            let newPhoneNumber = document.getElementById("newPhoneNumber").value;
+            let newPhoneType = document.getElementById("newPhoneType").selectedIndex;
+            let newComment = document.getElementById("newComment").value;
+
+            //if any required field is empty, the row won't be saved
+            if (newCountryCode=== null || newOperatorCode===null || newPhoneNumber===null ||
+                newCountryCode=== "" || newOperatorCode==="" || newPhoneNumber===""){
+                return alert("Some fields are empty, can not save the phone number.");
+            }
+
+            //create inputs for phoneTable
+            let checkbox = document.createElement("input");
+            checkbox.setAttribute("type", "checkbox");
+
+            let inputCountryCode = document.createElement("input");
+            inputCountryCode.setAttribute("type", "text");
+            inputCountryCode.setAttribute("value", newCountryCode);
+
+            let inputOperatorCode = document.createElement("input");
+            inputOperatorCode.setAttribute("type", "text");
+            inputOperatorCode.setAttribute("value", newOperatorCode);
+
+            let inputPhoneNumber = document.createElement("input");
+            inputPhoneNumber.setAttribute("type", "text");
+            inputPhoneNumber.setAttribute("value", newPhoneNumber);
+
+            let inputPhoneType = document.createElement("select");
+            inputPhoneType.options[0] = new Option("home", "0");
+            inputPhoneType.options[1] = new Option("mobile","1");
+            inputPhoneType.selectedIndex.value = newPhoneType;
+
+            let inputComment = document.createElement("input");
+            inputComment.setAttribute("type", "text");
+            inputComment.setAttribute("value", newComment);
+
+            //take table and insert a new row
+            let table = document.getElementById("phoneTable");
+            //when index in insertRow is omitted it is -1 by default, so the row appends as the last in the table
+            let newRow = table.insertRow();
+            newRow.insertCell(0).appendChild(checkbox);
+            newRow.insertCell(1).appendChild(inputCountryCode);
+            newRow.insertCell(2).appendChild(inputOperatorCode);
+            newRow.insertCell(3).appendChild(inputPhoneNumber);
+            newRow.insertCell(4).appendChild(inputPhoneType);
+            newRow.insertCell(5).appendChild(inputComment);
+
+            resetTable(newPhoneTable, modal);
         }
     }).then(function (res) {
         submitEditForm(checkedId);
@@ -292,6 +341,15 @@ function submitEditForm(checkedId) {
 
     })
 
+}
+
+
+function resetTable(tableName, modalWindow){
+    for (let i = 0; i < tableName.rows.length; i++){
+        // assign empty string into every input in the table
+        tableName.rows[i].cells[1].firstChild.value = "";
+    }
+    modalWindow.style.display = "none";
 }
 
 

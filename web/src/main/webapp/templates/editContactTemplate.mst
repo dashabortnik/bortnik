@@ -49,11 +49,11 @@
             </tr>
             <tr>
                 <th class="bg-light">Website</th>
-                <td><input type="url" name="website" value="{{contact.website}}"></td>
+                <td><input type="text" name="website" value="{{contact.website}}"></td>
             </tr>
             <tr>
                 <th class="bg-light">Email</th>
-                <td><input type="email" name="email" value="{{contact.email}}"></td>
+                <td><input type="text" name="email" value="{{contact.email}}"></td>
             </tr>
             <tr>
                 <th class="bg-light">Workplace</th>
@@ -85,23 +85,29 @@
                     <tbody>
                         <tr>
                             <th class="align-middle text-center">Country code</th>
-                            <td><input type="text" name="countryCode"></td>
+                            <td><input type="text" name="countryCode" id="newCountryCode"></td>
                         </tr>
                         <tr>
                             <th class="align-middle text-center">Operator code</th>
-                            <td><input type="text" name="operatorCode"></td>
+                            <td><input type="text" name="operatorCode" id="newOperatorCode"></td>
                         </tr>
                         <tr>
                             <th class="align-middle text-center">Phone number</th>
-                            <td><input type="text" name="phoneNumber"></td>
+                            <td><input type="text" name="phoneNumber" id="newPhoneNumber"></td>
                         </tr>
                         <tr>
                             <th class="align-middle text-center">Phone type</th>
-                            <td><input type="text" name="phoneType"></td>
+                            <td>
+                            <select name="phoneType" id="newPhoneType">
+                                <option value="home">home</option>
+                                <option value="mobile">mobile</option>
+                            </select>
+
+                            </td>
                         </tr>
                         <tr>
                             <th class="align-middle text-center">Comment</th>
-                            <td><input type="text" name="comment"></td>
+                            <td><input type="text" name="comment" id="newComment"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -111,7 +117,7 @@
                 </div>
            </div>
         </div>
-        <table class="table table-sm table-bordered table-hover">
+        <table class="table table-sm table-bordered table-hover" id="phoneTable">
             <thead class="bg-light">
             <tr class="bg-light">
                 <th class="align-middle text-center">Check</th>
