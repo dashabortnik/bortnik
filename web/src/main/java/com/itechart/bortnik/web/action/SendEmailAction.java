@@ -1,4 +1,4 @@
-package com.itechart.bortnik.core.action;
+package com.itechart.bortnik.web.action;
 
 import com.itechart.bortnik.core.domain.Contact;
 import com.itechart.bortnik.core.service.ContactService;
@@ -11,7 +11,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -74,10 +73,3 @@ public class SendEmailAction implements BaseAction {
 
     }
 }
-
-//create personal message for contact
-//    StringBuilder msg = new StringBuilder("Dear ");
-//            msg.append(contact.getName());
-//                    msg.append(" ");
-//                    msg.append(contact.getSurname());
-//                    msg.append("! We hope you have an amazing day today. Happy Birthday!");

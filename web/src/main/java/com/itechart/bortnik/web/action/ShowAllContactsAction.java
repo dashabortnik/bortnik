@@ -1,4 +1,4 @@
-package com.itechart.bortnik.core.action;
+package com.itechart.bortnik.web.action;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itechart.bortnik.core.domain.Contact;

@@ -1,4 +1,4 @@
-package com.itechart.bortnik.core.action;
+package com.itechart.bortnik.web.action;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;

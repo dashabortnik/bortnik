@@ -6,9 +6,10 @@ import com.itechart.bortnik.core.domain.Address;
 import com.itechart.bortnik.core.domain.Contact;
 import com.itechart.bortnik.core.domain.Gender;
 import com.itechart.bortnik.core.domain.Marital;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.*;
 import java.util.Date;
 
@@ -43,6 +44,9 @@ public class ContactDaoImpl implements ContactDao {
     public static ContactDao getInstance() {
         return Singletone.INSTANCE;
     }
+
+    //create Logger for current class
+    Logger logger = LoggerFactory.getLogger(ContactDaoImpl.class);
 
     @Override
     public Contact readById(int id) {
@@ -321,15 +325,15 @@ public class ContactDaoImpl implements ContactDao {
             ps.setString(2, contact.getName());
             ps.setString(3, contact.getPatronymic());
             ps.setObject(4, contact.getBirthday());
-            if ("male".equals(contact.getGender().toString().trim())) {
+            if (Gender.male.toString().equals(contact.getGender().toString().trim())) {
                 ps.setObject(5, 1);
             } else {
                 ps.setObject(5, 2);
             }
             ps.setString(6, contact.getNationality());
-            if ("single".equals(contact.getMaritalStatus().toString().trim())) {
+            if (Marital.single.toString().equals(contact.getMaritalStatus().toString().trim())) {
                 ps.setObject(7, 1);
-            } else if ("married".equals(contact.getMaritalStatus().toString().trim())) {
+            } else if (Marital.married.toString().equals(contact.getMaritalStatus().toString().trim())) {
                 ps.setObject(7, 2);
             } else {
                 ps.setObject(7, 3);
@@ -363,7 +367,8 @@ public class ContactDaoImpl implements ContactDao {
              PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.execute();
-            System.out.println("DELETE of contact " + id + " executed");
+            logger.info("Delete of contact with id {} executed.", id);
+            //System.out.println("DELETE of contact " + id + " executed");
         } catch (SQLException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

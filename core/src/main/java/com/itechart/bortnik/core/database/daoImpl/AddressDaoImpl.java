@@ -13,8 +13,6 @@ public class AddressDaoImpl implements AddressDao {
         private static final AddressDaoImpl INSTANCE = new AddressDaoImpl();
     }
 
-    //DO I NEED THE CLASS?!
-
     public static AddressDaoImpl getInstance() {
         return Singleton.INSTANCE;
     }

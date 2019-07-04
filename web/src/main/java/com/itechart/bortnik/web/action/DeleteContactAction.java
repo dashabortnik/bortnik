@@ -1,4 +1,4 @@
-package com.itechart.bortnik.core.action;
+package com.itechart.bortnik.web.action;
 
 import com.itechart.bortnik.core.service.ContactService;
 import com.itechart.bortnik.core.service.serviceImpl.ContactServiceImpl;

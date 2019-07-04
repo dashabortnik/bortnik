@@ -1,17 +1,12 @@
-package com.itechart.bortnik.core.action;
+package com.itechart.bortnik.web.action;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itechart.bortnik.core.domain.Address;
 import com.itechart.bortnik.core.domain.Contact;
 import com.itechart.bortnik.core.domain.Gender;
 import com.itechart.bortnik.core.domain.Marital;
-import com.itechart.bortnik.core.service.AttachmentService;
 import com.itechart.bortnik.core.service.ContactService;
-import com.itechart.bortnik.core.service.PhoneService;
-import com.itechart.bortnik.core.service.serviceImpl.AttachmentServiceImpl;
 import com.itechart.bortnik.core.service.serviceImpl.ContactServiceImpl;
-import com.itechart.bortnik.core.service.serviceImpl.PhoneServiceImpl;
-
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
@@ -30,23 +25,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class CreateContactAction implements BaseAction {
+public class UpdateContactAction implements BaseAction{
 
     private ContactService contactService;
-    private PhoneService phoneService;
-    private AttachmentService attachmentService;
-    //private HttpServletResponse reader;
+    //private PhoneService phoneService;
+   // private AttachmentService attachmentService;
 
-    public CreateContactAction() {
+    public UpdateContactAction(){
         contactService = new ContactServiceImpl();
-        phoneService = new PhoneServiceImpl();
-        attachmentService = new AttachmentServiceImpl();
+        //phoneService = new PhoneServiceImpl();
+        //attachmentService = new AttachmentServiceImpl();
     }
 
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         System.out.println("CREATE CONTACT ACTION");
-        Contact receivedContact = null;
+        Contact updatedContact = null;
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
 
         List<FileItem> items = null;
@@ -71,7 +65,7 @@ public class CreateContactAction implements BaseAction {
             String photoLink = null;
             cycle:
             for (FileItem item : items) {
-                //System.out.println(item.getFieldName() + " --- " + item.getString());
+                System.out.println(item.getFieldName() + " --- " + item.getString());
 
                 if (item.isFormField()) {
                     switch (item.getFieldName()) {
@@ -147,14 +141,11 @@ public class CreateContactAction implements BaseAction {
                     item.write(uploadedFile);
                     System.out.println("Image path: " + uploadedFile.getAbsolutePath());
                     photoLink = uploadedFile.getAbsolutePath();
-                        //1 //System.out.println("Working Directory = " + System.getProperty("user.dir"));
-                        //2 //System.out.println("Current relative path is: " + Paths.get("").toAbsolutePath().toString());
-                        //3 //System.out.println("LOCATION 2: " + FileSystems.getDefault().getPath("").toAbsolutePath());
                 }
             }
-            receivedContact = new Contact(0, surname, name, patronymic, birthday, gender, nationality, maritalStatus, website,
+            updatedContact = new Contact(0, surname, name, patronymic, birthday, gender, nationality, maritalStatus, website,
                     email, workplace, photoLink, new Address(0, country, city, street, postcode));
-            System.out.println(receivedContact.toString());
+            System.out.println("EXTRACTED DATA---" + updatedContact.toString());
         } catch (FileUploadException error) {
             System.out.println("Error With File Parsing - " + error.getMessage());
         } catch (ParseException e) {
@@ -162,20 +153,21 @@ public class CreateContactAction implements BaseAction {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        if (receivedContact!=null) {
-            Contact fullContact = contactService.save(receivedContact);
-            System.out.println("HEYYYYYY" + fullContact.toString());
+        if (updatedContact!=null) {
+            Contact fullContact = contactService.update(updatedContact);
+            System.out.println("UPD CONTACT: " + fullContact.toString());
             response.setHeader("Content-Type", "application/json; charset=UTF-8");
             ObjectMapper mapper = new ObjectMapper();
             mapper.setDateFormat(df);
             try (PrintWriter out = response.getWriter()){
-            mapper.writeValue(out, fullContact);
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+                mapper.writeValue(out, fullContact);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         } else {
             //display OOPS message
+            System.out.println("Something went wrong: updated contact is empty");
         }
     }
 }

@@ -1,7 +1,6 @@
-package com.itechart.bortnik.core.action;
+package com.itechart.bortnik.web.action;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.itechart.bortnik.core.domain.Contact;
 import com.itechart.bortnik.core.domain.dto.FullContactDTO;
 import com.itechart.bortnik.core.service.ContactService;
 import com.itechart.bortnik.core.service.serviceImpl.ContactServiceImpl;
@@ -12,7 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
-import java.util.List;
 
 public class GetContactByIdAction implements BaseAction{
 

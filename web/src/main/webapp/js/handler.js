@@ -352,4 +352,37 @@ function resetTable(tableName, modalWindow){
     modalWindow.style.display = "none";
 }
 
+function deleteContact() {
+    var currentPath = window.location.pathname;
+    console.log("Current pathname is --- " + currentPath);
+    var idArray = [];
+    if (new RegExp("^(\\/contacts)$").test(currentPath)) {
+        //checkboxes are checked and delete button is pressed
+        console.log("General case");
+        var checked = document.querySelectorAll(".check:checked");
+        console.log("CHECKED OBJECT---" + checked);
+        for (let i = 0; i < checked.length; i++) {
+            idArray.push(checked[i].id);
+        }
+    } else if (new RegExp("^(\\/contacts\\/\\d+)$").test(currentPath)) {
+        //delete button pressed on the page of individual contact
+        console.log("Particular case");
+        idArray.push(currentPath.split("/")[2]);
+    }
+    fetch(currentPath, {
+        method: 'DELETE',
+        headers: {'Content-Type': 'application/json', 'IdToDelete': idArray}
+    }).then(function (response) {
+        console.log("Deleted contact from its page");
+        return response.json();
+    }).then(function (myJson) {
+        console.log("Received reply:" + myJson);
+        var tmpl = document.getElementById("mainTableTemplate").innerHTML;
+        var html = Mustache.to_html(tmpl, myJson);
+        var container = document.getElementById("myDiv");
+        container.innerHTML = html;
+        history.pushState(null, "Contact page", "/contacts");
+    })
+}
+
 

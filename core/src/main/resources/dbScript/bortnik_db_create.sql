@@ -1,4 +1,5 @@
 CREATE DATABASE `bortnik_db` CHARACTER SET 'utf8mb4' COLLATE 'utf8mb4_general_ci';
+
 CREATE TABLE `bortnik_db`.`contact` (
  `contact_id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
  `surname` VARCHAR(30) NOT NULL,
@@ -13,6 +14,7 @@ CREATE TABLE `bortnik_db`.`contact` (
  `workplace` VARCHAR(50) NOT NULL, PRIMARY KEY (`contact_id`),
  `photo_link` VARCHAR(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
 CREATE TABLE `bortnik_db`.`attachment` (
  `attachment_id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
  `attachment_name` VARCHAR(100) NOT NULL,
@@ -21,6 +23,7 @@ CREATE TABLE `bortnik_db`.`attachment` (
  `contact_id` INT(11) UNSIGNED NOT NULL, PRIMARY KEY (`attachment_id`), KEY `contact_id` (`contact_id`), CONSTRAINT `attachment - contact` FOREIGN KEY (`contact_id`) REFERENCES `contact` (`contact_id`) ON
 DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
 CREATE TABLE `bortnik_db`.`phone` (
  `phone_id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
  `country_code` VARCHAR(6) NOT NULL DEFAULT '0',
@@ -31,6 +34,7 @@ CREATE TABLE `bortnik_db`.`phone` (
  `contact_id` INT(11) UNSIGNED NOT NULL, PRIMARY KEY (`phone_id`), KEY `contact_id` (`contact_id`), CONSTRAINT `phone - contact` FOREIGN KEY (`contact_id`) REFERENCES `contact` (`contact_id`) ON
 DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
 CREATE TABLE `bortnik_db`.`address` (
  `address_id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
  `country` VARCHAR(50) NOT NULL,
