@@ -58,13 +58,13 @@ function navigate(link, callback) {
             document.getElementById("myDiv").innerHTML = "";
             return document.getElementById('myDiv').innerHTML = html;
         }).catch(function (err) {
-        alert("Unable to render page with data");
-    }).then(function () {
-        history.pushState(null, title, link);
-        setSelectElementValue("gender", gender);
-        setSelectElementValue("marital", marital);
-        callback(photoLink);
-    })
+            alert("Unable to render page with data");
+        }).then(function () {
+            history.pushState(null, title, link);
+            setSelectElementValue("gender", gender);
+            setSelectElementValue("marital", marital);
+            callback(photoLink);
+        })
 
 }
 
@@ -106,10 +106,10 @@ function displayContact(link, callback) {
             document.getElementById("myDiv").innerHTML = "";
             return document.getElementById('myDiv').innerHTML = html;
         }).catch(function (err) {
-        alert("Unable to render page with data");
-    }).then(function () {
-        callback(photoLink);
-    })
+            alert("Unable to render page with data");
+        }).then(function () {
+            callback(photoLink);
+        })
     history.pushState(null, title, link);
 }
 
@@ -152,45 +152,129 @@ function openContactForm() {
     //fetch template
     fetch("/templates/newContactTemplate.mst")
         .then(response => response.text())
-        .catch(function (err) {
-            alert("Unable to get text from response");
-        })
         .then(res => {
             Mustache.parse(res);
             const html = Mustache.to_html(res);
             document.getElementById("myDiv").innerHTML = "";
             document.getElementById("myDiv").innerHTML = html;
-        }).catch(function (err) {
+        })
+        .then(function (res) {
+            form = document.getElementById("contactInfo");
+
+            //FOR DISPLAY OF MODAL WINDOW --- PHONES
+            let modalPhone = document.getElementById("myModalPhone");
+            let createPhoneBtn = document.getElementById("createPhone");
+            let resetPhoneBtn = document.getElementById("resetPhone");
+            let savePhoneBtn = document.getElementById("savePhone");
+            let newPhoneTable = document.getElementById("newPhoneTable");
+            // When the user clicks the button, open the modal
+            createPhoneBtn.onclick = function () {
+                modalPhone.style.display = "flex";
+            }
+
+            savePhoneBtn.onclick = function () {
+                savePhone(newPhoneTable, modalPhone);
+            }
+
+            resetPhoneBtn.onclick = function () {
+                resetTable(newPhoneTable, modalPhone);
+            }
+
+            //FOR DISPLAY OF MODAL WINDOW --- ATTACHMENTS
+            let modalAttach = document.getElementById("myModalAttachment");
+            let createAttach = document.getElementById("createAttachment");
+            let resetAttach = document.getElementById("resetAttachment");
+            let saveAttach = document.getElementById("saveAttachment");
+            let newAttachmentTable = document.getElementById("newAttachmentTable");
+            // When the user clicks the button, open the modal
+            createAttach.onclick = function () {
+                modalAttach.style.display = "flex";
+            }
+            //reset the values and close modal window
+            resetAttach.onclick = function () {
+                resetTable(newAttachmentTable, modalAttach)
+            }
+
+            //save attachment into attachmentTable
+            saveAttach.onclick = function () {
+                saveAttachment(newAttachmentTable, modalAttach)
+            }
+
+            // When the user clicks anywhere outside of ANY modal, close it
+            window.onclick = function (event) {
+                if (event.target == modalPhone) {
+                    resetTable(newPhoneTable, modalPhone);
+                } else if (event.target == modalAttach) {
+                    resetTable(newAttachmentTable, modalAttach);
+                }
+            }
+
+        }).then(function (res) {
+        // form.addEventListener("submit", submitForm(), false);
+        let submitBtn = document.getElementById("submitContact");
+        submitBtn.onclick = function () {
+            submitForm(form);
+        }
+    }).catch(function (err) {
         alert("Unable to render new contact page");
     })
-        .then(function () {
-            form = document.getElementById("contactInfo");
-        }).then(function (res) {
-        form.addEventListener("submit", submitForm(e), false);
-    })
     history.pushState(null, "New contact page", "/contacts/new-form");
-
-    function submitForm(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        var formData = new FormData(this);
-
-        fetch("/contacts/", {
-            method: 'POST',
-            body: formData,
-        }).then(function (response) {
-            return response.json();
-        }).then(function (myJson) {
-            var tmpl = document.getElementById("contactTemplate").innerHTML;
-            var html = Mustache.to_html(tmpl, myJson);
-            document.getElementById("myDiv").innerHTML = "";
-            var container = document.getElementById("myDiv");
-            container.innerHTML = html;
-        }).catch(function (error) {
-            console.error("An error here" + error);
-        })
-    }
 }
+
+function submitForm(form) {
+    event.preventDefault();
+    event.stopPropagation();
+    let formData = new FormData(form);
+
+    //append phones to formData
+    let phoneTable = document.getElementById("phoneTable");
+    for (let i = 1; i < phoneTable.rows.length; i++) {
+        for (let j = 1; j < phoneTable.rows[i].cells.length; j++) {
+            let name = phoneTable.rows[i].cells[j].firstChild.name;
+            let value = phoneTable.rows[i].cells[j].firstChild.value;
+            let fullName = "phone." + i + "." + name;
+            console.log(fullName + "---" + value);
+            formData.append(fullName, value);
+        }
+    }
+
+    //append attachments to formData
+    let attachmentTable = document.getElementById("attachmentTable");
+    for (let i = 1; i < attachmentTable.rows.length; i++) {
+        let name = attachmentTable.rows[i].cells[1].firstChild.name;
+        let value = attachmentTable.rows[i].cells[1].firstChild.value;
+        let fullName = "attachment." + i + "." + name;
+        formData.append(fullName, value);
+
+        let userFileName = "attachment." + i + "." + "submittedFileName";
+        let submittedName = attachmentTable.rows[i].cells[2].firstChild.value;
+        formData.append(userFileName, submittedName);
+
+        let fileName = attachmentTable.rows[i].cells[2].firstChild.name;
+        let file = attachmentTable.rows[i].cells[2].firstChild.files[0];
+        //value will give fake path with filename
+        let fullFileName = "attachment." + i + "." + fileName;
+        formData.append(fullFileName, file);
+    }
+
+
+    fetch("/contacts/", {
+        method: 'POST',
+        body: formData,
+    }).then(function (response) {
+        return response.json();
+    }).then(function (myJson) {
+        var tmpl = document.getElementById("contactTemplate").innerHTML;
+        var html = Mustache.to_html(tmpl, myJson);
+        //document.getElementById("myDiv").innerHTML = "";
+        let container = document.getElementById("myDiv");
+        container.innerHTML = ""
+        container.innerHTML = html;
+    }).catch(function (error) {
+        console.error("An error here" + error);
+    })
+}
+
 
 function openEditForm() {
     //Check how many checkboxes are checked. Only 1 should be checked, alert if not 1.
@@ -237,7 +321,9 @@ function openEditForm() {
             modal.style.display = "flex";
         }
 
-        resetBtn.onclick = function(){resetTable(newPhoneTable, modal)};
+        resetBtn.onclick = function () {
+            resetTable(newPhoneTable, modal)
+        };
 
         // When the user clicks anywhere outside of the modal, close it
         window.onclick = function (event) {
@@ -246,7 +332,7 @@ function openEditForm() {
             }
         }
 
-        saveBtn.onclick = function(){
+        saveBtn.onclick = function () {
             //get filled in values from popup window
             let newCountryCode = document.getElementById("newCountryCode").value;
             let newOperatorCode = document.getElementById("newOperatorCode").value;
@@ -255,8 +341,8 @@ function openEditForm() {
             let newComment = document.getElementById("newComment").value;
 
             //if any required field is empty, the row won't be saved
-            if (newCountryCode=== null || newOperatorCode===null || newPhoneNumber===null ||
-                newCountryCode=== "" || newOperatorCode==="" || newPhoneNumber===""){
+            if (newCountryCode === null || newOperatorCode === null || newPhoneNumber === null ||
+                newCountryCode === "" || newOperatorCode === "" || newPhoneNumber === "") {
                 return alert("Some fields are empty, can not save the phone number.");
             }
 
@@ -278,7 +364,7 @@ function openEditForm() {
 
             let inputPhoneType = document.createElement("select");
             inputPhoneType.options[0] = new Option("home", "0");
-            inputPhoneType.options[1] = new Option("mobile","1");
+            inputPhoneType.options[1] = new Option("mobile", "1");
             inputPhoneType.selectedIndex.value = newPhoneType;
 
             let inputComment = document.createElement("input");
@@ -344,12 +430,121 @@ function submitEditForm(checkedId) {
 }
 
 
-function resetTable(tableName, modalWindow){
-    for (let i = 0; i < tableName.rows.length; i++){
+function resetTable(tableName, modalWindow) {
+    for (let i = 0; i < tableName.rows.length; i++) {
         // assign empty string into every input in the table
         tableName.rows[i].cells[1].firstChild.value = "";
     }
     modalWindow.style.display = "none";
+}
+
+function savePhone(newPhoneTable, modal) {
+    //get filled in inputs from popup window
+    let newCountryCode = document.getElementById("newCountryCode");
+    let newOperatorCode = document.getElementById("newOperatorCode");
+    let newPhoneNumber = document.getElementById("newPhoneNumber");
+    let newPhoneType = document.getElementById("newPhoneType");
+    let newComment = document.getElementById("newComment");
+
+    //if any required field is empty, the row won't be saved
+    if (newCountryCode.value === null || newOperatorCode.value === null || newPhoneNumber.value === null ||
+        newCountryCode.value === "" || newOperatorCode.value === "" || newPhoneNumber.value === "") {
+        return alert("Some fields are empty, can not save the phone number.");
+    }
+
+    //create inputs for phoneTable
+    let checkbox = document.createElement("input");
+    checkbox.setAttribute("type", "checkbox");
+
+    //take table and insert a new row
+    let table = document.getElementById("phoneTable");
+    //when index in insertRow is omitted it is -1 by default, so the row appends as the last in the table
+    let newRow = table.insertRow();
+    newRow.insertCell(0).appendChild(checkbox);
+    newRow.insertCell(1).appendChild(newCountryCode);
+    newRow.insertCell(2).appendChild(newOperatorCode);
+    newRow.insertCell(3).appendChild(newPhoneNumber);
+    newRow.insertCell(4).appendChild(newPhoneType);
+    newRow.insertCell(5).appendChild(newComment);
+
+    //create empty inputs for modal window
+    let inputCountryCode = document.createElement("input");
+    inputCountryCode.setAttribute("type", "text");
+    inputCountryCode.setAttribute("id", "newCountryCode");
+    inputCountryCode.setAttribute("name", "countryCode");
+
+    let inputOperatorCode = document.createElement("input");
+    inputOperatorCode.setAttribute("type", "text");
+    inputOperatorCode.setAttribute("id", "newOperatorCode");
+    inputOperatorCode.setAttribute("name", "operatorCode");
+
+    let inputPhoneNumber = document.createElement("input");
+    inputPhoneNumber.setAttribute("type", "text");
+    inputPhoneNumber.setAttribute("id", "newPhoneNumber");
+    inputPhoneNumber.setAttribute("name", "phoneNumber");
+
+    let inputPhoneType = document.createElement("select");
+    inputPhoneType.setAttribute("id", "newPhoneType");
+    inputPhoneType.setAttribute("name", "phoneType");
+    inputPhoneType.options[0] = new Option("home", "home");
+    inputPhoneType.options[1] = new Option("mobile", "mobile");
+
+    let inputComment = document.createElement("input");
+    inputComment.setAttribute("type", "text");
+    inputComment.setAttribute("id", "newComment");
+    inputComment.setAttribute("name", "comment");
+
+    //append empty input fields to modal window
+    document.getElementById("countryCodeHolder").appendChild(inputCountryCode);
+    document.getElementById("operatorCodeHolder").appendChild(inputOperatorCode);
+    document.getElementById("phoneNumberHolder").appendChild(inputPhoneNumber);
+    document.getElementById("phoneTypeHolder").appendChild(inputPhoneType);
+    document.getElementById("commentHolder").appendChild(inputComment);
+
+    //hide modal window
+    modal.style.display = "none";
+}
+
+function saveAttachment(newAttachmentTable, modal) {
+    //get filled in values from popup window
+    let newAttachmentName = document.getElementById("attachmentName");
+    let newAttachmentLink = document.getElementById("attachmentLink");
+
+    //if any required field is empty, the row won't be saved
+    if (newAttachmentName.value === null || newAttachmentLink.value === null ||
+        newAttachmentName.value === "" || newAttachmentLink.value === "") {
+        return alert("Some fields are empty, can not save the attachment.");
+    }
+
+    //create inputs for attachmentTable
+    let checkbox = document.createElement("input");
+    checkbox.setAttribute("type", "checkbox");
+
+    //take table and insert a new row
+    let table = document.getElementById("attachmentTable");
+    //when index in insertRow is omitted it is -1 by default, so the row appends as the last in the table
+    let newRow = table.insertRow();
+    newRow.insertCell(0).appendChild(checkbox);
+    newRow.insertCell(1).appendChild(newAttachmentName);
+    newRow.insertCell(2).appendChild(newAttachmentLink);
+
+    //create new input fields for modal window, as the existing ones are appended to attachmentTable
+    let inputAttachmentName = document.createElement("input");
+    inputAttachmentName.setAttribute("type", "text");
+    inputAttachmentName.setAttribute("id", "attachmentName");
+    inputAttachmentName.setAttribute("name", "attachmentName");
+
+    let inputAttachmentLink = document.createElement("input");
+    inputAttachmentLink.setAttribute("type", "file");
+    inputAttachmentLink.setAttribute("id", "attachmentLink");
+    inputAttachmentLink.setAttribute("name", "attachmentLink");
+
+    //append empty input fields to modal window
+    document.getElementById("attachmentNameHolder").appendChild(inputAttachmentName);
+    document.getElementById("attachmentLinkHolder").appendChild(inputAttachmentLink);
+
+    //hide modal window
+    modal.style.display = "none";
 }
 
 function deleteContact() {

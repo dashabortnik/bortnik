@@ -3,7 +3,7 @@
     <form enctype="multipart/form-data" method="post" id="contactInfo">
     <span class="rounded float-right col-6 col-md-4 text-center">
         <img class="img-fluid img-thumbnail">
-        <input type="file" name="photoLink">
+        <input type="file" name="photoLink" id="photoLink">
     </span>
         <table class="table table-bordered table-sm table-hover col-12 col-md-8">
             <tbody>
@@ -76,11 +76,51 @@
             </tr>
             </tbody>
         </table>
+ </form>
+
         <h2>Telephone numbers</h2>
-        <button class="btn btn-outline-success" id="createPhone">Create</button>
-        <table class="table table-sm table-bordered table-hover">
+        <button type="button" class="btn btn-outline-success" id="createPhone">Create</button>
+        <div id="myModalPhone" class="modal">
+            <div class="modal-content">
+                <table class="table table-sm table-bordered table-hover" id="newPhoneTable">
+                    <tbody>
+                         <tr>
+                            <th class="align-middle text-center">Country code</th>
+                            <td id="countryCodeHolder"><input type="text" name="countryCode" id="newCountryCode"></td>
+                         </tr>
+                         <tr>
+                            <th class="align-middle text-center">Operator code</th>
+                            <td id="operatorCodeHolder"><input type="text" name="operatorCode" id="newOperatorCode"></td>
+                         </tr>
+                         <tr>
+                            <th class="align-middle text-center">Phone number</th>
+                            <td id="phoneNumberHolder"><input type="text" name="phoneNumber" id="newPhoneNumber"></td>
+                         </tr>
+                         <tr>
+                            <th class="align-middle text-center">Phone type</th>
+                            <td id="phoneTypeHolder">
+                                <select name="phoneType" id="newPhoneType">
+                                    <option value="home">home</option>
+                                    <option value="mobile">mobile</option>
+                                </select>
+                            </td>
+                         </tr>
+                         <tr>
+                            <th class="align-middle text-center">Comment</th>
+                            <td id="commentHolder"><input type="text" name="comment" id="newComment"></td>
+                         </tr>
+                    </tbody>
+                </table>
+                <div class="d-flex justify-content-around flex-wrap">
+                    <button type="button" class="btn btn-outline-success" id="savePhone">Save</button>
+                    <button type="button" class="btn btn-outline-warning" id="resetPhone">Reset</button>
+                </div>
+            </div>
+        </div>
+        <table class="table table-sm table-bordered table-hover" id="phoneTable">
             <thead class="bg-light">
                 <tr class="bg-light">
+                    <th class="align-middle text-center">Check</th>
                     <th class="align-middle text-center">Country code</th>
                     <th class="align-middle text-center">Operator code</th>
                     <th class="align-middle text-center">Phone number</th>
@@ -89,33 +129,49 @@
                 </tr>
             </thead>
             <tbody>
-                <td class="align-middle text-center"><input type="text" name="countryCode"></td>
-                <td class="align-middle text-center"><input type="text" name="operatorCode"></td>
-                <td class="align-middle text-center"><input type="text" name="phoneNumber"></td>
-                <td class="align-middle text-center"><input type="text" name="phoneType"></td>
-                <td class="align-middle text-center"><input type="text" name="comment"></td>
+
             </tbody>
         </table>
-        <h2>Attachments</h2>
-        <button class="btn btn-outline-success" id="createAttachment">Create</button>
-            <table class="table table-sm table-bordered table-hover">
-                <thead class="bg-light">
-                <tr class="bg-light">
-                    <th class="align-middle text-center">Attachment</th>
-                    <th class="align-middle text-center">Comment</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td class="align-middle text-center"><input type="file"
-                           id="avatar" name="attachment"></td>
 
-                    <td class="align-middle text-center"><input type="text" name="comment"></td>
+
+        <h2>Attachments</h2>
+        <button type="button" class="btn btn-outline-success" id="createAttachment">Create</button>
+        <div id="myModalAttachment" class="modal">
+            <div class="modal-content">
+                <table class="table table-sm table-bordered table-hover" id="newAttachmentTable">
+                    <tbody>
+                        <tr>
+                            <th class="align-middle text-center">Attachment name</th>
+                            <td id="attachmentNameHolder"><input type="text" name="attachmentName" id="attachmentName"></td>
+                        </tr>
+                        <tr>
+                            <th class="align-middle text-center">Attachment link</th>
+                            <td id="attachmentLinkHolder">
+                                <input type="file" name="attachmentLink" id="attachmentLink">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div class="d-flex justify-content-around flex-wrap">
+                    <button type="button" class="btn btn-outline-success" id="saveAttachment">Save</button>
+                    <button type="button" class="btn btn-outline-warning" id="resetAttachment">Reset</button>
+                </div>
+            </div>
+        </div>
+        <table class="table table-sm table-bordered table-hover" id="attachmentTable">
+            <thead class="bg-light">
+                <tr class="bg-light">
+                    <th class="align-middle text-center">Check</th>
+                    <th class="align-middle text-center">Attachment name</th>
+                    <th class="align-middle text-center">Attachment link</th>
                 </tr>
-                </tbody>
-            </table>
+            </thead>
+            <tbody>
+
+            </tbody>
+        </table>
         <div class="d-flex justify-content-around flex-wrap">
-            <button type="submit" class="btn btn-success col-md-5">Submit</button>
+            <button type="submit" class="btn btn-success col-md-5" id="submitContact">Submit</button>
             <button type="button" class="btn btn-secondary col-md-5" onclick="history.back()">Cancel</button>
         </div>
-    </form>
+

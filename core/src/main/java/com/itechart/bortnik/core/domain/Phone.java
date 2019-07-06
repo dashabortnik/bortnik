@@ -95,7 +95,8 @@ public class Phone extends BaseEntity{
     @Override
     public String toString() {
         return "Phone{" +
-                "countryCode='" + countryCode + '\'' +
+                "id='" + this.getId() + '\''+
+                ", countryCode='" + countryCode + '\'' +
                 ", operatorCode='" + operatorCode + '\'' +
                 ", phoneNumber='" + phoneNumber + '\'' +
                 ", phoneType=" + phoneType +
