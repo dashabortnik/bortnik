@@ -4,6 +4,8 @@ import com.itechart.bortnik.core.database.DatabaseUtil;
 import com.itechart.bortnik.core.database.PhoneDao;
 import com.itechart.bortnik.core.domain.Phone;
 import com.itechart.bortnik.core.domain.PhoneType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -23,34 +25,33 @@ public class PhoneDaoImpl implements PhoneDao {
         return Singleton.INSTANCE;
     }
 
+    //create Logger for current class
+    Logger logger = LoggerFactory.getLogger(PhoneDaoImpl.class);
+
     @Override
     public List<Phone> readAllById(int id) {
-
         List<Phone> phones = new ArrayList<>();
         String sql = "SELECT * FROM phone WHERE contact_id = ?";
-
         try (Connection connection = DatabaseUtil.getDataSource().getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
-
             ps.setInt(1, id);
             ResultSet resultSet = ps.executeQuery();
-
             while (resultSet.next()) {
-                int phoneId = resultSet.getInt("phone_id"); // в кавычках названия как в базе?
+                int phoneId = resultSet.getInt("phone_id");
                 String countryCode = resultSet.getString("country_code");
                 String operatorCode = resultSet.getString("operator_code");
                 String phoneNumber = resultSet.getString("phone_number");
                 PhoneType phoneType = PhoneType.valueOf(resultSet.getString("phone_type"));
                 String comment = resultSet.getString("comment");
                 int contactId = resultSet.getInt("contact_id");
-
+                //create Phone with data retrieved from database
                 Phone phone = new Phone(phoneId, countryCode, operatorCode, phoneNumber, phoneType, comment, contactId);
                 phones.add(phone);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error with fetching phones from database: ", e);
         }
-        System.out.println("TELEPHONES:" + phones.toString());
+        logger.info("Phones for contact {} were fetched successfully.", id);
         return phones;
     }
 
@@ -62,7 +63,6 @@ public class PhoneDaoImpl implements PhoneDao {
             ps.setString(1, phone.getCountryCode());
             ps.setString(2, phone.getOperatorCode());
             ps.setString(3, phone.getPhoneNumber());
-
             if (PhoneType.home.toString().equals(phone.getPhoneType().toString().trim())) {
                 ps.setObject(4, 1);
             } else {
@@ -74,11 +74,11 @@ public class PhoneDaoImpl implements PhoneDao {
             ResultSet generatedKeys = ps.getGeneratedKeys();
             if (generatedKeys.next()) {
                 phone.setId(generatedKeys.getInt(1));
-            } // чтобы получить id добавленного элемента
+            }
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Error with inserting phone into database: ", e);
         }
+        logger.info("Phone for contact {} was inserted successfully.", phone.getId());
         return phone;
     }
 
@@ -90,13 +90,13 @@ public class PhoneDaoImpl implements PhoneDao {
             ps.setString(1, phone.getCountryCode());
             ps.setString(2, phone.getOperatorCode());
             ps.setString(3, phone.getPhoneNumber());
-            ps.setObject(4, phone.getPhoneType()); // верно??
+            ps.setObject(4, phone.getPhoneType());
             ps.setString(5, phone.getComment());
             ps.setInt(6, phone.getContactId());
             ps.execute();
+            logger.info("Phone was updated successfully.");
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Error with updating phone: ", e);
         }
         return phone;
     }
@@ -108,9 +108,9 @@ public class PhoneDaoImpl implements PhoneDao {
              PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.execute();
+            logger.info("Phone with id {} was deleted successfully.", id);
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Error with deleting phone: ", e);
         }
     }
 

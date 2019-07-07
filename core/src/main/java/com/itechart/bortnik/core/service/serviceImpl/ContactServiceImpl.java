@@ -23,16 +23,14 @@ public class ContactServiceImpl implements ContactService {
     private AttachmentDao attachmentDaoImpl;
 
     public ContactServiceImpl() {
-
-        contactDaoImpl = new ContactDaoImpl();
-        phoneDaoImpl = new PhoneDaoImpl();
-        attachmentDaoImpl = new AttachmentDaoImpl();
+        contactDaoImpl = ContactDaoImpl.getInstance();
+        phoneDaoImpl = PhoneDaoImpl.getInstance();
+        attachmentDaoImpl = AttachmentDaoImpl.getInstance();
     }
 
     @Override
     public FullContactDTO save(FullContactDTO entity) {
         Contact insertedContact = contactDaoImpl.insert(entity.getContact());
-        //int contactId = insertedContact.getId();
         //if contact insert failed, we'll get an empty contact, it this case we don't insert phones and attachments
         if (insertedContact != null) {
             int contactId = insertedContact.getId();
@@ -71,7 +69,6 @@ public class ContactServiceImpl implements ContactService {
 
     @Override
     public List<Contact> findContactsByCriteria(Contact search) {
-
         return contactDaoImpl.readByCriteria(search);
     }
 
@@ -86,7 +83,6 @@ public class ContactServiceImpl implements ContactService {
 
     @Override
     public List<Contact> findContactByBirthday(Date birthday) {
-
         return contactDaoImpl.readByBirthday(birthday);
     }
 

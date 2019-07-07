@@ -3,6 +3,8 @@ package com.itechart.bortnik.core.database.daoImpl;
 import com.itechart.bortnik.core.database.AttachmentDao;
 import com.itechart.bortnik.core.database.DatabaseUtil;
 import com.itechart.bortnik.core.domain.Attachment;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -23,31 +25,31 @@ public class AttachmentDaoImpl implements AttachmentDao {
         return Singleton.INSTANCE;
     }
 
+    //create Logger for current class
+    Logger logger = LoggerFactory.getLogger(AttachmentDaoImpl.class);
+
     @Override
     public List<Attachment> readAllById(int id) {
         List<Attachment> attachments = new ArrayList<>();
         String sql = "SELECT * FROM attachment WHERE contact_id = ? ";
-
         try (Connection connection = DatabaseUtil.getDataSource().getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
-
             ps.setInt(1, id);
             ResultSet resultSet = ps.executeQuery();
-
             while (resultSet.next()) {
                 int attachmentId = resultSet.getInt("attachment_id");
                 String name = resultSet.getString("attachment_name");
                 String link = resultSet.getString("attachment_link");
                 Date uploadDate = resultSet.getDate("upload_date");
                 int contactId = resultSet.getInt("contact_id");
-
+                //create attachment from extracted data
                 Attachment attach = new Attachment(attachmentId, name, link, uploadDate, contactId);
                 attachments.add(attach);
             }
+            logger.info("Attachments were fetched successfully.");
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error with fetching attachments from database: ", e);
         }
-        System.out.println("ATTACHMENTS:" + attachments.toString());
         return attachments;
     }
 
@@ -64,10 +66,10 @@ public class AttachmentDaoImpl implements AttachmentDao {
             ResultSet generatedKeys = ps.getGeneratedKeys();
             if (generatedKeys.next()) {
                 attachment.setId(generatedKeys.getInt(1));
-            } // чтобы получить id добавленного элемента
+            }
+            logger.info("Attachment was saved successfully.");
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Error with inserting attachment into database: ", e);
         }
         return attachment;
     }
@@ -82,9 +84,9 @@ public class AttachmentDaoImpl implements AttachmentDao {
             ps.setObject(3, attachment.getUploadDate());
             ps.setInt(4, attachment.getContactId());
             ps.execute();
+            logger.info("Attachment was updated successfully.");
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Error with updating attachment: ", e);
         }
         return attachment;
     }
@@ -96,9 +98,9 @@ public class AttachmentDaoImpl implements AttachmentDao {
              PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
             ps.execute();
+            logger.info("Attachment with id {} was deleted successfully.", id);
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Error with deleting attachment: ", e);
         }
     }
 }

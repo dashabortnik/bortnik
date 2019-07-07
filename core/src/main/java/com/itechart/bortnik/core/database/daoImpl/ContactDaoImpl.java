@@ -37,12 +37,12 @@ public class ContactDaoImpl implements ContactDao {
     }
 
     // create the only instance of class and return it afterwards
-    private static class Singletone {
+    private static class Singleton {
         private static final ContactDao INSTANCE = new ContactDaoImpl();
     }
 
     public static ContactDao getInstance() {
-        return Singletone.INSTANCE;
+        return Singleton.INSTANCE;
     }
 
     //create Logger for current class
@@ -56,7 +56,7 @@ public class ContactDaoImpl implements ContactDao {
              PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, id);
             ResultSet resultSet = ps.executeQuery();
-            //вынести в отд метод
+
             while (resultSet.next()) {
                 int contactId = resultSet.getInt(DB_CONTACTID);
                 String surname = resultSet.getString(DB_SURNAME);
@@ -74,12 +74,12 @@ public class ContactDaoImpl implements ContactDao {
                         resultSet.getString(DB_CITY), resultSet.getString(DB_STREET), resultSet.getString(DB_POSTCODE));
                 contact = new Contact(contactId, surname, name, patronymic, birthday, gender, nationality, maritalStatus, website,
                         email, workplace, photoLink, address);
+                logger.info("Contact was fetched from database successfully.");
                 return contact;
             }
 
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Error with database query execution: ", e);
         }
         return null;
     }
@@ -90,7 +90,7 @@ public class ContactDaoImpl implements ContactDao {
         String sql = "SELECT * FROM contact WHERE birthday=?";
         try (Connection connection = DatabaseUtil.getDataSource().getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
-            System.out.println("Search for "+ new java.sql.Date(today.getTime()).toString());
+            System.out.println("Search for " + new java.sql.Date(today.getTime()).toString());
             ps.setObject(1, today);
             ResultSet resultSet = ps.executeQuery();
             while (resultSet.next()) {
@@ -117,8 +117,7 @@ public class ContactDaoImpl implements ContactDao {
         return contacts;
     }
 
-    // collects all search parameters from searchedContact submitted by user, puts
-    // not empty parameters into map params
+    // collects all search parameters from searchedContact submitted by user, puts not empty parameters into map params
     private void collectSearchParams(Contact searchedContact, Map<String, Object> params) {
         String surname = searchedContact.getSurname();
         if (surname != null && surname.isEmpty()) {
@@ -179,7 +178,6 @@ public class ContactDaoImpl implements ContactDao {
              ResultSet resultSet = st.executeQuery(sql)) {
 
             while (resultSet.next()) {
-                // Contact contact = assignValuesToContact(resultSet);
                 int contactId = resultSet.getInt(DB_CONTACTID);
                 String surname = resultSet.getString(DB_SURNAME);
                 String name = resultSet.getString(DB_NAME);
@@ -199,14 +197,12 @@ public class ContactDaoImpl implements ContactDao {
                         email, workplace, photoLink, address));
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error with fetching contacts from database: ", e);
         }
-        System.out.println(contacts.toString());
         return contacts;
     }
 
-    /* поиск по нескольким критериям */
-
+    // поиск по нескольким критериям
     @Override
     public List<Contact> readByCriteria(Contact searchedContact) { // private methods
 
@@ -266,7 +262,8 @@ public class ContactDaoImpl implements ContactDao {
              PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
              PreparedStatement psAddress = connection.prepareStatement(sqlAddress, Statement.RETURN_GENERATED_KEYS)) {
             connection.setAutoCommit(false);
-
+            logger.debug("Insert of new contact - begin transaction.");
+            //query to insert new contact into database
             ps.setString(1, contact.getSurname());
             ps.setString(2, contact.getName());
             ps.setString(3, contact.getPatronymic());
@@ -284,7 +281,7 @@ public class ContactDaoImpl implements ContactDao {
             } else {
                 ps.setObject(7, 3);
             }
-            ps.setString(8,contact.getWebsite());
+            ps.setString(8, contact.getWebsite());
             ps.setString(9, contact.getEmail());
             ps.setString(10, contact.getWorkplace());
             ps.setString(11, contact.getPhotoLink());
@@ -292,9 +289,8 @@ public class ContactDaoImpl implements ContactDao {
             ResultSet generatedKeys = ps.getGeneratedKeys();
             if (generatedKeys.next()) {
                 contact.setId(generatedKeys.getInt(1));
-            } // чтобы получить id добавленного элемента
-            System.out.println("NEW ID ___ " + contact.getId());
-            // создание адреса
+            }
+            //query to insert new address into database
             psAddress.setString(1, contact.getAddress().getCountry());
             psAddress.setString(2, contact.getAddress().getCity());
             psAddress.setString(3, contact.getAddress().getStreet());
@@ -304,12 +300,11 @@ public class ContactDaoImpl implements ContactDao {
             ResultSet generatedKeysAddress = psAddress.getGeneratedKeys();
             if (generatedKeysAddress.next()) {
                 contact.getAddress().setId(generatedKeys.getInt(1));
-            } // чтобы получить id добавленного адреса
-            System.out.println("NEW Address ID ___ " + contact.getAddress().getId());
+            }
             connection.commit();
+            logger.debug("Insert of new contact - end transaction.");
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Error with inserting contact into database: ", e);
         }
         return contact;
     }
@@ -321,6 +316,9 @@ public class ContactDaoImpl implements ContactDao {
         try (Connection connection = DatabaseUtil.getDataSource().getConnection();
              PreparedStatement ps = connection.prepareStatement(sql);
              PreparedStatement psAddress = connection.prepareStatement(sqlAddress)) {
+            connection.setAutoCommit(false);
+            logger.debug("Update of contact - begin transaction.");
+            //update the contact
             ps.setString(1, contact.getSurname());
             ps.setString(2, contact.getName());
             ps.setString(3, contact.getPatronymic());
@@ -344,7 +342,6 @@ public class ContactDaoImpl implements ContactDao {
             ps.setString(11, contact.getPhotoLink());
             ps.setInt(12, contact.getId());
             ps.execute();
-
             //update the address
             psAddress.setString(1, contact.getAddress().getCountry());
             psAddress.setString(2, contact.getAddress().getCity());
@@ -352,10 +349,10 @@ public class ContactDaoImpl implements ContactDao {
             psAddress.setString(4, contact.getAddress().getPostcode());
             psAddress.setInt(5, contact.getId());
             psAddress.execute();
-
+            connection.commit();
+            logger.debug("Update of contact - end transaction.");
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Error with updating contact: ", e);
         }
         return contact;
     }
@@ -368,11 +365,8 @@ public class ContactDaoImpl implements ContactDao {
             ps.setInt(1, id);
             ps.execute();
             logger.info("Delete of contact with id {} executed.", id);
-            //System.out.println("DELETE of contact " + id + " executed");
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            logger.error("Error with deleting contact: ", e);
         }
-
     }
 }

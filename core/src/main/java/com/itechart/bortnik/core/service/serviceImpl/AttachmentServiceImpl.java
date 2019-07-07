@@ -12,7 +12,7 @@ public class AttachmentServiceImpl implements AttachmentService {
     private AttachmentDao attachmentDao;
 
     public AttachmentServiceImpl() {
-        attachmentDao = new AttachmentDaoImpl();
+        attachmentDao = AttachmentDaoImpl.getInstance();
     }
 
     @Override

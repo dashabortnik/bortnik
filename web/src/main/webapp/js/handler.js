@@ -159,13 +159,14 @@ function downloadFile(link){
     var newLink = null;
     fetch("/contacts/file", {
         method: "GET",
-        headers: new Headers({'Content-Type': 'application/json; charset=UTF-8', 'fileLink': JSON.stringify(link)})
+        headers: new Headers({'Content-Type': 'application/json; charset=UTF-8', 'fileLink': encodeURI(link)})
     }).then(function (response) {
         if (response.ok) {
             response.blob().then(function (myBlob) {
                 let objectURL = URL.createObjectURL(myBlob);
                 newLink = objectURL;
                 console.log("New link---" + newLink);
+                //create new link with the new link to the file, click it to initiate file download and remove a
                 let a = document.createElement("a");
                 a.href = newLink;
                 a.style.display = "none";

@@ -28,7 +28,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -94,13 +93,12 @@ public class CreateContactAction implements BaseAction {
                 if (fieldName.matches("phone.*")) {
                     //flag that shows if the same fieldName should be checked again
                     int checkAgain = 1;
-                    //parse fieldName to find ordinal number of the phone and item name
-                    //example: phone.1.countryCode
+                    //parse fieldName to find ordinal number of the phone and item name (phone.1.countryCode)
                     String[] fieldNameParts = fieldName.split("\\.");
                     int itemNumber = Integer.parseInt(fieldNameParts[1]);
                     String itemName = fieldNameParts[2];
-                    //parse values depending on item name, all fields are required, only comment can be omitted
-                    //new phone is created either after a comment was reached, or when the itemNumber has changed
+                    /* parse values depending on item name, all fields are required, only comment can be omitted
+                    new phone is created either after a comment was reached, or when the itemNumber has changed */
                     while (checkAgain == 1) {
                         if (itemNumber == phoneCounter) {
                             switch (itemName) {
@@ -143,38 +141,30 @@ public class CreateContactAction implements BaseAction {
                                 phoneType = null;
                                 comment = null;
                             }
-
                             //when the itemNumber has changed, counter+1 and the field should be checked again
                             phoneCounter++;
                             checkAgain = 1;
                         }
                     }
-
                 } else if (fieldName.matches("attachment.*")) {
-
-                    //parse fieldName to find ordinal number of the attachment and item name
-                    //example: attachment.1.attachmentName
+                    //parse fieldName to find ordinal number of the attachment and item name(attachment.1.attachmentName)
                     String[] fieldNameParts = fieldName.split("\\.");
                     int itemNumber = Integer.parseInt(fieldNameParts[1]);
                     String itemName = fieldNameParts[2];
-                    //parse values depending on item name, all fields are required
-                    //new attachment is created when link is reached
+                    /*parse values depending on item name, all fields are required;
+                    a new attachment is created when link is reached*/
                     switch (itemName) {
                         case "attachmentName":
                             attachmentName = item.getString("UTF-8");
                             break;
                         case "submittedFileName":
-                            //String fakeName = item.getString();
                             String fakeName = item.getString("UTF-8");
-                            //String [] nameParts = fakeName.split("/");
-
                             if (fakeName.contains("fakepath")) {
-                                // update the file-path text using case-insensitive regex
+                                // update the file-path text using regex
                                 submittedFileName = fakeName.replace("C:\\fakepath\\", "");
                             } else {
                                 submittedFileName = fakeName;
                             }
-                            System.out.println("SUB FILENAME---" + submittedFileName);
                             break;
                         case "attachmentLink":
                             String path = FileSystems.getDefault().getPath("").toAbsolutePath() + File.separator +
@@ -182,11 +172,9 @@ public class CreateContactAction implements BaseAction {
                                     + "---" + submittedFileName;
                             File uploadedFile = new File(path);
                             item.write(uploadedFile);
-                            System.out.println("File path: " + uploadedFile.getAbsolutePath());
                             attachmentLink = uploadedFile.getAbsolutePath();
-
                             //create attachment and add it to the list
-                            if (attachmentName != null && !attachmentName.equals("")&& attachmentLink != null &&
+                            if (attachmentName != null && !attachmentName.equals("") && attachmentLink != null &&
                                     !attachmentLink.equals("")) {
                                 Attachment attachment = new Attachment(0, attachmentName, attachmentLink,
                                         new java.sql.Date(new Date().getTime()), 0);
@@ -195,7 +183,7 @@ public class CreateContactAction implements BaseAction {
                                 attachmentLink = null;
                                 submittedFileName = null;
                             } else {
-                                System.out.println("Problem with new attachment. Name or link are empty.");
+                                logger.warn("Problem with new attachment. Name or link are empty.");
                             }
                             break;
                     }
@@ -269,38 +257,33 @@ public class CreateContactAction implements BaseAction {
                             + File.separator + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1) + ".jpg";
                     File uploadedFile = new File(path);
                     item.write(uploadedFile);
-                    System.out.println("Image path: " + uploadedFile.getAbsolutePath());
                     photoLink = uploadedFile.getAbsolutePath();
                 }
             }
             receivedContact = new Contact(0, surname, name, patronymic, birthday, gender, nationality, maritalStatus, website,
                     email, workplace, photoLink, new Address(0, country, city, street, postcode));
 
-        } catch (
-                FileUploadException ex) {
-            System.out.println("Error With File Parsing - " + ex.getMessage());
-        } catch (
-                ParseException e) {
-            e.printStackTrace();
-        } catch (
-                Exception e) {
-            e.printStackTrace();
+        } catch (FileUploadException e) {
+            logger.error("Error with file upload: ", e);
+        } catch (ParseException e) {
+            logger.error("Error with file parsing: ", e);
+        } catch (Exception e) {
+            logger.error("Error: ", e);
         }
-
         //create DTO object with contact, list of phones and list of attachments
         FullContactDTO fullContactDTO = new FullContactDTO(receivedContact, phones, attachments);
-        System.out.println(fullContactDTO.toString());
-
+        logger.debug("Contact from formData info: {}", fullContactDTO);
         if (fullContactDTO != null) {
             FullContactDTO fullContact = contactService.save(fullContactDTO);
-
+            //write the created contact into response
             response.setHeader("Content-Type", "application/json; charset=UTF-8");
             ObjectMapper mapper = new ObjectMapper();
             mapper.setDateFormat(df);
             try (PrintWriter out = response.getWriter()) {
                 mapper.writeValue(out, fullContact);
+                logger.info("Created contact sent to browser.");
             } catch (IOException e) {
-                e.printStackTrace();
+                logger.error("Error with reading or writing the file: ", e);
             }
         } else {
             logger.warn("Unable to add new contact to DB. The received contact is empty.");

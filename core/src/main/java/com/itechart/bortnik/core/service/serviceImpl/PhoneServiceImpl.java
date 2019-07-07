@@ -12,7 +12,7 @@ public class PhoneServiceImpl implements PhoneService {
     private PhoneDao phoneDao;
 
     public PhoneServiceImpl() {
-        phoneDao = new PhoneDaoImpl();
+        phoneDao = PhoneDaoImpl.getInstance();
     }
 
     @Override

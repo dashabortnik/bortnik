@@ -1,6 +1,8 @@
 package com.itechart.bortnik.web.servlets;
 
 import com.itechart.bortnik.web.action.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -27,7 +29,7 @@ public class Controller {
         actions.put("GET_\\/", GET_ALL_CONTACTS);
         actions.put("POST_\\/", CREATE_CONTACT);
         actions.put("GET_\\/\\d+", GET_CONTACT_BY_ID);
-        actions.put("PUT_\\/\\d+\\/edit-form", UPDATE_CONTACT);               //UPDATE BAD FIX edit-form
+        actions.put("PUT_\\/\\d+\\/edit-form", UPDATE_CONTACT);
         //actions.put("GET_\\/contacts/new-form", "NEWCONTACTFORM");
         actions.put("GET_\\/image", GET_IMAGE_FOR_CONTACT);
         actions.put("GET_\\/file", GET_FILE);
@@ -39,58 +41,58 @@ public class Controller {
         //urls with and without /?
     }
 
-    void processString(String parsedUrl, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        System.out.println("Process string:" + parsedUrl);
-        String action = "";
+    //create Logger for current class
+    Logger logger = LoggerFactory.getLogger(Controller.class);
 
-        for (String key : actions.keySet()){
-            if (parsedUrl != null && !parsedUrl.isEmpty() && parsedUrl.matches(key)){
+    void processString(String parsedUrl, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = "";
+        for (String key : actions.keySet()) {
+            if (parsedUrl != null && !parsedUrl.isEmpty() && parsedUrl.matches(key)) {
                 action = actions.get(key);
                 break;
             }
         }
-        System.out.println("ACTION: " + action);
+        logger.debug("ACTION: {}", action);
 
         switch (action) {
             case "":
             case GET_ALL_CONTACTS:
-                System.out.println("switch get all");
+                logger.info("ShowAllContactsAction is invoked.");
                 new ShowAllContactsAction().execute(request, response);
                 break;
             case CREATE_CONTACT:
-                System.out.println("switch create");
+                logger.info("CreateContactAction is invoked.");
                 new CreateContactAction().execute(request, response);
                 break;
             case GET_CONTACT_BY_ID:
             case EDIT_CONTACT_FORM:
-                System.out.println("switch get by id");
+                logger.info("GetContactByIdAction is invoked.");
                 new GetContactByIdAction().execute(request, response);
                 break;
             case GET_IMAGE_FOR_CONTACT:
-                System.out.println("switch get image for contact");
+                logger.info("GetImageForContactAction is invoked.");
                 new GetImageForContactAction().execute(request, response);
                 break;
             case GET_FILE:
-                System.out.println("switch get file");
+                logger.info("GetFileAction is invoked.");
                 new GetFileAction().execute(request, response);
                 break;
             case UPDATE_CONTACT:
-                System.out.println("switch update contact");
+                logger.info("UpdateContactAction is invoked.");
                 new UpdateContactAction().execute(request, response);
                 break;
             case DELETE_CONTACT:
-                System.out.println("switch delete contact");
+                logger.info("DeleteContactAction is invoked.");
                 new DeleteContactAction().execute(request, response);
                 break;
             case GET_ALL_EMAILS:
-                System.out.println("switch get all emails");
+                logger.info("SendEmailAction is invoked.");
                 new SendEmailAction().execute(request, response);
                 break;
             default:
+                logger.info("ShowAllContactsAction is invoked by default.");
                 new ShowAllContactsAction().execute(request, response);
                 break;
         }
-
     }
-
 }
