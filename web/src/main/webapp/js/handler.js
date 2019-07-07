@@ -89,8 +89,13 @@ function displayContact(link, callback) {
     }).then(function (myJson) {
         // ignore warning, it works: contact is a nested object with attributes
         photoLink = myJson.contact.photoLink;
-        gender = myJson.contact.gender;
-        marital = myJson.contact.maritalStatus;
+        var list = myJson.attachmentList;
+        for(var i = 0; i < list.length; i++){
+            myJson.attachmentList[i].realFileName = myJson.attachmentList[i].link.split("---", 2)[1];
+            console.log(myJson.attachmentList[i].realFileName);
+        }
+        //gender = myJson.contact.gender;
+        //marital = myJson.contact.maritalStatus;
         return myJson;
     })
     //fetch template
@@ -140,6 +145,38 @@ function retrieveImage(link) {
             });
         } else {
             console.log('Network response was not ok. Image exists but download failed.');
+        }
+    })
+        .catch(function (error) {
+            console.log('There has been a problem with your fetch operation: ' + error.message);
+        });
+}
+
+function downloadFile(link){
+    event.preventDefault();
+    event.stopPropagation();
+    console.log("The link to download file is---" + link);
+    var newLink = null;
+    fetch("/contacts/file", {
+        method: "GET",
+        headers: new Headers({'Content-Type': 'application/json; charset=UTF-8', 'fileLink': JSON.stringify(link)})
+    }).then(function (response) {
+        if (response.ok) {
+            response.blob().then(function (myBlob) {
+                let objectURL = URL.createObjectURL(myBlob);
+                newLink = objectURL;
+                console.log("New link---" + newLink);
+                let a = document.createElement("a");
+                a.href = newLink;
+                a.style.display = "none";
+                let fileName = link.split("---", 2)[1];
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            });
+        } else {
+            console.log('Network response was not ok. File download failed.');
         }
     })
         .catch(function (error) {

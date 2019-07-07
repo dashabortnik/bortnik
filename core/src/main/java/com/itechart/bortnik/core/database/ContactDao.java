@@ -2,7 +2,6 @@ package com.itechart.bortnik.core.database;
 
 import com.itechart.bortnik.core.domain.Contact;
 
-import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 

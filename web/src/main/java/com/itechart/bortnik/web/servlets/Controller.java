@@ -15,6 +15,7 @@ public class Controller {
     public static final String GET_CONTACT_BY_ID = "GETCONTACTBYID";
     public static final String UPDATE_CONTACT = "UPDATECONTACT";
     public static final String GET_IMAGE_FOR_CONTACT = "GETIMAGEFORCONTACT";
+    public static final String GET_FILE = "GETFILE";
     public static final String EDIT_CONTACT_FORM = "EDITCONTACTFORM";
     public static final String DELETE_CONTACT = "DELETECONTACT";
     public static final String GET_ALL_EMAILS = "GETALLEMAILS";
@@ -29,6 +30,7 @@ public class Controller {
         actions.put("PUT_\\/\\d+\\/edit-form", UPDATE_CONTACT);               //UPDATE BAD FIX edit-form
         //actions.put("GET_\\/contacts/new-form", "NEWCONTACTFORM");
         actions.put("GET_\\/image", GET_IMAGE_FOR_CONTACT);
+        actions.put("GET_\\/file", GET_FILE);
         actions.put("GET_\\/\\d+\\/edit-form", EDIT_CONTACT_FORM);
         actions.put("DELETE_", DELETE_CONTACT);
         actions.put("DELETE_\\/", DELETE_CONTACT);
@@ -67,6 +69,10 @@ public class Controller {
             case GET_IMAGE_FOR_CONTACT:
                 System.out.println("switch get image for contact");
                 new GetImageForContactAction().execute(request, response);
+                break;
+            case GET_FILE:
+                System.out.println("switch get file");
+                new GetFileAction().execute(request, response);
                 break;
             case UPDATE_CONTACT:
                 System.out.println("switch update contact");

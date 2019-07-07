@@ -33,7 +33,7 @@ public class ContactServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.setCharacterEncoding("utf-8");
+        request.setCharacterEncoding("UTF-8");
         System.out.println("Post request");
 //        if (request.getParameterMap().containsKey("_method") && request.getParameter("_method") == "PUT") {
 //            doPut(request, response);

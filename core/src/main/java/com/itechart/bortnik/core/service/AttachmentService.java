@@ -4,7 +4,7 @@ import com.itechart.bortnik.core.domain.Attachment;
 
 import java.util.List;
 
-public interface AttachmentService extends BaseEntityService<Attachment>{
+public interface AttachmentService extends BaseEntityService<Attachment, Attachment>{
 
     List<Attachment> readAllAttachmentsByContactId(int id);
 

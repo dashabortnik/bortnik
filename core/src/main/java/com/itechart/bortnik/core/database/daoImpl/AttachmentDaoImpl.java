@@ -4,10 +4,7 @@ import com.itechart.bortnik.core.database.AttachmentDao;
 import com.itechart.bortnik.core.database.DatabaseUtil;
 import com.itechart.bortnik.core.domain.Attachment;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -58,7 +55,7 @@ public class AttachmentDaoImpl implements AttachmentDao {
     public Attachment insert(Attachment attachment) {
         String sql = "INSERT INTO attachment (attachment_name, attachment_link, upload_date, contact_id) VALUES (?, ?, ?, ?)";
         try (Connection connection = DatabaseUtil.getDataSource().getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, attachment.getName());
             ps.setString(2, attachment.getLink());
             ps.setObject(3, attachment.getUploadDate());

@@ -56,7 +56,6 @@
     <table class="table table-sm table-bordered table-hover">
         <thead class="bg-light">
         <tr class="bg-light">
-            <th class="align-middle text-center">Check</th>
             <th class="align-middle text-center">Phone number</th>
             <th class="align-middle text-center">Phone type</th>
             <th class="align-middle text-center">Comment</th>
@@ -65,8 +64,6 @@
         <tbody>
         {{#phoneList}}
         <tr>
-            <td><input type="checkbox" name="#" value="?" class="check"
-                       id="{{phoneId}}"></td>
             <td>{{countryCode}}{{operatorCode}}{{phoneNumber}}</td>
             <td>{{phoneType}}</td>
             <td>{{comment}}</td>
@@ -77,21 +74,19 @@
     <h2>Attachments</h2>
     <table class="table table-sm table-bordered table-hover">
         <thead class="bg-light">
-        {{#attachmentList}}
+
         <tr class="bg-light">
-            <th class="align-middle text-center">Check</th>
             <th class="align-middle text-center">Attachment</th>
             <th class="align-middle text-center">Download link</th>
-            <th class="align-middle text-center">Comment</th>
         </tr>
         </thead>
         <tbody>
+        {{#attachmentList}}
         <tr>
-            <td><input type="checkbox" name="#" value="?" class="check"
-                       id="{{attachmentId}}"></td>
-            <td>{{attachmentName}}, {{uploadDate}}</td>
-            <td>{{attachmentLink}}</td>
-            <td>{{comment}}</td>
+            <td>{{name}}, {{uploadDate}}</td>
+            <td>
+                <button type="button" class="btn btn-secondary col-md-5"  value="{{& link}}" onclick="downloadFile(this.value)">Download: "{{& realFileName}}"</button>
+            </td>
         </tr>
         {{/attachmentList}}
         </tbody>

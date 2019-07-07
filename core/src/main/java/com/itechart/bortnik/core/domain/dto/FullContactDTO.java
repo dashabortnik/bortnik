@@ -1,12 +1,13 @@
 package com.itechart.bortnik.core.domain.dto;
 
 import com.itechart.bortnik.core.domain.Attachment;
+import com.itechart.bortnik.core.domain.BaseEntity;
 import com.itechart.bortnik.core.domain.Contact;
 import com.itechart.bortnik.core.domain.Phone;
 
 import java.util.List;
 
-public class FullContactDTO {
+public class FullContactDTO extends BaseEntity {
     private Contact contact;
     private List<Phone> phoneList;
     private List<Attachment> attachmentList;

@@ -265,26 +265,26 @@ public class ContactDaoImpl implements ContactDao {
         try (Connection connection = DatabaseUtil.getDataSource().getConnection();
              PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
              PreparedStatement psAddress = connection.prepareStatement(sqlAddress, Statement.RETURN_GENERATED_KEYS)) {
+            connection.setAutoCommit(false);
+
             ps.setString(1, contact.getSurname());
             ps.setString(2, contact.getName());
             ps.setString(3, contact.getPatronymic());
             ps.setObject(4, contact.getBirthday());
-            if ("male".equals(contact.getGender().toString().trim())) {
+            if (Gender.male.toString().equals(contact.getGender().toString().trim())) {
                 ps.setObject(5, 1);
             } else {
                 ps.setObject(5, 2);
             }
-            //ps.setObject(5, contact.getGender());
             ps.setString(6, contact.getNationality());
-            if ("single".equals(contact.getMaritalStatus().toString().trim())) {
+            if (Marital.single.toString().equals(contact.getMaritalStatus().toString().trim())) {
                 ps.setObject(7, 1);
-            } else if ("married".equals(contact.getMaritalStatus().toString().trim())) {
+            } else if (Marital.married.toString().equals(contact.getMaritalStatus().toString().trim())) {
                 ps.setObject(7, 2);
             } else {
                 ps.setObject(7, 3);
             }
-            //ps.setObject(7, contact.getMaritalStatus());
-            ps.setString(8, contact.getWebsite());
+            ps.setString(8,contact.getWebsite());
             ps.setString(9, contact.getEmail());
             ps.setString(10, contact.getWorkplace());
             ps.setString(11, contact.getPhotoLink());
@@ -294,7 +294,6 @@ public class ContactDaoImpl implements ContactDao {
                 contact.setId(generatedKeys.getInt(1));
             } // чтобы получить id добавленного элемента
             System.out.println("NEW ID ___ " + contact.getId());
-
             // создание адреса
             psAddress.setString(1, contact.getAddress().getCountry());
             psAddress.setString(2, contact.getAddress().getCity());
@@ -306,7 +305,8 @@ public class ContactDaoImpl implements ContactDao {
             if (generatedKeysAddress.next()) {
                 contact.getAddress().setId(generatedKeys.getInt(1));
             } // чтобы получить id добавленного адреса
-            System.out.println("NEW ID ___ " + contact.getAddress().getId());
+            System.out.println("NEW Address ID ___ " + contact.getAddress().getId());
+            connection.commit();
         } catch (SQLException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

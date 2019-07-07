@@ -1,6 +1,6 @@
 <!--Mustache template for the form of a new contact. Allows to fill in data, upload a picture and submit data.-->
 
-    <form enctype="multipart/form-data" method="post" id="contactInfo">
+    <form  method="post" enctype="multipart/form-data;charset=UTF-8" accept-charset="UTF-8" id="contactInfo">
     <span class="rounded float-right col-6 col-md-4 text-center">
         <img class="img-fluid img-thumbnail">
         <input type="file" name="photoLink" id="photoLink">

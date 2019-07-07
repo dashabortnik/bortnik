@@ -11,7 +11,7 @@ public class GetImageForContactAction implements BaseAction {
     public void execute(HttpServletRequest request, HttpServletResponse response) throws IOException {
 
         String path = request.getHeader("fileLink").trim();
-        System.out.println("FILELINK---" + path);
+        System.out.println("IMAGELINK---" + path);
         BufferedImage img = null;
 
         // if image was uploaded, DB will return its link in path

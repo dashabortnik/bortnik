@@ -17,8 +17,6 @@ public class Contact extends BaseEntity{
     private String workplace;
     private String photoLink;
     private Address address;
-    //private List<Phone> phones;
-    //private List<Attachment> attachments;
 
     public Contact(int id) {
         super(id);
@@ -26,7 +24,7 @@ public class Contact extends BaseEntity{
 
     public Contact(int id, String surname, String name, String patronymic, Date birthday, Gender gender,
                    String nationality, Marital maritalStatus, String website, String email, String workplace, String photoLink,
-                   Address address /*, List<Phone> phones, List<Attachment> attachments*/) {
+                   Address address) {
         super(id);
         this.surname = surname;
         this.name = name;
@@ -40,8 +38,6 @@ public class Contact extends BaseEntity{
         this.workplace = workplace;
         this.photoLink = photoLink;
         this.address = address;
-        //this.phones = phones;
-        //this.attachments = attachments;
     }
 
     public String getSurname() {
@@ -162,7 +158,8 @@ public class Contact extends BaseEntity{
 
     @Override
     public int hashCode() {
-        return Objects.hash(surname, name, patronymic, birthday, gender, nationality, maritalStatus, website, email, workplace, photoLink, address);
+        return Objects.hash(surname, name, patronymic, birthday, gender, nationality, maritalStatus, website, email,
+                workplace, photoLink, address);
     }
 
     @Override
@@ -183,19 +180,4 @@ public class Contact extends BaseEntity{
                 ", address=" + address +
                 '}';
     }
-//	public List<Phone> getPhones() {
-//		return phones;
-//	}
-//
-//	public void setPhones(List<Phone> phones) {
-//		this.phones = phones;
-//	}
-//
-//	public List<Attachment> getAttachments() {
-//		return attachments;
-//	}
-//
-//	public void setAttachments(List<Attachment> attachments) {
-//		this.attachments = attachments;
-//	}
 }

@@ -5,10 +5,7 @@ import com.itechart.bortnik.core.database.PhoneDao;
 import com.itechart.bortnik.core.domain.Phone;
 import com.itechart.bortnik.core.domain.PhoneType;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,12 +15,12 @@ public class PhoneDaoImpl implements PhoneDao {
     }
 
     // create the only instance of class and return it afterwards
-    private static class Singletone {
+    private static class Singleton {
         private static final PhoneDaoImpl INSTANCE = new PhoneDaoImpl();
     }
 
     public static PhoneDaoImpl getInstance() {
-        return Singletone.INSTANCE;
+        return Singleton.INSTANCE;
     }
 
     @Override
@@ -59,14 +56,20 @@ public class PhoneDaoImpl implements PhoneDao {
 
     @Override
     public Phone insert(Phone phone) {
-        String sql = "INSERT INTO phone (country_code, operator_code, phone_number, phone_type, contact_id) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO phone (country_code, operator_code, phone_number, phone_type, comment, contact_id) VALUES (?, ?, ?, ?, ?, ?)";
         try (Connection connection = DatabaseUtil.getDataSource().getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+             PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, phone.getCountryCode());
             ps.setString(2, phone.getOperatorCode());
             ps.setString(3, phone.getPhoneNumber());
-            ps.setObject(4, phone.getPhoneType());
-            ps.setInt(5, phone.getContactId());
+
+            if (PhoneType.home.toString().equals(phone.getPhoneType().toString().trim())) {
+                ps.setObject(4, 1);
+            } else {
+                ps.setObject(4, 2);
+            }
+            ps.setString(5, phone.getComment());
+            ps.setInt(6, phone.getContactId());
             ps.execute();
             ResultSet generatedKeys = ps.getGeneratedKeys();
             if (generatedKeys.next()) {

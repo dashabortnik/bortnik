@@ -4,6 +4,8 @@ public abstract class BaseEntity {
 
     private int id;
 
+    public BaseEntity(){}
+
     public BaseEntity(int id) {
         super();
         this.id = id;

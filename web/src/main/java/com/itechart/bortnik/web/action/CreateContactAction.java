@@ -105,19 +105,19 @@ public class CreateContactAction implements BaseAction {
                         if (itemNumber == phoneCounter) {
                             switch (itemName) {
                                 case "countryCode":
-                                    countryCode = item.getString();
+                                    countryCode = item.getString("UTF-8");
                                     break;
                                 case "operatorCode":
-                                    operatorCode = item.getString();
+                                    operatorCode = item.getString("UTF-8");
                                     break;
                                 case "phoneNumber":
-                                    phoneNumber = item.getString();
+                                    phoneNumber = item.getString("UTF-8");
                                     break;
                                 case "phoneType":
-                                    phoneType = PhoneType.valueOf(item.getString().trim());
+                                    phoneType = PhoneType.valueOf(item.getString("UTF-8").trim());
                                     break;
                                 case "comment":
-                                    comment = item.getString();
+                                    comment = item.getString("UTF-8");
                                     if (countryCode != null && operatorCode != null && phoneNumber != null && phoneType != null) {
                                         Phone phone = new Phone(0, countryCode, operatorCode,
                                                 phoneNumber, phoneType, comment, 0);
@@ -161,10 +161,11 @@ public class CreateContactAction implements BaseAction {
                     //new attachment is created when link is reached
                     switch (itemName) {
                         case "attachmentName":
-                            attachmentName = item.getString();
+                            attachmentName = item.getString("UTF-8");
                             break;
                         case "submittedFileName":
-                            String fakeName = item.getString();
+                            //String fakeName = item.getString();
+                            String fakeName = item.getString("UTF-8");
                             //String [] nameParts = fakeName.split("/");
 
                             if (fakeName.contains("fakepath")) {
@@ -176,8 +177,9 @@ public class CreateContactAction implements BaseAction {
                             System.out.println("SUB FILENAME---" + submittedFileName);
                             break;
                         case "attachmentLink":
-                            String path = FileSystems.getDefault().getPath("").toAbsolutePath() + File.separator
-                                    + "file" + File.separator + submittedFileName;
+                            String path = FileSystems.getDefault().getPath("").toAbsolutePath() + File.separator +
+                                    "file" + File.separator + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1)
+                                    + "---" + submittedFileName;
                             File uploadedFile = new File(path);
                             item.write(uploadedFile);
                             System.out.println("File path: " + uploadedFile.getAbsolutePath());
@@ -200,62 +202,62 @@ public class CreateContactAction implements BaseAction {
                 } else if (item.isFormField()) {
                     switch (item.getFieldName()) {
                         case "surname": {
-                            surname = item.getString();
+                            surname = item.getString("UTF-8");
                             break;
                         }
                         case "name": {
-                            name = item.getString();
+                            name = item.getString("UTF-8");
                             break;
                         }
                         case "patronymic": {
-                            patronymic = item.getString();
+                            patronymic = item.getString("UTF-8");
                             break;
                         }
                         case "birthday": {
                             SimpleDateFormat dfShort = new SimpleDateFormat("yyyy-MM-dd");
-                            birthday = dfShort.parse(item.getString());
+                            birthday = dfShort.parse(item.getString("UTF-8"));
                             java.sql.Date sqlDate = new java.sql.Date(birthday.getTime());
                             birthday = sqlDate;
                             break;
                         }
                         case "gender": {
-                            gender = Gender.valueOf(item.getString().trim());
+                            gender = Gender.valueOf(item.getString("UTF-8").trim());
                             break;
                         }
                         case "nationality": {
-                            nationality = item.getString();
+                            nationality = item.getString("UTF-8");
                             break;
                         }
                         case "marital": {
-                            maritalStatus = Marital.valueOf(item.getString().trim());
+                            maritalStatus = Marital.valueOf(item.getString("UTF-8").trim());
                             break;
                         }
                         case "website": {
-                            website = item.getString();
+                            website = item.getString("UTF-8");
                             break;
                         }
                         case "email": {
-                            email = item.getString();
+                            email = item.getString("UTF-8");
                             break;
                         }
                         case "workplace": {
-                            workplace = item.getString();
+                            workplace = item.getString("UTF-8");
                             break;
                         }
                         case "country": {
-                            country = item.getString();
+                            country = item.getString("UTF-8");
                             break;
                         }
                         case "city": {
-                            city = item.getString();
+                            city = item.getString("UTF-8");
                             break;
                         }
                         case "street": {
-                            street = item.getString();
+                            street = item.getString("UTF-8");
                             break;
                         }
                         case "postcode": {
-                            postcode = item.getString();
+                            postcode = item.getString("UTF-8");
                             break;
                         }
                         default: {
@@ -289,14 +291,14 @@ public class CreateContactAction implements BaseAction {
         FullContactDTO fullContactDTO = new FullContactDTO(receivedContact, phones, attachments);
         System.out.println(fullContactDTO.toString());
 
-        if (receivedContact != null) {
-            Contact fullContact = contactService.save(receivedContact);
+        if (fullContactDTO != null) {
+            FullContactDTO fullContact = contactService.save(fullContactDTO);
 
             response.setHeader("Content-Type", "application/json; charset=UTF-8");
             ObjectMapper mapper = new ObjectMapper();
             mapper.setDateFormat(df);
             try (PrintWriter out = response.getWriter()) {
-                mapper.writeValue(out, fullContact);            //CHANGE!!!
+                mapper.writeValue(out, fullContact);
             } catch (IOException e) {
                 e.printStackTrace();
             }
