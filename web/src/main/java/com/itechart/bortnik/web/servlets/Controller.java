@@ -29,7 +29,7 @@ public class Controller {
         actions.put("GET_\\/", GET_ALL_CONTACTS);
         actions.put("POST_\\/", CREATE_CONTACT);
         actions.put("GET_\\/\\d+", GET_CONTACT_BY_ID);
-        actions.put("PUT_\\/\\d+\\/edit-form", UPDATE_CONTACT);
+        actions.put("POST_\\/\\d+", UPDATE_CONTACT);
         //actions.put("GET_\\/contacts/new-form", "NEWCONTACTFORM");
         actions.put("GET_\\/image", GET_IMAGE_FOR_CONTACT);
         actions.put("GET_\\/file", GET_FILE);

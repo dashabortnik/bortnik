@@ -53,8 +53,29 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public Contact update(Contact entity) {
-        return contactDaoImpl.update(entity);
+    public FullContactDTO update(FullContactDTO entity) {
+
+        Contact insertedContact = contactDaoImpl.update(entity.getContact());
+        //if contact insert failed, we'll get an empty contact, it this case we don't insert phones and attachments
+        if (insertedContact != null) {
+            int contactId = insertedContact.getId();
+            List<Phone> extractedPhones = entity.getPhoneList();
+            List<Phone> insertedPhones = new ArrayList<>();
+            for (Phone phone : extractedPhones) {
+                phone.setContactId(contactId);
+                insertedPhones.add(phoneDaoImpl.insert(phone));
+            }
+            List<Attachment> extractedAttachments = entity.getAttachmentList();
+            List<Attachment> insertedAttachments = new ArrayList<>();
+            for (Attachment attachment : extractedAttachments) {
+                attachment.setContactId(contactId);
+                insertedAttachments.add(attachmentDaoImpl.insert(attachment));
+            }
+            return new FullContactDTO(insertedContact, insertedPhones, insertedAttachments);
+        } else {
+            return new FullContactDTO();
+        }
+
     }
 
     @Override

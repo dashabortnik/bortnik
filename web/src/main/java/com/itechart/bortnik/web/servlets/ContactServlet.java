@@ -30,15 +30,6 @@ public class ContactServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
-//        if (request.getParameterMap().containsKey("_method") && request.getParameter("_method") == "PUT") {
-//            doPut(request, response);
-//        } else {
-            parseUrl(request, response);
-//        }
-    }
-
-    @Override
-    protected void doPut(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         parseUrl(request, response);
     }
 
@@ -51,13 +42,7 @@ public class ContactServlet extends HttpServlet {
         //URI starts with /contacts, which gives us an empty String in the beginning if regex = "/contacts"
         String[] urlArray = request.getRequestURI().split("contacts", 2);
         String urlPart = request.getMethod() + "_";
-/*
-        if (request.getParameterMap().containsKey("_method")) {
-            urlPart = request.getParameter("_method") + "_";
-        } else {
-            urlPart = request.getMethod() + "_";
-        }
-*/
+
         if (urlArray.length > 1) {
             urlPart += urlArray[1];
             logger.info("Incoming request: {}", urlPart);

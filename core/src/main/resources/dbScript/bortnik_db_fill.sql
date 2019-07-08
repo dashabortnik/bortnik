@@ -44,7 +44,7 @@ INSERT INTO phone (country_code, operator_code, phone_number, phone_type, COMMEN
 VALUES ('+7', '495','7556983', 'home', NULL, 1);
 
 INSERT INTO phone (country_code, operator_code, phone_number, phone_type, COMMENT, contact_id) 
-VALUES ('+375', '29","3278567', 'mobile', NULL, 2);
+VALUES ('+375', '29','3278567', 'mobile', NULL, 2);
 
 INSERT INTO phone (country_code, operator_code, phone_number, phone_type, COMMENT, contact_id) 
 VALUES ('+7', '499','7345465', 'home', NULL, 3);

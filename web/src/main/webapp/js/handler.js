@@ -16,7 +16,7 @@ window.addEventListener('load', () => {
         container.innerHTML = html;
         history.replaceState(null, "Contact page", "/contacts");
     }).catch(function (err) {
-        alert("Что-то пошло не так 1");
+        alert("Unable to load main page.");
     });
 });
 
@@ -43,6 +43,11 @@ function navigate(link, callback) {
         photoLink = myJson.contact.photoLink;
         gender = myJson.contact.gender;
         marital = myJson.contact.maritalStatus;
+        var list = myJson.attachmentList;
+        for (var i = 0; i < list.length; i++) {
+            myJson.attachmentList[i].realFileName = myJson.attachmentList[i].link.split("---", 2)[1];
+            console.log(myJson.attachmentList[i].realFileName);
+        }
         return myJson;
     })
     //fetch template
@@ -57,15 +62,14 @@ function navigate(link, callback) {
             // Write out the rendered template
             document.getElementById("myDiv").innerHTML = "";
             return document.getElementById('myDiv').innerHTML = html;
-        }).catch(function (err) {
-            alert("Unable to render page with data");
         }).then(function () {
             history.pushState(null, title, link);
             setSelectElementValue("gender", gender);
             setSelectElementValue("marital", marital);
             callback(photoLink);
+        }).catch(function (err) {
+            alert("Unable to render page with data");
         })
-
 }
 
 function displayContact(link, callback) {
@@ -90,12 +94,10 @@ function displayContact(link, callback) {
         // ignore warning, it works: contact is a nested object with attributes
         photoLink = myJson.contact.photoLink;
         var list = myJson.attachmentList;
-        for(var i = 0; i < list.length; i++){
+        for (var i = 0; i < list.length; i++) {
             myJson.attachmentList[i].realFileName = myJson.attachmentList[i].link.split("---", 2)[1];
             console.log(myJson.attachmentList[i].realFileName);
         }
-        //gender = myJson.contact.gender;
-        //marital = myJson.contact.maritalStatus;
         return myJson;
     })
     //fetch template
@@ -111,11 +113,12 @@ function displayContact(link, callback) {
             document.getElementById("myDiv").innerHTML = "";
             return document.getElementById('myDiv').innerHTML = html;
         }).catch(function (err) {
-            alert("Unable to render page with data");
+            alert("Unable to render display contact page");
         }).then(function () {
             callback(photoLink);
         })
     history.pushState(null, title, link);
+
 }
 
 //set values of "select"
@@ -152,7 +155,7 @@ function retrieveImage(link) {
         });
 }
 
-function downloadFile(link){
+function downloadFile(link) {
     event.preventDefault();
     event.stopPropagation();
     console.log("The link to download file is---" + link);
@@ -246,17 +249,15 @@ function openContactForm() {
                     resetTable(newAttachmentTable, modalAttach);
                 }
             }
-
         }).then(function (res) {
-        // form.addEventListener("submit", submitForm(), false);
         let submitBtn = document.getElementById("submitContact");
         submitBtn.onclick = function () {
             submitForm(form);
         }
+        history.pushState(null, "New contact page", "/contacts/new-form");
     }).catch(function (err) {
         alert("Unable to render new contact page");
     })
-    history.pushState(null, "New contact page", "/contacts/new-form");
 }
 
 function submitForm(form) {
@@ -285,40 +286,66 @@ function submitForm(form) {
         formData.append(fullName, value);
 
         let userFileName = "attachment." + i + "." + "submittedFileName";
+        //value will give fake path with filename
         let submittedName = attachmentTable.rows[i].cells[2].firstChild.value;
         formData.append(userFileName, submittedName);
 
         let fileName = attachmentTable.rows[i].cells[2].firstChild.name;
         let file = attachmentTable.rows[i].cells[2].firstChild.files[0];
-        //value will give fake path with filename
         let fullFileName = "attachment." + i + "." + fileName;
         formData.append(fullFileName, file);
     }
 
+    let photoLink;
+    let contactId;
 
-    fetch("/contacts/", {
+    const data = fetch("/contacts/", {
         method: 'POST',
         body: formData,
     }).then(function (response) {
         return response.json();
     }).then(function (myJson) {
-        var tmpl = document.getElementById("contactTemplate").innerHTML;
-        var html = Mustache.to_html(tmpl, myJson);
-        //document.getElementById("myDiv").innerHTML = "";
-        let container = document.getElementById("myDiv");
-        container.innerHTML = ""
-        container.innerHTML = html;
-    }).catch(function (error) {
-        console.error("An error here" + error);
+        // ignore warning, it works: contact is a nested object with attributes
+        photoLink = myJson.contact.photoLink;
+        contactId = myJson.contact.id;
+        let list = myJson.attachmentList;
+        for (let i = 0; i < list.length; i++) {
+            myJson.attachmentList[i].realFileName = myJson.attachmentList[i].link.split("---", 2)[1];
+            console.log(myJson.attachmentList[i].realFileName);
+        }
+        return myJson;
     })
-}
 
+    let tmpl = "/templates/contactTemplate.mst";
+    const template = fetch(tmpl).then(response => response.text());
+    let title = "Contact page";
+    let link = "/contacts/" +  contactId;
+
+    return Promise.all([data, template])
+        .then(response => {
+            let resolvedData = response[0];
+            let resolvedTemplate = response[1];
+            // Cache the template for future use
+            Mustache.parse(resolvedTemplate);
+            const html = Mustache.render(resolvedTemplate, resolvedData);
+            // Write out the rendered template
+            let container = document.getElementById("myDiv");
+            container.innerHTML = "";
+            return container.innerHTML = html;
+        }).then(function () {
+            retrieveImage(photoLink);
+            history.pushState(null, title, link);
+        }).catch(function (err) {
+            alert("Unable to render display contact page with new data");
+        })
+}
 
 function openEditForm() {
     //Check how many checkboxes are checked. Only 1 should be checked, alert if not 1.
     var link;
     var checkedId;
     let path = window.location.pathname;
+    let form = null;
 
     var prom = Promise.resolve()
         .then(function (res) {
@@ -346,127 +373,145 @@ function openEditForm() {
             return navigate(link, retrieveImage);
         })
     prom.then(function () {
+        form = document.getElementById("editedContact");
+
         //FOR DISPLAY OF MODAL WINDOW
         // Get the modal
-        let modal = document.getElementById("myModal");
-        // Get the button that opens the modal
-        let btn = document.getElementById("createPhone");
-        let resetBtn = document.getElementById("resetPhone");
-        let saveBtn = document.getElementById("savePhone");
+        let modalPhone = document.getElementById("myModalPhone");
+        let createPhoneBtn = document.getElementById("createPhone");
+        let resetPhoneBtn = document.getElementById("resetPhone");
+        let savePhoneBtn = document.getElementById("savePhone");
         let newPhoneTable = document.getElementById("newPhoneTable");
         // When the user clicks the button, open the modal
-        btn.onclick = function () {
-            modal.style.display = "flex";
+        createPhoneBtn.onclick = function () {
+            modalPhone.style.display = "flex";
         }
 
-        resetBtn.onclick = function () {
-            resetTable(newPhoneTable, modal)
-        };
+        savePhoneBtn.onclick = function () {
+            savePhone(newPhoneTable, modalPhone);
+        }
 
-        // When the user clicks anywhere outside of the modal, close it
+        resetPhoneBtn.onclick = function () {
+            resetTable(newPhoneTable, modalPhone);
+        }
+
+        //FOR DISPLAY OF MODAL WINDOW --- ATTACHMENTS
+        let modalAttach = document.getElementById("myModalAttachment");
+        let createAttach = document.getElementById("createAttachment");
+        let resetAttach = document.getElementById("resetAttachment");
+        let saveAttach = document.getElementById("saveAttachment");
+        let newAttachmentTable = document.getElementById("newAttachmentTable");
+        // When the user clicks the button, open the modal
+        createAttach.onclick = function () {
+            modalAttach.style.display = "flex";
+        }
+
+        //save attachment into attachmentTable
+        saveAttach.onclick = function () {
+            saveAttachment(newAttachmentTable, modalAttach)
+        }
+
+        //reset the values and close modal window
+        resetAttach.onclick = function () {
+            resetTable(newAttachmentTable, modalAttach)
+        }
+
+        // When the user clicks anywhere outside of ANY modal, close it
         window.onclick = function (event) {
-            if (event.target === modal) {
-                modal.style.display = "none";
+            if (event.target == modalPhone) {
+                resetTable(newPhoneTable, modalPhone);
+            } else if (event.target == modalAttach) {
+                resetTable(newAttachmentTable, modalAttach);
             }
-        }
-
-        saveBtn.onclick = function () {
-            //get filled in values from popup window
-            let newCountryCode = document.getElementById("newCountryCode").value;
-            let newOperatorCode = document.getElementById("newOperatorCode").value;
-            let newPhoneNumber = document.getElementById("newPhoneNumber").value;
-            let newPhoneType = document.getElementById("newPhoneType").selectedIndex;
-            let newComment = document.getElementById("newComment").value;
-
-            //if any required field is empty, the row won't be saved
-            if (newCountryCode === null || newOperatorCode === null || newPhoneNumber === null ||
-                newCountryCode === "" || newOperatorCode === "" || newPhoneNumber === "") {
-                return alert("Some fields are empty, can not save the phone number.");
-            }
-
-            //create inputs for phoneTable
-            let checkbox = document.createElement("input");
-            checkbox.setAttribute("type", "checkbox");
-
-            let inputCountryCode = document.createElement("input");
-            inputCountryCode.setAttribute("type", "text");
-            inputCountryCode.setAttribute("value", newCountryCode);
-
-            let inputOperatorCode = document.createElement("input");
-            inputOperatorCode.setAttribute("type", "text");
-            inputOperatorCode.setAttribute("value", newOperatorCode);
-
-            let inputPhoneNumber = document.createElement("input");
-            inputPhoneNumber.setAttribute("type", "text");
-            inputPhoneNumber.setAttribute("value", newPhoneNumber);
-
-            let inputPhoneType = document.createElement("select");
-            inputPhoneType.options[0] = new Option("home", "0");
-            inputPhoneType.options[1] = new Option("mobile", "1");
-            inputPhoneType.selectedIndex.value = newPhoneType;
-
-            let inputComment = document.createElement("input");
-            inputComment.setAttribute("type", "text");
-            inputComment.setAttribute("value", newComment);
-
-            //take table and insert a new row
-            let table = document.getElementById("phoneTable");
-            //when index in insertRow is omitted it is -1 by default, so the row appends as the last in the table
-            let newRow = table.insertRow();
-            newRow.insertCell(0).appendChild(checkbox);
-            newRow.insertCell(1).appendChild(inputCountryCode);
-            newRow.insertCell(2).appendChild(inputOperatorCode);
-            newRow.insertCell(3).appendChild(inputPhoneNumber);
-            newRow.insertCell(4).appendChild(inputPhoneType);
-            newRow.insertCell(5).appendChild(inputComment);
-
-            resetTable(newPhoneTable, modal);
         }
     }).then(function (res) {
-        submitEditForm(checkedId);
+        let submitBtn = document.getElementById("submitContact");
+        submitBtn.onclick = function () {
+            submitEditForm(form, checkedId);
+        }
+        history.pushState(null, "Edit contact page", link);
     }).catch(function (err) {
-        console.log(err.message); //выведет сообщение "не удалось выполнить..."
+        alert("Error on edit contact page");
     })
 }
 
-function submitEditForm(checkedId) {
-    console.log("submit method here");
-    var editedForm;
+function submitEditForm(form, checkedId) {
+    event.preventDefault();
+    event.stopPropagation();
+    let formData = new FormData(form);
 
-    window.addEventListener('load', function () {
-        editedForm = document.getElementById("editedContact");
-        editedForm.addEventListener("submit", function (e) {
-            document.getElementById("submitButton").addEventListener("click", function (e) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log("I got the form:" + editedForm.innerText);
-                var editedFormData = new FormData(this);
-                console.log("Edited form data---" + editedFormData);
-                console.log("ID WILL BE---" + checkedId);
-                var fetchLink = "/contacts/" + checkedId;
-                fetch(fetchLink, {
-                    method: 'POST',
-                    body: editedFormData,
-                }).then(function (response) {
-                    return response.json();
-                }).then(function (myJson) {
-                    let tmpl = document.getElementById("contactTemplate").innerHTML;
-                    let html = Mustache.to_html(tmpl, myJson);
-                    document.getElementById("myDiv").innerHTML = "";
-                    let container = document.getElementById("myDiv");
-                    container.innerHTML = html;
+    //append phones to formData
+    let phoneTable = document.getElementById("phoneTable");
+    for (let i = 1; i < phoneTable.rows.length; i++) {
+        for (let j = 1; j < phoneTable.rows[i].cells.length; j++) {
+            let name = phoneTable.rows[i].cells[j].firstChild.name;
+            let value = phoneTable.rows[i].cells[j].firstChild.value;
+            let fullName = "phone." + i + "." + name;
+            console.log(fullName + "---" + value);
+            formData.append(fullName, value);
+        }
+    }
 
-                }).catch(function (error) {
-                    console.error("ERROR on updating a contact" + error);
-                })
+    //append attachments to formData
+    let attachmentTable = document.getElementById("attachmentTable");
+    for (let i = 1; i < attachmentTable.rows.length; i++) {
+        let name = attachmentTable.rows[i].cells[1].firstChild.name;
+        let value = attachmentTable.rows[i].cells[1].firstChild.value;
+        let fullName = "attachment." + i + "." + name;
+        formData.append(fullName, value);
 
-            })
-        });
+        let userFileName = "attachment." + i + "." + "submittedFileName";
+        //value will give fake path with filename
+        let submittedName = attachmentTable.rows[i].cells[2].childNodes[3].value;
+        formData.append(userFileName, submittedName);
 
+        let fileName = attachmentTable.rows[i].cells[2].childNodes[3].name;
+        let file = attachmentTable.rows[i].cells[2].childNodes[3].files[0];
+        let fullFileName = "attachment." + i + "." + fileName;
+        formData.append(fullFileName, file);
+    }
+
+    let photoLink;
+    let fetchLink = "/contacts/" + checkedId;
+
+    const data = fetch(fetchLink, {
+        method: 'POST',
+        body: formData,
+    }).then(function (response) {
+        return response.json();
+    }).then(function (myJson) {
+        // ignore warning, it works: contact is a nested object with attributes
+        photoLink = myJson.contact.photoLink;
+        let list = myJson.attachmentList;
+        for (let i = 0; i < list.length; i++) {
+            myJson.attachmentList[i].realFileName = myJson.attachmentList[i].link.split("---", 2)[1];
+            console.log(myJson.attachmentList[i].realFileName);
+        }
+        return myJson;
     })
 
-}
+    let tmpl = "/templates/contactTemplate.mst";
+    const template = fetch(tmpl).then(response => response.text());
+    let title = "Contact page";
 
+    return Promise.all([data, template])
+        .then(response => {
+            let resolvedData = response[0];
+            let resolvedTemplate = response[1];
+            // Cache the template for future use
+            Mustache.parse(resolvedTemplate);
+            const html = Mustache.render(resolvedTemplate, resolvedData);
+            // Write out the rendered template
+            let container = document.getElementById("myDiv");
+            container.innerHTML = "";
+            return container.innerHTML = html;
+        }).then(function () {
+            retrieveImage(photoLink);
+            history.pushState(null, title, fetchLink);
+        }).catch(function (err) {
+            alert("Unable to update contact with new data");
+        })
+}
 
 function resetTable(tableName, modalWindow) {
     for (let i = 0; i < tableName.rows.length; i++) {

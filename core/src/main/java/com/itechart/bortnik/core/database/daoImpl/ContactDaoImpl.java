@@ -313,11 +313,23 @@ public class ContactDaoImpl implements ContactDao {
     public Contact update(Contact contact) {
         String sql = "UPDATE contact SET surname=?, name=?, patronymic=?, birthday=?, gender=?, nationality=?, marital_status=?, website=?, email=?, workplace=?, photo_link=? WHERE contact_id = ?";
         String sqlAddress = "UPDATE address SET country=?, city=?, street=?, postcode=? WHERE contact_id = ?";
-        try (Connection connection = DatabaseUtil.getDataSource().getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql);
-             PreparedStatement psAddress = connection.prepareStatement(sqlAddress)) {
+        String deleteSql = "DELETE FROM contact WHERE contact_id = ?";
+
+        Connection connection = null;
+        PreparedStatement psDelete = null;
+        PreparedStatement ps =  null;
+        PreparedStatement psAddress = null;
+        try {
+            connection = DatabaseUtil.getDataSource().getConnection();
+            psDelete = connection.prepareStatement(deleteSql);
+            ps = connection.prepareStatement(sql);
+            psAddress = connection.prepareStatement(sqlAddress);
             connection.setAutoCommit(false);
             logger.debug("Update of contact - begin transaction.");
+
+            psDelete.setInt(1, contact.getId());
+            ps.execute();
+            logger.info("Delete of contact with id {} executed.", contact.getId());
             //update the contact
             ps.setString(1, contact.getSurname());
             ps.setString(2, contact.getName());
@@ -351,10 +363,46 @@ public class ContactDaoImpl implements ContactDao {
             psAddress.execute();
             connection.commit();
             logger.debug("Update of contact - end transaction.");
+            return contact;
         } catch (SQLException e) {
-            logger.error("Error with updating contact: ", e);
+            try {
+                logger.error("Error with updating contact: ", e);
+                connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
+
+        } finally {
+            if (psDelete != null) {
+                try {
+                    psDelete.close();
+                } catch (SQLException e) {
+                    logger.error("Error with closing delete prepared statement: ", e);
+                }
+            }
+            if (ps != null) {
+                try {
+                    ps.close();
+                } catch (SQLException e) {
+                    logger.error("Error with closing insert contact prepared statement: ", e);
+                }
+            }
+            if (psAddress != null) {
+                try {
+                    psAddress.close();
+                } catch (SQLException e) {
+                    logger.error("Error with closing insert address prepared statement: ", e);
+                }
+            }
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    logger.error("Error with closing connection: ", e);
+                }
+            }
         }
-        return contact;
+        return null;
     }
 
     @Override
