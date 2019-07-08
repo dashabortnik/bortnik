@@ -115,10 +115,9 @@ function displayContact(link, callback) {
         }).catch(function (err) {
             alert("Unable to render display contact page");
         }).then(function () {
+            history.pushState(null, title, link);
             callback(photoLink);
         })
-    history.pushState(null, title, link);
-
 }
 
 //set values of "select"
@@ -642,10 +641,12 @@ function deleteContact() {
         for (let i = 0; i < checked.length; i++) {
             idArray.push(checked[i].id);
         }
-    } else if (new RegExp("^(\\/contacts\\/\\d+)$").test(currentPath)) {
+    } else if (new RegExp("^(\\/contacts\\/\\d+.*)").test(currentPath)) {
         //delete button pressed on the page of individual contact
         console.log("Particular case");
-        idArray.push(currentPath.split("/")[2]);
+        let array = currentPath.split("/");
+        console.log("parsed array: " + array);
+        idArray.push(array[2]);
     }
     fetch(currentPath, {
         method: 'DELETE',

@@ -9,6 +9,7 @@ import com.itechart.bortnik.core.domain.Marital;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -32,6 +33,7 @@ public class ContactDaoImpl implements ContactDao {
     private static final String DB_CITY = "city";
     private static final String DB_STREET = "street";
     private static final String DB_POSTCODE = "postcode";
+    private static final String DB_ATTACHMENTLINK = "attachment_link";
 
     public ContactDaoImpl() {
     }
@@ -311,24 +313,28 @@ public class ContactDaoImpl implements ContactDao {
 
     @Override
     public Contact update(Contact contact) {
-        String sql = "UPDATE contact SET surname=?, name=?, patronymic=?, birthday=?, gender=?, nationality=?, marital_status=?, website=?, email=?, workplace=?, photo_link=? WHERE contact_id = ?";
-        String sqlAddress = "UPDATE address SET country=?, city=?, street=?, postcode=? WHERE contact_id = ?";
-        String deleteSql = "DELETE FROM contact WHERE contact_id = ?";
+//        String sql = "UPDATE contact SET surname=?, name=?, patronymic=?, birthday=?, gender=?, nationality=?, marital_status=?, website=?, email=?, workplace=?, photo_link=? WHERE contact_id = ?";
+//        String sqlAddress = "UPDATE address SET country=?, city=?, street=?, postcode=? WHERE contact_id = ?";
+//        String deleteSql = "DELETE FROM contact WHERE contact_id = ?";
+
+        String sql = "INSERT INTO contact (surname, name, patronymic, birthday, gender, nationality, marital_status, website, email, workplace, photo_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sqlAddress = "INSERT INTO address (country, city, street, postcode, contact_id) VALUES (?, ?, ?, ?, ?)";
 
         Connection connection = null;
-        PreparedStatement psDelete = null;
-        PreparedStatement ps =  null;
+//        PreparedStatement psDelete = null;
+        PreparedStatement ps = null;
         PreparedStatement psAddress = null;
         try {
             connection = DatabaseUtil.getDataSource().getConnection();
-            psDelete = connection.prepareStatement(deleteSql);
+//            psDelete = connection.prepareStatement(deleteSql);
             ps = connection.prepareStatement(sql);
             psAddress = connection.prepareStatement(sqlAddress);
             connection.setAutoCommit(false);
-            logger.debug("Update of contact - begin transaction.");
+            logger.debug("Update of contact - begin transaction. {}", contact.getId());
 
-            psDelete.setInt(1, contact.getId());
-            ps.execute();
+//            psDelete.setInt(1, contact.getId());
+//            ps.execute();
+            delete(contact.getId());
             logger.info("Delete of contact with id {} executed.", contact.getId());
             //update the contact
             ps.setString(1, contact.getSurname());
@@ -352,7 +358,6 @@ public class ContactDaoImpl implements ContactDao {
             ps.setString(9, contact.getEmail());
             ps.setString(10, contact.getWorkplace());
             ps.setString(11, contact.getPhotoLink());
-            ps.setInt(12, contact.getId());
             ps.execute();
             //update the address
             psAddress.setString(1, contact.getAddress().getCountry());
@@ -369,17 +374,17 @@ public class ContactDaoImpl implements ContactDao {
                 logger.error("Error with updating contact: ", e);
                 connection.rollback();
             } catch (SQLException ex) {
-                ex.printStackTrace();
+                logger.error("Error with updating contact: ", ex);
             }
 
         } finally {
-            if (psDelete != null) {
-                try {
-                    psDelete.close();
-                } catch (SQLException e) {
-                    logger.error("Error with closing delete prepared statement: ", e);
-                }
-            }
+//            if (psDelete != null) {
+//                try {
+//                    psDelete.close();
+//                } catch (SQLException e) {
+//                    logger.error("Error with closing delete prepared statement: ", e);
+//                }
+//            }
             if (ps != null) {
                 try {
                     ps.close();
@@ -408,8 +413,37 @@ public class ContactDaoImpl implements ContactDao {
     @Override
     public void delete(int id) {
         String sql = "DELETE FROM contact WHERE contact_id=?";
+        String sqlGetPhoto = "SELECT photo_link FROM contact WHERE contact_id = ?";
+        String sqlGetAttachments = "SELECT attachment_link FROM attachment WHERE contact_id = ?";
         try (Connection connection = DatabaseUtil.getDataSource().getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+             PreparedStatement ps = connection.prepareStatement(sql);
+             PreparedStatement psgetPhoto = connection.prepareStatement(sqlGetPhoto);
+             PreparedStatement psGetAttachments = connection.prepareStatement(sqlGetAttachments)) {
+            //retrieve photo link and delete corresponding photo
+            psgetPhoto.setInt(1, id);
+            ResultSet resultSetPhoto = psgetPhoto.executeQuery();
+            while (resultSetPhoto.next()) {
+                String photoLink = resultSetPhoto.getString(DB_PHOTOLINK);
+                File file = new File(photoLink);
+                if (file.delete()) { //if deleted, returns true
+                    logger.info("Image of contact {} was deleted.", id);
+                } else {
+                    logger.warn("Deleting image of contact {} failed.", id);
+                }
+            }
+            //retrieve attachment links and delete corresponding files
+            psGetAttachments.setInt(1, id);
+            ResultSet resultSetAttachments = psGetAttachments.executeQuery();
+            while (resultSetAttachments.next()) {
+                String attachmentLink = resultSetAttachments.getString(DB_ATTACHMENTLINK);
+                File file = new File(attachmentLink);
+                if (file.delete()) { //if deleted, returns true
+                    logger.info("Attachment of contact {} was deleted.", id);
+                } else {
+                    logger.warn("Deleting attachment of contact {} failed.", id);
+                }
+            }
+            //delete requested contact
             ps.setInt(1, id);
             ps.execute();
             logger.info("Delete of contact with id {} executed.", id);

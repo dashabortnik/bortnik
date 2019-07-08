@@ -37,6 +37,7 @@ public class Controller {
         actions.put("DELETE_", DELETE_CONTACT);
         actions.put("DELETE_\\/", DELETE_CONTACT);
         actions.put("DELETE_\\/\\d+", DELETE_CONTACT);
+        actions.put("DELETE_\\/\\d+.*", DELETE_CONTACT);
         actions.put("GET_\\/emails", GET_ALL_EMAILS);
         //urls with and without /?
     }
