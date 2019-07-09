@@ -87,14 +87,12 @@ public class ContactDaoImpl implements ContactDao {
     }
 
     @Override
-    public List<Contact> readByBirthday(Date today) {
+    public List<Contact> readByBirthday() {
         List<Contact> contacts = new ArrayList<>();
-        String sql = "SELECT * FROM contact WHERE birthday=?";
+        String sql = "SELECT * FROM contact WHERE MONTH(birthday) = MONTH(NOW()) AND DAY(birthday) = DAY(NOW())";
         try (Connection connection = DatabaseUtil.getDataSource().getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
-            System.out.println("Search for " + new java.sql.Date(today.getTime()).toString());
-            ps.setObject(1, today);
-            ResultSet resultSet = ps.executeQuery();
+            Statement st = connection.createStatement()){
+            ResultSet resultSet = st.executeQuery(sql);
             while (resultSet.next()) {
                 int contactId = resultSet.getInt(DB_CONTACTID);
                 String surname = resultSet.getString(DB_SURNAME);
@@ -112,9 +110,10 @@ public class ContactDaoImpl implements ContactDao {
                 contacts.add(new Contact(contactId, surname, name, patronymic, birthday, gender, nationality, maritalStatus, website,
                         email, workplace, photoLink, address));
             }
-            System.out.println("TODAY BIRTHDAY: " + contacts.toString());
+            logger.debug("List of contacts with birthday today: " + contacts.toString());
+            return contacts;
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("Error with reading contacts with birthday today: ", e);
         }
         return contacts;
     }

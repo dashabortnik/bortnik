@@ -1,5 +1,11 @@
 package com.itechart.bortnik.web.servlets;
 
+import com.itechart.bortnik.web.schedule.EmailToAdminJob;
+import org.quartz.JobBuilder;
+import org.quartz.JobDetail;
+import org.quartz.Scheduler;
+import org.quartz.Trigger;
+import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,6 +16,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
+import static org.quartz.CronScheduleBuilder.dailyAtHourAndMinute;
+import static org.quartz.TriggerBuilder.newTrigger;
+
 @MultipartConfig
 public class ContactServlet extends HttpServlet {
 
@@ -17,6 +26,29 @@ public class ContactServlet extends HttpServlet {
 
     public ContactServlet() {
         controller = new Controller();
+        initializeEmailTrigger();
+    }
+
+    private void initializeEmailTrigger() {
+        try {
+            JobDetail job = JobBuilder.newJob(EmailToAdminJob.class).withIdentity("emailToAdminJob",
+                    "group1").build();
+
+            Trigger trigger = newTrigger()
+                    .withIdentity("emailToAdminTrigger", "group1")
+                    .withSchedule(dailyAtHourAndMinute(10, 0))
+                    .forJob(job)
+                    .build();
+            //every day at 10 am; http://www.cronmaker.com/
+//          Trigger trigger1 = TriggerBuilder.newTrigger().withIdentity("cronTrigger", "group1")
+//                    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 10 1/1 * ? *")).build();
+            Scheduler scheduler = new StdSchedulerFactory().getScheduler();
+            scheduler.start();
+            scheduler.scheduleJob(job, trigger);
+        }
+        catch(Exception e){
+            e.printStackTrace();
+        }
     }
 
     //create Logger for current class

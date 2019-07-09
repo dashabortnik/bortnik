@@ -1,39 +1,27 @@
-package com.itechart.bortnik.web.action;
+package com.itechart.bortnik.web.schedule;
 
 import com.itechart.bortnik.core.domain.Contact;
-import com.itechart.bortnik.core.service.ContactService;
-import com.itechart.bortnik.core.service.serviceImpl.ContactServiceImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.mail.*;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 
-public class SendEmailAction implements BaseAction {
+public class EmailToAdminService {
 
-    private ContactService contactService;
-    private String sourceEmail = "dasha_bortnik@mail.ru";
-    private String adminEmail = "soleildasha@gmail.com";
-    private String password = "xyzxyz";
+    //create Logger for current class
+    Logger logger = LoggerFactory.getLogger(EmailToAdminService.class);
 
+    public void sendEmail(List<Contact> contactList) {
 
-    public SendEmailAction() {
-        contactService = new ContactServiceImpl();
-    }
+        String sourceEmail = "contacts.app.2019@gmail.com";
+        String password = "App.contacts.2019";
+        String adminEmail = "soleildasha@gmail.com";
 
-    @Override
-    public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-//        Date date = new Date();
-//        System.out.println("TODAY IS " + date);
-        List<Contact> contactList = contactService.findContactByBirthday();
-        System.out.println("FROM ACTION: " + contactList.toString());
         StringBuilder msg = new StringBuilder("Good morning! We have some birthdays to celebrate today: \n");
         for (Contact contact : contactList) {
             msg.append(contact.getName());
@@ -62,15 +50,16 @@ public class SendEmailAction implements BaseAction {
         try {
             MimeMessage message = new MimeMessage(session);
             message.addRecipient(Message.RecipientType.TO, new InternetAddress(adminEmail));
-            message.setSubject("Happy Birthday!");
+            message.setSubject("Notification about birthdays");
             message.setText(msg.toString());
             //send message
             Transport.send(message);
-            System.out.println("message sent successfully");
+            logger.info("Notification about contacts who have birthday today was sent to admin email.");
+        } catch (AddressException e) {
+            logger.error("Error with address: ", e);
         } catch (MessagingException e) {
-            throw new RuntimeException(e);
+            logger.error("Error with email: ", e);
         }
-
 
     }
 

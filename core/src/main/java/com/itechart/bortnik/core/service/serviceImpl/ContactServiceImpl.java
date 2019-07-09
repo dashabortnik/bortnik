@@ -13,7 +13,6 @@ import com.itechart.bortnik.core.domain.dto.FullContactDTO;
 import com.itechart.bortnik.core.service.ContactService;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class ContactServiceImpl implements ContactService {
@@ -103,8 +102,8 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public List<Contact> findContactByBirthday(Date birthday) {
-        return contactDaoImpl.readByBirthday(birthday);
+    public List<Contact> findContactByBirthday() {
+        return contactDaoImpl.readByBirthday();
     }
 
 }

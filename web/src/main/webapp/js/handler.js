@@ -645,7 +645,6 @@ function deleteContact() {
         //delete button pressed on the page of individual contact
         console.log("Particular case");
         let array = currentPath.split("/");
-        console.log("parsed array: " + array);
         idArray.push(array[2]);
     }
     fetch(currentPath, {
