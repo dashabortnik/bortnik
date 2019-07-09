@@ -79,25 +79,26 @@
      </form>
         <h2>Telephone numbers</h2>
         <button type="button" class="btn btn-outline-success" id="createPhone">Create</button>
+        <button type="button" class="btn btn-outline-danger" id="deletePhone">Delete</button>
         <div id="myModalPhone" class="modal">
             <div class="modal-content">
                 <table class="table table-sm table-bordered table-hover" id="newPhoneTable">
                     <tbody>
                         <tr>
                             <th class="align-middle text-center">Country code</th>
-                            <td><input type="text" name="countryCode" id="newCountryCode"></td>
+                            <td id="countryCodeHolder"><input type="text" name="countryCode" id="newCountryCode"></td>
                         </tr>
                         <tr>
                             <th class="align-middle text-center">Operator code</th>
-                            <td><input type="text" name="operatorCode" id="newOperatorCode"></td>
+                            <td id="operatorCodeHolder"><input type="text" name="operatorCode" id="newOperatorCode"></td>
                         </tr>
                         <tr>
                             <th class="align-middle text-center">Phone number</th>
-                            <td><input type="text" name="phoneNumber" id="newPhoneNumber"></td>
+                            <td id="phoneNumberHolder"><input type="text" name="phoneNumber" id="newPhoneNumber"></td>
                         </tr>
                         <tr>
                             <th class="align-middle text-center">Phone type</th>
-                            <td>
+                            <td id="phoneTypeHolder">
                             <select name="phoneType" id="newPhoneType">
                                 <option value="home">home</option>
                                 <option value="mobile">mobile</option>
@@ -107,7 +108,7 @@
                         </tr>
                         <tr>
                             <th class="align-middle text-center">Comment</th>
-                            <td><input type="text" name="comment" id="newComment"></td>
+                            <td id="commentHolder"><input type="text" name="comment" id="newComment"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -145,6 +146,7 @@
 
         <h2>Attachments</h2>
         <button type="button" class="btn btn-outline-success" id="createAttachment">Create</button>
+        <button type="button" class="btn btn-outline-danger" id="deleteAttachment">Delete</button>
         <div id="myModalAttachment" class="modal">
              <div class="modal-content">
                    <table class="table table-sm table-bordered table-hover" id="newAttachmentTable">

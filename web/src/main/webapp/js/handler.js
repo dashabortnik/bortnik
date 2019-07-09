@@ -248,6 +248,20 @@ function openContactForm() {
                     resetTable(newAttachmentTable, modalAttach);
                 }
             }
+
+            let deletePhoneBtn = document.getElementById("deletePhone");
+            let deleteAttachmentBtn = document.getElementById("deleteAttachment");
+
+            //delete chosen phones
+            deletePhoneBtn.onclick = function () {
+                deleteCheckedRows("phoneTable");
+            }
+
+            //delete chosen attachments
+            deleteAttachmentBtn.onclick = function () {
+                deleteCheckedRows("attachmentTable");
+            }
+
         }).then(function (res) {
         let submitBtn = document.getElementById("submitContact");
         submitBtn.onclick = function () {
@@ -318,7 +332,7 @@ function submitForm(form) {
     let tmpl = "/templates/contactTemplate.mst";
     const template = fetch(tmpl).then(response => response.text());
     let title = "Contact page";
-    let link = "/contacts/" +  contactId;
+    let link = "/contacts/" + contactId;
 
     return Promise.all([data, template])
         .then(response => {
@@ -423,6 +437,20 @@ function openEditForm() {
                 resetTable(newAttachmentTable, modalAttach);
             }
         }
+
+        let deletePhoneBtn = document.getElementById("deletePhone");
+        let deleteAttachmentBtn = document.getElementById("deleteAttachment");
+
+        //delete chosen phones
+        deletePhoneBtn.onclick = function () {
+            deleteCheckedRows("phoneTable");
+        }
+
+        //delete chosen attachments
+        deleteAttachmentBtn.onclick = function () {
+            deleteCheckedRows("attachmentTable");
+        }
+
     }).then(function (res) {
         let submitBtn = document.getElementById("submitContact");
         submitBtn.onclick = function () {
@@ -537,6 +565,7 @@ function savePhone(newPhoneTable, modal) {
     //create inputs for phoneTable
     let checkbox = document.createElement("input");
     checkbox.setAttribute("type", "checkbox");
+    checkbox.setAttribute("class", "phoneCheck");
 
     //take table and insert a new row
     let table = document.getElementById("phoneTable");
@@ -601,6 +630,7 @@ function saveAttachment(newAttachmentTable, modal) {
     //create inputs for attachmentTable
     let checkbox = document.createElement("input");
     checkbox.setAttribute("type", "checkbox");
+    checkbox.setAttribute("class", "attachmentCheck");
 
     //take table and insert a new row
     let table = document.getElementById("attachmentTable");
@@ -663,4 +693,17 @@ function deleteContact() {
     })
 }
 
+function deleteCheckedRows(tableId){
+    let table = document.getElementById(tableId);
+    let rowCount = table.rows.length;
 
+    for (let i = 0; i < rowCount; i++) {
+        let row = table.rows[i];
+        var checkbox = row.cells[0].childNodes[0];
+        if (null != checkbox && true == checkbox.checked) {
+            table.deleteRow(i);
+            rowCount--;
+            i--;
+        }
+    }
+}

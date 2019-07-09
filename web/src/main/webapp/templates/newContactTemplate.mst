@@ -80,6 +80,7 @@
 
         <h2>Telephone numbers</h2>
         <button type="button" class="btn btn-outline-success" id="createPhone">Create</button>
+        <button type="button" class="btn btn-outline-danger" id="deletePhone">Delete</button>
         <div id="myModalPhone" class="modal">
             <div class="modal-content">
                 <table class="table table-sm table-bordered table-hover" id="newPhoneTable">
@@ -133,9 +134,9 @@
             </tbody>
         </table>
 
-
         <h2>Attachments</h2>
         <button type="button" class="btn btn-outline-success" id="createAttachment">Create</button>
+        <button type="button" class="btn btn-outline-danger" id="deleteAttachment">Delete</button>
         <div id="myModalAttachment" class="modal">
             <div class="modal-content">
                 <table class="table table-sm table-bordered table-hover" id="newAttachmentTable">
