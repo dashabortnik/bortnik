@@ -1,4 +1,4 @@
-package com.itechart.bortnik.web.schedule;
+package com.itechart.bortnik.core.schedule;
 
 import com.itechart.bortnik.core.domain.Contact;
 import org.slf4j.Logger;
@@ -8,6 +8,9 @@ import javax.mail.*;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Properties;
 
@@ -18,10 +21,6 @@ public class EmailToAdminService {
 
     public void sendEmail(List<Contact> contactList) {
 
-        String sourceEmail = "contacts.app.2019@gmail.com";
-        String password = "App.contacts.2019";
-        String adminEmail = "soleildasha@gmail.com";
-
         StringBuilder msg = new StringBuilder("Good morning! We have some birthdays to celebrate today: \n");
         for (Contact contact : contactList) {
             msg.append(contact.getName());
@@ -31,25 +30,20 @@ public class EmailToAdminService {
             msg.append(contact.getEmail());
             msg.append("\n");
         }
-        //Get properties object
+        msg.append("Let's wish them happy birthday!");
+
         Properties props = new Properties();
-        props.put("mail.smtp.host", "smtp.gmail.com");
-        props.put("mail.smtp.socketFactory.port", "465");
-        props.put("mail.smtp.socketFactory.class",
-                "javax.net.ssl.SSLSocketFactory");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.port", "465");
-        //get Session
-        Session session = Session.getDefaultInstance(props,
-                new javax.mail.Authenticator() {
-                    protected PasswordAuthentication getPasswordAuthentication() {
-                        return new PasswordAuthentication(sourceEmail, password);
-                    }
-                });
-        //compose message
-        try {
+        //compose message and fetch properties for smtp server and emails
+        try(InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("emailConfig.properties")){
+            props.load(input);
+            Session session = Session.getDefaultInstance(props,
+                    new javax.mail.Authenticator() {
+                        protected PasswordAuthentication getPasswordAuthentication() {
+                            return new PasswordAuthentication(props.getProperty("sourceEmail"), props.getProperty("password"));
+                        }
+                    });
             MimeMessage message = new MimeMessage(session);
-            message.addRecipient(Message.RecipientType.TO, new InternetAddress(adminEmail));
+            message.addRecipient(Message.RecipientType.TO, new InternetAddress(props.getProperty("adminEmail")));
             message.setSubject("Notification about birthdays");
             message.setText(msg.toString());
             //send message
@@ -59,8 +53,10 @@ public class EmailToAdminService {
             logger.error("Error with address: ", e);
         } catch (MessagingException e) {
             logger.error("Error with email: ", e);
+        } catch (FileNotFoundException e) {
+            logger.error("EmailConfig property file was not found: ", e);
+        } catch (IOException e) {
+            logger.error("Error with access to properties: ", e);
         }
-
     }
-
 }

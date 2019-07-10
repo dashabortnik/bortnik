@@ -1,6 +1,6 @@
 package com.itechart.bortnik.web.servlets;
 
-import com.itechart.bortnik.web.schedule.EmailToAdminJob;
+import com.itechart.bortnik.core.schedule.EmailToAdminJob;
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.Scheduler;
@@ -33,15 +33,11 @@ public class ContactServlet extends HttpServlet {
         try {
             JobDetail job = JobBuilder.newJob(EmailToAdminJob.class).withIdentity("emailToAdminJob",
                     "group1").build();
-
             Trigger trigger = newTrigger()
                     .withIdentity("emailToAdminTrigger", "group1")
-                    .withSchedule(dailyAtHourAndMinute(10, 0))
+                    .withSchedule(dailyAtHourAndMinute(16, 33))
                     .forJob(job)
                     .build();
-            //every day at 10 am; http://www.cronmaker.com/
-//          Trigger trigger1 = TriggerBuilder.newTrigger().withIdentity("cronTrigger", "group1")
-//                    .withSchedule(CronScheduleBuilder.cronSchedule("0 0 10 1/1 * ? *")).build();
             Scheduler scheduler = new StdSchedulerFactory().getScheduler();
             scheduler.start();
             scheduler.scheduleJob(job, trigger);
@@ -82,8 +78,7 @@ public class ContactServlet extends HttpServlet {
         try {
             controller.processString(urlPart, request, response);
         } catch (ServletException e) {
-            e.printStackTrace();
-            logger.error("Exception in parseUrl method: ", e);
+            logger.error("Servlet exception in parseUrl method: ", e);
         } catch (IOException e) {
             logger.error("Exception in parseUrl method: ", e);
         }

@@ -20,15 +20,14 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.file.FileSystems;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class CreateContactAction implements BaseAction {
@@ -77,6 +76,16 @@ public class CreateContactAction implements BaseAction {
         String attachmentName = null;
         String attachmentLink = null;
         String submittedFileName = null;
+
+        Properties props = new Properties();
+        //compose message and fetch properties for smtp server and emails
+        try(InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("saveFiles.properties")){
+            props.load(input);
+         }catch (FileNotFoundException e) {
+            logger.error("SaveFiles property file was not found: ", e);
+        } catch (IOException e) {
+            logger.error("Error with access to saveFiles properties: ", e);
+        }
 
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         List<FileItem> items = null;
@@ -167,7 +176,7 @@ public class CreateContactAction implements BaseAction {
                             }
                             break;
                         case "attachmentLink":
-                            String path = FileSystems.getDefault().getPath("").toAbsolutePath() + File.separator +
+                            String path = props.getProperty("saveDirectory") + File.separator +
                                     "file" + File.separator + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1)
                                     + "---" + submittedFileName;
                             File uploadedFile = new File(path);
@@ -253,7 +262,7 @@ public class CreateContactAction implements BaseAction {
                         }
                     }
                 } else {
-                    String path = FileSystems.getDefault().getPath("").toAbsolutePath() + File.separator + "img"
+                    String path = props.getProperty("saveDirectory") + File.separator + "img"
                             + File.separator + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1) + ".jpg";
                     File uploadedFile = new File(path);
                     item.write(uploadedFile);

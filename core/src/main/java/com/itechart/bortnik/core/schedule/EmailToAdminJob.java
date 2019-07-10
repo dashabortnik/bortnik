@@ -1,4 +1,4 @@
-package com.itechart.bortnik.web.schedule;
+package com.itechart.bortnik.core.schedule;
 
 import com.itechart.bortnik.core.domain.Contact;
 import com.itechart.bortnik.core.service.ContactService;
