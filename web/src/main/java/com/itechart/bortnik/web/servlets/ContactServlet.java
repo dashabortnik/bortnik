@@ -9,6 +9,7 @@ import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.HttpServlet;
@@ -66,22 +67,39 @@ public class ContactServlet extends HttpServlet {
         parseUrl(request, response);
     }
 
-    private void parseUrl(HttpServletRequest request, HttpServletResponse response) {
-        //URI starts with /contacts, which gives us an empty String in the beginning if regex = "/contacts"
-        String[] urlArray = request.getRequestURI().split("contacts", 2);
-        String urlPart = request.getMethod() + "_";
+    private void parseUrl(HttpServletRequest request, HttpServletResponse response){
 
-        if (urlArray.length > 1) {
-            urlPart += urlArray[1];
-            logger.info("Incoming request: {}", urlPart);
-        }
-        try {
-            controller.processString(urlPart, request, response);
-        } catch (ServletException e) {
-            logger.error("Servlet exception in parseUrl method: ", e);
-        } catch (IOException e) {
-            logger.error("Exception in parseUrl method: ", e);
+        String requestUri = request.getRequestURI();
+        System.out.println("REQUEST URI---" + requestUri);
+
+        if (requestUri.matches("\\/brt\\/api\\/contacts.*")){
+            System.out.println("MATCH");
+            String[] urlArray = request.getRequestURI().split("contacts", 2);
+            String urlPart = request.getMethod() + "_";
+
+            if (urlArray.length > 1) {
+                urlPart += urlArray[1];
+                logger.info("Incoming request: {}", urlPart);
+            }
+            try {
+                controller.processString(urlPart, request, response);
+            } catch (ServletException e) {
+                logger.error("Servlet exception in parseUrl method from /api request: ", e);
+            } catch (IOException e) {
+                logger.error("Exception in parseUrl method from /api request: ", e);
+            }
+
+        }else{
+            System.out.println("NO MATCH");
+            RequestDispatcher rd = request.getRequestDispatcher("/index.html");
+            try {
+                rd.forward(request, response);
+                logger.info("Forward of request with URI {} to index.html was executed.", requestUri);
+            } catch (ServletException e) {
+                logger.error("Servlet exception in request dispatcher: ", e);
+            } catch (IOException e) {
+                logger.error("IO exception in request dispatcher: ", e);
+            }
         }
     }
-
 }

@@ -26,14 +26,15 @@ public class Controller {
 
     public Controller() {
         actions = new HashMap<>();
+        actions.put("GET_", GET_ALL_CONTACTS);
         actions.put("GET_\\/", GET_ALL_CONTACTS);
         actions.put("POST_\\/", CREATE_CONTACT);
+        actions.put("GET_\\/\\d+\\/edit-form", EDIT_CONTACT_FORM);
         actions.put("GET_\\/\\d+", GET_CONTACT_BY_ID);
         actions.put("POST_\\/\\d+", UPDATE_CONTACT);
         //actions.put("GET_\\/contacts/new-form", "NEWCONTACTFORM");
         actions.put("GET_\\/image", GET_IMAGE_FOR_CONTACT);
         actions.put("GET_\\/file", GET_FILE);
-        actions.put("GET_\\/\\d+\\/edit-form", EDIT_CONTACT_FORM);
         actions.put("DELETE_", DELETE_CONTACT);
         actions.put("DELETE_\\/", DELETE_CONTACT);
         actions.put("DELETE_\\/\\d+", DELETE_CONTACT);
@@ -88,7 +89,7 @@ public class Controller {
                 break;
             case GET_ALL_EMAILS:
                 logger.info("SendEmailAction is invoked.");
-                new SendEmailAction().execute(request, response);
+                new  SendEmailAction().execute(request, response);
                 break;
             default:
                 logger.info("ShowAllContactsAction is invoked by default.");

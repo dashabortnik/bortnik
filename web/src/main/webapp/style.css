@@ -1,5 +1,7 @@
-html, body {
-    height: 100%;
+html, body{
+    /*height: 100%;*/
+    height:100vh;
+    margin:0;
 }
 
 body {
@@ -7,7 +9,8 @@ body {
     background-color: #f0f0f0; /* Цвет фона веб-страницы */
     color: #333; /* Цвет основного текста */
     display: flex;
-    flex-flow: column;
+    /*flex-flow: column;*/
+    flex-direction:column;
 }
 
 footer {
@@ -19,7 +22,6 @@ footer {
     display: none; /* Hidden by default */
     position: fixed; /* Stay in place */
     z-index: 1; /* Sit on top */
-    /*padding-top: 50%;  Location of the box */
     left: 0;
     top: 0;
     width: 100%; /* Full width */
@@ -34,7 +36,6 @@ footer {
 /* Modal Content */
 .modal-content {
     background-color: #fefefe;
-   /* margin: auto;*/
     padding: 20px;
     border: 1px solid #888;
     width: 50%;
@@ -45,4 +46,9 @@ footer {
 
 #myDiv {
     overflow: scroll;
+    height: 100%;
+}
+
+#logo{
+    color: red;
 }

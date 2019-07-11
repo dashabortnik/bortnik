@@ -34,7 +34,7 @@ public class GetContactByIdAction implements BaseAction{
         mapper.setDateFormat(df);
 
         //Example String: empty-contacts-number
-        String urlPart = (request.getRequestURI().split("/"))[2];
+        String urlPart = (request.getRequestURI().split("/"))[4];
         int searchedId = Integer.parseInt(urlPart);
         logger.info("Contact with id: {} was requested.", searchedId);
 

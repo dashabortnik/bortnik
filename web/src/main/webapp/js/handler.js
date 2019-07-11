@@ -1,4 +1,4 @@
-//main page loading on
+//main page loading  - shows all contacts
 window.addEventListener('load', () => {
     const container = document.getElementById("myDiv");
     const template = document.getElementById("mainTableTemplate").innerHTML;
@@ -6,7 +6,7 @@ window.addEventListener('load', () => {
     //check current URI
     const currentUri = window.location.pathname;
     console.log("Current path: " + currentUri);
-    fetch('contacts', {
+    fetch('/brt/api/contacts', {
         method: "GET",
         headers: new Headers({'content-type': 'application/json', "Test": "MyMethod"})
     }).then(function (response) {
@@ -14,7 +14,7 @@ window.addEventListener('load', () => {
     }).then(function (myJson) {
         const html = Mustache.to_html(template, myJson);
         container.innerHTML = html;
-        history.replaceState(null, "Contact page", "/contacts");
+        history.replaceState(null, "Contact page", "/brt/contacts");
     }).catch(function (err) {
         alert("Unable to load main page.");
     });
@@ -72,14 +72,13 @@ function navigate(link, callback) {
         })
 }
 
+//display details about 1 chosen contact
 function displayContact(link, callback) {
     event.preventDefault();
     event.stopPropagation();
     let tmpl = "/templates/contactTemplate.mst";
     let title = "Contact page";
     let photoLink = null;
-    let gender = null;
-    let marital = null;
     //fetch data
     const data = fetch(link, {
         method: "GET",
@@ -126,10 +125,11 @@ function setSelectElementValue(id, valueToSelect) {
     element.value = valueToSelect;
 }
 
+//fetch image for chosen contact
 function retrieveImage(link) {
     console.log("The link in retrieve image is---" + link);
     var newLink = null;
-    fetch("/contacts/image", {
+    fetch("/brt/api/contacts/image", {
         method: "GET",
         headers: new Headers({'fileLink': link})
     }).then(function (response) {
@@ -154,12 +154,13 @@ function retrieveImage(link) {
         });
 }
 
+//download displayed attachment
 function downloadFile(link) {
     event.preventDefault();
     event.stopPropagation();
     console.log("The link to download file is---" + link);
     var newLink = null;
-    fetch("/contacts/file", {
+    fetch("/api/contacts/file", {
         method: "GET",
         headers: new Headers({'Content-Type': 'application/json; charset=UTF-8', 'fileLink': encodeURI(link)})
     }).then(function (response) {
@@ -187,6 +188,7 @@ function downloadFile(link) {
         });
 }
 
+//open form for a new contact
 function openContactForm() {
     let form = null;
     //fetch template
@@ -267,7 +269,7 @@ function openContactForm() {
         submitBtn.onclick = function () {
             submitForm(form);
         }
-        history.pushState(null, "New contact page", "/contacts/new-form");
+        history.pushState(null, "New contact page", "/brt/contacts/new-form");
     }).catch(function (err) {
         alert("Unable to render new contact page");
     })
@@ -312,7 +314,7 @@ function submitForm(form) {
     let photoLink;
     let contactId;
 
-    const data = fetch("/contacts/", {
+    const data = fetch("/brt/api/contacts/", {
         method: 'POST',
         body: formData,
     }).then(function (response) {
@@ -332,7 +334,7 @@ function submitForm(form) {
     let tmpl = "/templates/contactTemplate.mst";
     const template = fetch(tmpl).then(response => response.text());
     let title = "Contact page";
-    let link = "/contacts/" + contactId;
+    let link = "/brt/contacts/" + contactId;
 
     return Promise.all([data, template])
         .then(response => {
@@ -362,8 +364,8 @@ function openEditForm() {
 
     var prom = Promise.resolve()
         .then(function (res) {
-            if (path.match(new RegExp("\\/contacts\\/\\d+"))) {
-                checkedId = path.split("/")[1];
+            if (path.match(new RegExp("\\/brt\\/api\\/contacts\\/\\d+"))) {
+                checkedId = path.split("/")[4];
                 console.log("ID---" + checkedId);
             } else {
                 var checked = document.querySelectorAll(".check:checked");
@@ -372,12 +374,11 @@ function openEditForm() {
                 console.log("CHECKED quantity---" + checkedChecks);
                 console.log(checkedChecks + "boxes checked now");
                 if (checkedChecks !== 1) {
-                    alert("You can edit only one contact at a time! Please, check only one checkbox.");
-                    return false;
+                    return alert("You can edit only one contact at a time! Please, check only one checkbox.");
                 } else {
                     checkedId = checked.item(0).id;
                 }
-                link = "/contacts/" + checkedId + "/edit-form";
+                link = "/brt/api/contacts/" + checkedId + "/edit-form";
                 console.log("BUILT LINK:" + link);
             }
         }).catch(function (err) {
@@ -499,7 +500,7 @@ function submitEditForm(form, checkedId) {
     }
 
     let photoLink;
-    let fetchLink = "/contacts/" + checkedId;
+    let fetchLink = "/api/contacts/" + checkedId;
 
     const data = fetch(fetchLink, {
         method: 'POST',
@@ -663,20 +664,24 @@ function deleteContact() {
     var currentPath = window.location.pathname;
     console.log("Current pathname is --- " + currentPath);
     var idArray = [];
-    if (new RegExp("^(\\/contacts)$").test(currentPath)) {
+    let tail = "";
+    if (new RegExp("^(\\/brt\\/contacts)$").test(currentPath)) {
         //checkboxes are checked and delete button is pressed
         console.log("General case");
-        var checked = document.querySelectorAll(".check:checked");
+        tail = "/contacts";
+        let checked = document.querySelectorAll(".check:checked");
         console.log("CHECKED OBJECT---" + checked);
         for (let i = 0; i < checked.length; i++) {
             idArray.push(checked[i].id);
         }
-    } else if (new RegExp("^(\\/contacts\\/\\d+.*)").test(currentPath)) {
+    } else if (new RegExp("^(\\/brt\\/contacts\\/\\d+.*)").test(currentPath)) {
         //delete button pressed on the page of individual contact
         console.log("Particular case");
         let array = currentPath.split("/");
         idArray.push(array[2]);
+        tail = "/contacts/" + array[2];
     }
+    currentPath = "/brt/api" + tail;
     fetch(currentPath, {
         method: 'DELETE',
         headers: {'Content-Type': 'application/json', 'IdToDelete': idArray}
@@ -689,11 +694,11 @@ function deleteContact() {
         var html = Mustache.to_html(tmpl, myJson);
         var container = document.getElementById("myDiv");
         container.innerHTML = html;
-        history.pushState(null, "Contact page", "/contacts");
+        history.pushState(null, "Contact page", "/brt/contacts");
     })
 }
 
-function deleteCheckedRows(tableId){
+function deleteCheckedRows(tableId) {
     let table = document.getElementById(tableId);
     let rowCount = table.rows.length;
 
