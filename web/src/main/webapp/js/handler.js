@@ -1,14 +1,34 @@
-//main page loading  - shows all contacts
+//js controller: checks currentURI and invokes corresponding function to display requested page
 window.addEventListener('load', () => {
-    const container = document.getElementById("myDiv");
-    const template = document.getElementById("mainTableTemplate").innerHTML;
-    //const startPageUri = ""; //add index.html route
     //check current URI
     const currentUri = window.location.pathname;
     console.log("Current path: " + currentUri);
+    let stringSplitter = "brt/";
+    if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/\\d+\\/*)$"))) {
+        let pathParts = currentUri.split(stringSplitter);
+        let link = pathParts[0] + stringSplitter + "api/" + pathParts[1];
+        //display requested contact page
+        displayContact(link, retrieveImage);
+    } else  if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/\\d+\\/edit-form\\/*)$"))){
+        let pathParts = currentUri.split(stringSplitter);
+        let link = pathParts[0] + stringSplitter + "api/" + pathParts[1];
+        //display edit contact page
+        navigate(link, retrieveImage);
+    } else  if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/new-form\\/*)$"))){
+        //display new contact form
+        openContactForm();
+    } else  {
+        //display main page
+        displayMainPage();
+    }
+})
+
+function displayMainPage() {
+    const container = document.getElementById("myDiv");
+    const template = document.getElementById("mainTableTemplate").innerHTML;
     fetch('/brt/api/contacts', {
         method: "GET",
-        headers: new Headers({'content-type': 'application/json', "Test": "MyMethod"})
+        headers: new Headers({'content-type': 'application/json'})
     }).then(function (response) {
         return response.json();
     }).then(function (myJson) {
@@ -18,7 +38,7 @@ window.addEventListener('load', () => {
     }).catch(function (err) {
         alert("Unable to load main page.");
     });
-});
+}
 
 function navigate(link, callback) {
     event.preventDefault();
@@ -28,6 +48,9 @@ function navigate(link, callback) {
     let photoLink = null;
     let gender = null;
     let marital = null;
+    let linkParts = link.split("api/");
+    let historyLink = linkParts[0] + linkParts[1];
+    console.log(historyLink + "--- formed link");
     //fetch data
     const data = fetch(link, {
         method: "GET",
@@ -63,7 +86,7 @@ function navigate(link, callback) {
             document.getElementById("myDiv").innerHTML = "";
             return document.getElementById('myDiv').innerHTML = html;
         }).then(function () {
-            history.pushState(null, title, link);
+            history.pushState(null, title, historyLink);
             setSelectElementValue("gender", gender);
             setSelectElementValue("marital", marital);
             callback(photoLink);
@@ -78,6 +101,8 @@ function displayContact(link, callback) {
     event.stopPropagation();
     let tmpl = "/templates/contactTemplate.mst";
     let title = "Contact page";
+    let pathParts = link.split("api/");
+    let historyLink = pathParts[0] + pathParts[1];
     let photoLink = null;
     //fetch data
     const data = fetch(link, {
@@ -114,7 +139,7 @@ function displayContact(link, callback) {
         }).catch(function (err) {
             alert("Unable to render display contact page");
         }).then(function () {
-            history.pushState(null, title, link);
+            history.pushState(null, title, historyLink);
             callback(photoLink);
         })
 }
