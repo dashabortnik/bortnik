@@ -23,6 +23,10 @@ window.addEventListener('load', () => {
     }
 })
 
+window.addEventListener('popstate', function(event) {
+    location.reload();
+});
+
 function displayMainPage() {
     const container = document.getElementById("myDiv");
     const template = document.getElementById("mainTableTemplate").innerHTML;
@@ -34,7 +38,7 @@ function displayMainPage() {
     }).then(function (myJson) {
         const html = Mustache.to_html(template, myJson);
         container.innerHTML = html;
-        history.replaceState(null, "Contact page", "/brt/contacts");
+        history.pushState(null, "Display main page", "/brt/contacts");
     }).catch(function (err) {
         alert("Unable to load main page.");
     });
@@ -86,7 +90,7 @@ function navigate(link, callback) {
             document.getElementById("myDiv").innerHTML = "";
             return document.getElementById('myDiv').innerHTML = html;
         }).then(function () {
-            history.pushState(null, title, historyLink);
+            history.pushState(null, "Edit contact page", historyLink);
             setSelectElementValue("gender", gender);
             setSelectElementValue("marital", marital);
             callback(photoLink);
@@ -139,7 +143,7 @@ function displayContact(link, callback) {
         }).catch(function (err) {
             alert("Unable to render display contact page");
         }).then(function () {
-            history.pushState(null, title, historyLink);
+            history.pushState(null, "Display contact page", historyLink);
             callback(photoLink);
         })
 }
@@ -374,7 +378,7 @@ function submitForm(form) {
             return container.innerHTML = html;
         }).then(function () {
             retrieveImage(photoLink);
-            history.pushState(null, title, link);
+            history.pushState(null, "Display created contact page", link);
         }).catch(function (err) {
             alert("Unable to render display contact page with new data");
         })
@@ -482,7 +486,7 @@ function openEditForm() {
         submitBtn.onclick = function () {
             submitEditForm(form, checkedId);
         }
-        history.pushState(null, "Edit contact page", link);
+        //history.pushState(null, "Edit contact page", link);
     }).catch(function (err) {
         alert("Error on edit contact page");
     })
@@ -560,7 +564,7 @@ function submitEditForm(form, checkedId) {
             return container.innerHTML = html;
         }).then(function () {
             retrieveImage(photoLink);
-            history.pushState(null, title, fetchLink);
+            history.pushState(null, "Display contact after edit page", fetchLink);
         }).catch(function (err) {
             alert("Unable to update contact with new data");
         })
@@ -719,7 +723,7 @@ function deleteContact() {
         var html = Mustache.to_html(tmpl, myJson);
         var container = document.getElementById("myDiv");
         container.innerHTML = html;
-        history.pushState(null, "Contact page", "/brt/contacts");
+        history.pushState(null, "Display main page", "/brt/contacts");
     })
 }
 
@@ -737,3 +741,5 @@ function deleteCheckedRows(tableId) {
         }
     }
 }
+
+
