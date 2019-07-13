@@ -28,9 +28,20 @@ window.addEventListener('popstate', function(event) {
 });
 
 function displayMainPage() {
+    let page = 1;
+    let pageSize = 10;
+    let link = "/brt/api/contacts/?page=" + page + "&pageSize=" + pageSize;
+    let historyLink = "/brt/contacts/?page=" + page + "&pageSize=" + pageSize;
+    //document.querySelectorAll(".check:checked");
+    // if(document.getElementById("pageId")){
+    //     alert("Element exists");
+    // } else {
+    //     alert("Element does not exist");
+    // }
+    // '/brt/api/contacts/?page=1&pageSize=10'
     const container = document.getElementById("myDiv");
     const template = document.getElementById("mainTableTemplate").innerHTML;
-    fetch('/brt/api/contacts', {
+    fetch(link, {
         method: "GET",
         headers: new Headers({'content-type': 'application/json'})
     }).then(function (response) {
@@ -38,7 +49,25 @@ function displayMainPage() {
     }).then(function (myJson) {
         const html = Mustache.to_html(template, myJson);
         container.innerHTML = html;
-        history.pushState(null, "Display main page", "/brt/contacts");
+        history.pushState(null, "Display main page", historyLink);
+        return myJson;
+    }).then (function(myJson){
+        let navContainer = document.getElementById("navContainer");
+        let nextBtnContainer = document.getElementById("nextBtnContainer");
+        let totalSize = myJson.totalSize;
+        for (let i = 1; i <= totalSize; i++){
+            let li = document.createElement('li');
+            li.setAttribute('class','page-item');
+            let a = document.createElement('a');
+            a.setAttribute("class", "page-link");
+            a.setAttribute("id", i.toString());
+            a.setAttribute("href", "");
+            let linkText = document.createTextNode(i.toString());
+            a.appendChild(linkText);
+            li.appendChild(a);
+           //navContainer.appendChild(li);
+            navContainer.insertBefore(li, nextBtnContainer);
+        }
     }).catch(function (err) {
         alert("Unable to load main page.");
     });

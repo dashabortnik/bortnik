@@ -26,7 +26,7 @@ public class Controller {
 
     public Controller() {
         actions = new HashMap<>();
-        actions.put("GET_\\/*", GET_ALL_CONTACTS);
+        actions.put("GET_\\/*.*", GET_ALL_CONTACTS);
         actions.put("POST_\\/", CREATE_CONTACT);
         actions.put("GET_\\/\\d+\\/edit-form\\/*", EDIT_CONTACT_FORM);
         actions.put("GET_\\/\\d+\\/*", GET_CONTACT_BY_ID);

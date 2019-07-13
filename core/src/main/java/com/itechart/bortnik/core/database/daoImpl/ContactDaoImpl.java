@@ -91,7 +91,7 @@ public class ContactDaoImpl implements ContactDao {
         List<Contact> contacts = new ArrayList<>();
         String sql = "SELECT * FROM contact WHERE MONTH(birthday) = MONTH(NOW()) AND DAY(birthday) = DAY(NOW())";
         try (Connection connection = DatabaseUtil.getDataSource().getConnection();
-            Statement st = connection.createStatement()){
+             Statement st = connection.createStatement()) {
             ResultSet resultSet = st.executeQuery(sql);
             while (resultSet.next()) {
                 int contactId = resultSet.getInt(DB_CONTACTID);
@@ -170,13 +170,15 @@ public class ContactDaoImpl implements ContactDao {
     }
 
     @Override
-    public List<Contact> readAll() {
+    public List<Contact> readAll(int offset, int limit) {
         List<Contact> contacts = new ArrayList<>();
-        String sql = "SELECT * FROM contact LEFT JOIN address ON contact.contact_id=address.contact_id";
+        String sql = "SELECT * FROM contact LEFT JOIN address ON contact.contact_id=address.contact_id LIMIT ?, ?";
 
         try (Connection connection = DatabaseUtil.getDataSource().getConnection();
-             Statement st = connection.createStatement();
-             ResultSet resultSet = st.executeQuery(sql)) {
+            PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, offset);
+            ps.setInt(2, limit);
+            ResultSet resultSet = ps.executeQuery();
 
             while (resultSet.next()) {
                 int contactId = resultSet.getInt(DB_CONTACTID);
@@ -449,5 +451,22 @@ public class ContactDaoImpl implements ContactDao {
         } catch (SQLException e) {
             logger.error("Error with deleting contact: ", e);
         }
+    }
+
+    @Override
+    public int countContacts() {
+        int totalNumberOfContacts = 0;
+        String sql = "SELECT COUNT(*) AS totalNumber FROM contact";
+        try (Connection connection = DatabaseUtil.getDataSource().getConnection();
+             Statement st = connection.createStatement()) {
+            ResultSet resultSet = st.executeQuery(sql);
+            while (resultSet.next()) {
+                totalNumberOfContacts = resultSet.getInt("totalNumber");
+            }
+            return totalNumberOfContacts;
+        } catch (SQLException e) {
+            logger.error("Error with reading contacts with birthday today: ", e);
+        }
+        return totalNumberOfContacts;
     }
 }

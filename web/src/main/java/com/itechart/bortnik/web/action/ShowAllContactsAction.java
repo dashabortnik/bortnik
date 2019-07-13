@@ -2,6 +2,7 @@ package com.itechart.bortnik.web.action;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itechart.bortnik.core.domain.Contact;
+import com.itechart.bortnik.core.domain.dto.PaginationContactList;
 import com.itechart.bortnik.core.service.ContactService;
 import com.itechart.bortnik.core.service.serviceImpl.ContactServiceImpl;
 import org.slf4j.Logger;
@@ -29,14 +30,31 @@ public class ShowAllContactsAction implements BaseAction {
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
+        int page = Integer.parseInt(request.getParameter("page"));
+        int pageSize = Integer.parseInt(request.getParameter("pageSize"));
+
+        int totalNumberOfContacts = contactService.countAllContacts();
+        System.out.println("Total---" + totalNumberOfContacts);
+        int maxPage = (int)Math.ceil((double)totalNumberOfContacts/pageSize);
+        System.out.println("DOUBLE---" + (double)totalNumberOfContacts/pageSize);
+        System.out.println("MAXPAGE---" + maxPage);
+
+        if (page<=0 || page > maxPage){
+            page = 1;
+        }
+
+        int offset = (page-1)*pageSize; //limit = pageSize
+        List<Contact> contactList = contactService.findAllContacts(offset, pageSize);
+
+        PaginationContactList paginationContactList = new PaginationContactList(contactList, page, pageSize, maxPage);
+
         response.setHeader("Content-Type", "application/json; charset=UTF-8");
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         ObjectMapper mapper = new ObjectMapper();
         mapper.setDateFormat(df);
 
-        List<Contact> contactList = contactService.findAllContacts();
         try (PrintWriter out = response.getWriter()){
-            mapper.writeValue(out, contactList);
+            mapper.writeValue(out, paginationContactList);
             logger.info("List of all contacts was sent to browser.");
         } catch (IOException e) {
             logger.error("Error with sending contacts to browser: ", e);

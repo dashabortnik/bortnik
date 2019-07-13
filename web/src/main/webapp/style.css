@@ -49,6 +49,7 @@ footer {
     height: 100%;
 }
 
-#logo{
-    color: red;
-}
+/*#navContainer {
+    display: inline-block;
+    flex-direction: row;
+}*/

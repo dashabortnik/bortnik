@@ -83,8 +83,8 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public List<Contact> findAllContacts() {
-        return contactDaoImpl.readAll();
+    public List<Contact> findAllContacts(int offset, int limit) {
+        return contactDaoImpl.readAll(offset, limit);
     }
 
     @Override
@@ -104,6 +104,11 @@ public class ContactServiceImpl implements ContactService {
     @Override
     public List<Contact> findContactByBirthday() {
         return contactDaoImpl.readByBirthday();
+    }
+
+    @Override
+    public int countAllContacts(){
+        return contactDaoImpl.countContacts();
     }
 
 }
