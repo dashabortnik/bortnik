@@ -34,10 +34,7 @@ public class ShowAllContactsAction implements BaseAction {
         int pageSize = Integer.parseInt(request.getParameter("pageSize"));
 
         int totalNumberOfContacts = contactService.countAllContacts();
-        System.out.println("Total---" + totalNumberOfContacts);
         int maxPage = (int)Math.ceil((double)totalNumberOfContacts/pageSize);
-        System.out.println("DOUBLE---" + (double)totalNumberOfContacts/pageSize);
-        System.out.println("MAXPAGE---" + maxPage);
 
         if (page<=0 || page > maxPage){
             page = 1;

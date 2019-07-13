@@ -65,7 +65,6 @@ function displayMainPage() {
             let linkText = document.createTextNode(i.toString());
             a.appendChild(linkText);
             li.appendChild(a);
-           //navContainer.appendChild(li);
             navContainer.insertBefore(li, nextBtnContainer);
         }
     }).catch(function (err) {
