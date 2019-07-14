@@ -417,48 +417,57 @@ function submitForm(form) {
         formData.append(fullFileName, file);
     }
 
-    let photoLink;
-    let contactId;
+    //VALIDATION!!!
+    if (validate(formData)){
+        let photoLink;
+        let contactId;
 
-    const data = fetch("/brt/api/contacts/", {
-        method: 'POST',
-        body: formData,
-    }).then(function (response) {
-        return response.json();
-    }).then(function (myJson) {
-        // ignore warning, it works: contact is a nested object with attributes
-        photoLink = myJson.contact.photoLink;
-        contactId = myJson.contact.id;
-        let list = myJson.attachmentList;
-        for (let i = 0; i < list.length; i++) {
-            myJson.attachmentList[i].realFileName = myJson.attachmentList[i].link.split("---", 2)[1];
-            console.log(myJson.attachmentList[i].realFileName);
-        }
-        return myJson;
-    })
-
-    let tmpl = "/templates/contactTemplate.mst";
-    const template = fetch(tmpl).then(response => response.text());
-    let title = "Contact page";
-    let link = "/brt/contacts/" + contactId;
-
-    return Promise.all([data, template])
-        .then(response => {
-            let resolvedData = response[0];
-            let resolvedTemplate = response[1];
-            // Cache the template for future use
-            Mustache.parse(resolvedTemplate);
-            const html = Mustache.render(resolvedTemplate, resolvedData);
-            // Write out the rendered template
-            let container = document.getElementById("myDiv");
-            container.innerHTML = "";
-            return container.innerHTML = html;
-        }).then(function () {
-            retrieveImage(photoLink);
-            history.pushState(null, "Display created contact page", link);
-        }).catch(function (err) {
-            alert("Unable to render display contact page with new data");
+        const data = fetch("/brt/api/contacts/", {
+            method: 'POST',
+            body: formData,
+        }).then(function (response) {
+            return response.json();
+        }).then(function (myJson) {
+            // ignore warning, it works: contact is a nested object with attributes
+            photoLink = myJson.contact.photoLink;
+            contactId = myJson.contact.id;
+            let list = myJson.attachmentList;
+            for (let i = 0; i < list.length; i++) {
+                myJson.attachmentList[i].realFileName = myJson.attachmentList[i].link.split("---", 2)[1];
+                console.log(myJson.attachmentList[i].realFileName);
+            }
+            return myJson;
         })
+
+        let tmpl = "/templates/contactTemplate.mst";
+        const template = fetch(tmpl).then(response => response.text());
+        let title = "Contact page";
+        let link = "/brt/contacts/" + contactId;
+
+        return Promise.all([data, template])
+            .then(response => {
+                let resolvedData = response[0];
+                let resolvedTemplate = response[1];
+                // Cache the template for future use
+                Mustache.parse(resolvedTemplate);
+                const html = Mustache.render(resolvedTemplate, resolvedData);
+                // Write out the rendered template
+                let container = document.getElementById("myDiv");
+                container.innerHTML = "";
+                return container.innerHTML = html;
+            }).then(function () {
+                retrieveImage(photoLink);
+                history.pushState(null, "Display created contact page", link);
+            }).catch(function (err) {
+                alert("Unable to render display contact page with new data");
+            })
+
+    } else {
+        alert("oops");
+    }
+
+
+
 }
 
 function openEditForm() {
@@ -663,64 +672,64 @@ function savePhone(newPhoneTable, modal) {
     let newPhoneType = document.getElementById("newPhoneType");
     let newComment = document.getElementById("newComment");
 
-    //if any required field is empty, the row won't be saved
-    if (newCountryCode.value === null || newOperatorCode.value === null || newPhoneNumber.value === null ||
-        newCountryCode.value === "" || newOperatorCode.value === "" || newPhoneNumber.value === "") {
-        return alert("Some fields are empty, can not save the phone number.");
+    if(validatePhone(newCountryCode, newOperatorCode, newPhoneNumber, newComment)){
+        //create inputs for phoneTable
+        let checkbox = document.createElement("input");
+        checkbox.setAttribute("type", "checkbox");
+        checkbox.setAttribute("class", "phoneCheck");
+
+        //take table and insert a new row
+        let table = document.getElementById("phoneTable");
+        //when index in insertRow is omitted it is -1 by default, so the row appends as the last in the table
+        let newRow = table.insertRow();
+        newRow.insertCell(0).appendChild(checkbox);
+        newRow.insertCell(1).appendChild(newCountryCode);
+        newRow.insertCell(2).appendChild(newOperatorCode);
+        newRow.insertCell(3).appendChild(newPhoneNumber);
+        newRow.insertCell(4).appendChild(newPhoneType);
+        newRow.insertCell(5).appendChild(newComment);
+
+        //create empty inputs for modal window
+        let inputCountryCode = document.createElement("input");
+        inputCountryCode.setAttribute("type", "text");
+        inputCountryCode.setAttribute("id", "newCountryCode");
+        inputCountryCode.setAttribute("name", "countryCode");
+
+        let inputOperatorCode = document.createElement("input");
+        inputOperatorCode.setAttribute("type", "text");
+        inputOperatorCode.setAttribute("id", "newOperatorCode");
+        inputOperatorCode.setAttribute("name", "operatorCode");
+
+        let inputPhoneNumber = document.createElement("input");
+        inputPhoneNumber.setAttribute("type", "text");
+        inputPhoneNumber.setAttribute("id", "newPhoneNumber");
+        inputPhoneNumber.setAttribute("name", "phoneNumber");
+
+        let inputPhoneType = document.createElement("select");
+        inputPhoneType.setAttribute("id", "newPhoneType");
+        inputPhoneType.setAttribute("name", "phoneType");
+        inputPhoneType.options[0] = new Option("home", "home");
+        inputPhoneType.options[1] = new Option("mobile", "mobile");
+
+        let inputComment = document.createElement("input");
+        inputComment.setAttribute("type", "text");
+        inputComment.setAttribute("id", "newComment");
+        inputComment.setAttribute("name", "comment");
+
+        //append empty input fields to modal window
+        document.getElementById("countryCodeHolder").appendChild(inputCountryCode);
+        document.getElementById("operatorCodeHolder").appendChild(inputOperatorCode);
+        document.getElementById("phoneNumberHolder").appendChild(inputPhoneNumber);
+        document.getElementById("phoneTypeHolder").appendChild(inputPhoneType);
+        document.getElementById("commentHolder").appendChild(inputComment);
+
+        //hide modal window
+        modal.style.display = "none";
     }
 
-    //create inputs for phoneTable
-    let checkbox = document.createElement("input");
-    checkbox.setAttribute("type", "checkbox");
-    checkbox.setAttribute("class", "phoneCheck");
 
-    //take table and insert a new row
-    let table = document.getElementById("phoneTable");
-    //when index in insertRow is omitted it is -1 by default, so the row appends as the last in the table
-    let newRow = table.insertRow();
-    newRow.insertCell(0).appendChild(checkbox);
-    newRow.insertCell(1).appendChild(newCountryCode);
-    newRow.insertCell(2).appendChild(newOperatorCode);
-    newRow.insertCell(3).appendChild(newPhoneNumber);
-    newRow.insertCell(4).appendChild(newPhoneType);
-    newRow.insertCell(5).appendChild(newComment);
 
-    //create empty inputs for modal window
-    let inputCountryCode = document.createElement("input");
-    inputCountryCode.setAttribute("type", "text");
-    inputCountryCode.setAttribute("id", "newCountryCode");
-    inputCountryCode.setAttribute("name", "countryCode");
 
-    let inputOperatorCode = document.createElement("input");
-    inputOperatorCode.setAttribute("type", "text");
-    inputOperatorCode.setAttribute("id", "newOperatorCode");
-    inputOperatorCode.setAttribute("name", "operatorCode");
-
-    let inputPhoneNumber = document.createElement("input");
-    inputPhoneNumber.setAttribute("type", "text");
-    inputPhoneNumber.setAttribute("id", "newPhoneNumber");
-    inputPhoneNumber.setAttribute("name", "phoneNumber");
-
-    let inputPhoneType = document.createElement("select");
-    inputPhoneType.setAttribute("id", "newPhoneType");
-    inputPhoneType.setAttribute("name", "phoneType");
-    inputPhoneType.options[0] = new Option("home", "home");
-    inputPhoneType.options[1] = new Option("mobile", "mobile");
-
-    let inputComment = document.createElement("input");
-    inputComment.setAttribute("type", "text");
-    inputComment.setAttribute("id", "newComment");
-    inputComment.setAttribute("name", "comment");
-
-    //append empty input fields to modal window
-    document.getElementById("countryCodeHolder").appendChild(inputCountryCode);
-    document.getElementById("operatorCodeHolder").appendChild(inputOperatorCode);
-    document.getElementById("phoneNumberHolder").appendChild(inputPhoneNumber);
-    document.getElementById("phoneTypeHolder").appendChild(inputPhoneType);
-    document.getElementById("commentHolder").appendChild(inputComment);
-
-    //hide modal window
-    modal.style.display = "none";
 }
 
 function saveAttachment(newAttachmentTable, modal) {
