@@ -9,36 +9,46 @@ window.addEventListener('load', () => {
         let link = pathParts[0] + stringSplitter + "api/" + pathParts[1];
         //display requested contact page
         displayContact(link, retrieveImage);
-    } else  if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/\\d+\\/edit-form\\/*)$"))){
+    } else if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/\\d+\\/edit-form\\/*)$"))) {
         let pathParts = currentUri.split(stringSplitter);
         let link = pathParts[0] + stringSplitter + "api/" + pathParts[1];
         //display edit contact page
         navigate(link, retrieveImage);
-    } else  if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/new-form\\/*)$"))){
+    } else if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/new-form\\/*)$"))) {
         //display new contact form
         openContactForm();
-    } else  {
-        //display main page
-        displayMainPage();
+    } else {
+        //display main page with default page number and pageSize
+        let page = 1;
+        let pageSize = 10;
+
+        let urlParams = new URLSearchParams(window.location.search);
+        if (urlParams!== null){
+            let newPage = urlParams.get('page');
+            let newPageSize = urlParams.get('pageSize');
+            if (newPage!=="" && newPage!== null){
+                page = newPage;
+            }
+            if (newPageSize!=="" && newPageSize!== null){
+                pageSize = newPageSize;
+            }
+        }
+        displayMainPage(page, pageSize);
     }
 })
 
-window.addEventListener('popstate', function(event) {
+window.addEventListener('popstate', function (event) {
     location.reload();
 });
 
-function displayMainPage() {
-    let page = 1;
-    let pageSize = 10;
+function displayMainPage(page, pageSize) {
+    event.preventDefault();
+    let sizeArray = ["5","10","15","20"];
+    if(sizeArray.indexOf(pageSize) < 0){
+        pageSize = sizeArray[1];
+    }
     let link = "/brt/api/contacts/?page=" + page + "&pageSize=" + pageSize;
-    let historyLink = "/brt/contacts/?page=" + page + "&pageSize=" + pageSize;
-    //document.querySelectorAll(".check:checked");
-    // if(document.getElementById("pageId")){
-    //     alert("Element exists");
-    // } else {
-    //     alert("Element does not exist");
-    // }
-    // '/brt/api/contacts/?page=1&pageSize=10'
+
     const container = document.getElementById("myDiv");
     const template = document.getElementById("mainTableTemplate").innerHTML;
     fetch(link, {
@@ -49,24 +59,63 @@ function displayMainPage() {
     }).then(function (myJson) {
         const html = Mustache.to_html(template, myJson);
         container.innerHTML = html;
-        history.pushState(null, "Display main page", historyLink);
         return myJson;
-    }).then (function(myJson){
+    }).then(function (myJson) {
         let navContainer = document.getElementById("navContainer");
         let nextBtnContainer = document.getElementById("nextBtnContainer");
-        let totalSize = myJson.totalSize;
-        for (let i = 1; i <= totalSize; i++){
+        let maxPage = myJson.totalSize;
+
+        if (+page <= 1) {
+            page = 1;
+            document.getElementById("prevBtnContainer").setAttribute("class", "page-item disabled");
+            document.getElementById("btn_prev").setAttribute("tabindex", "-1");
+        }
+        if (+page >= maxPage) {
+            page = maxPage;
+            document.getElementById("nextBtnContainer").setAttribute("class", "page-item disabled");
+            document.getElementById("btn_next").setAttribute("tabindex", "-1");
+        }
+
+
+        let pageSizeSelect = document.getElementById("pageSize");
+        pageSizeSelect.value = pageSize;
+        for (let i = 1; i <= maxPage; i++) {
             let li = document.createElement('li');
-            li.setAttribute('class','page-item');
             let a = document.createElement('a');
-            a.setAttribute("class", "page-link");
+            if (i === +page) {
+                li.setAttribute("class", "page-item disabled");
+                a.setAttribute("class", "page-link active");
+                a.setAttribute("tabindex", "-1")
+            } else {
+                li.setAttribute("class", "page-item");
+                a.setAttribute("class", "page-link");
+            }
             a.setAttribute("id", i.toString());
             a.setAttribute("href", "");
+            a.onclick = function () {
+                displayMainPage(this.id, pageSizeSelect.value);
+            }
             let linkText = document.createTextNode(i.toString());
             a.appendChild(linkText);
             li.appendChild(a);
             navContainer.insertBefore(li, nextBtnContainer);
         }
+
+        pageSizeSelect.onchange = function(){
+            page = 1;
+            displayMainPage(page, pageSizeSelect.value);
+        }
+
+        document.getElementById("btn_prev").onclick = function () {
+            displayMainPage(+page - 1, document.getElementById("pageSize").value);
+        }
+
+        document.getElementById("btn_next").onclick = function () {
+            displayMainPage(+page + 1, document.getElementById("pageSize").value);
+        }
+
+        let historyLink = "/brt/contacts/?page=" + page + "&pageSize=" + pageSize;
+        history.pushState(null, "Display main page", historyLink);
     }).catch(function (err) {
         alert("Unable to load main page.");
     });
@@ -217,7 +266,7 @@ function downloadFile(link) {
     event.stopPropagation();
     console.log("The link to download file is---" + link);
     var newLink = null;
-    fetch("/api/contacts/file", {
+    fetch("/brt/api/contacts/file", {
         method: "GET",
         headers: new Headers({'Content-Type': 'application/json; charset=UTF-8', 'fileLink': encodeURI(link)})
     }).then(function (response) {

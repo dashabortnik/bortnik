@@ -26,18 +26,17 @@ public class Controller {
 
     public Controller() {
         actions = new HashMap<>();
-        actions.put("GET_\\/*.*", GET_ALL_CONTACTS);
         actions.put("POST_\\/", CREATE_CONTACT);
         actions.put("GET_\\/\\d+\\/edit-form\\/*", EDIT_CONTACT_FORM);
         actions.put("GET_\\/\\d+\\/*", GET_CONTACT_BY_ID);
         actions.put("POST_\\/\\d+", UPDATE_CONTACT);
         actions.put("GET_\\/image", GET_IMAGE_FOR_CONTACT);
         actions.put("GET_\\/file", GET_FILE);
-        //actions.put("DELETE_", DELETE_CONTACT);
-        actions.put("DELETE_\\/*", DELETE_CONTACT);
+        actions.put("DELETE_\\/*.*", DELETE_CONTACT);
         actions.put("DELETE_\\/\\d+", DELETE_CONTACT);
         actions.put("DELETE_\\/\\d+.*", DELETE_CONTACT);
         actions.put("GET_\\/emails", GET_ALL_EMAILS);
+        actions.put("GET_\\/*", GET_ALL_CONTACTS);
     }
 
     //create Logger for current class

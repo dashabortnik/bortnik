@@ -9,8 +9,8 @@ body {
     background-color: #f0f0f0; /* Цвет фона веб-страницы */
     color: #333; /* Цвет основного текста */
     display: flex;
-    /*flex-flow: column;*/
-    flex-direction:column;
+    flex-flow: column;
+    /*flex-direction:column;*/
 }
 
 footer {
@@ -49,7 +49,6 @@ footer {
     height: 100%;
 }
 
-/*#navContainer {
-    display: inline-block;
-    flex-direction: row;
-}*/
+a.active {
+    background-color: lightgrey;
+}
