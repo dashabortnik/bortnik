@@ -1,10 +1,8 @@
 const regexEmail = new RegExp("[a-zA-Z0-9_\\.\\+-]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-\\.]+");
 const regexPostcode = new RegExp("^\\d{5,6}(?:[-\\s]\\d{4})?$");
-const regexCountryCode = new RegExp("\\+?[0-9]+");
-const regexOperatorCode = new RegExp("\\(?[0-9]+\\)?");
-const regexPhoneNumber = new RegExp("[0-9-]+");
-const regexCountryCodeField = new RegExp("phone\.\d+\.countryCode");
-const regexAttachmentNameField = new RegExp("attachment\.\d+\.attachmentName");
+const regexCountryCode = new RegExp("^\\+?[0-9]+$");
+const regexOperatorCode = new RegExp("^\\(?[0-9]+\\)?$");
+const regexPhoneNumber = new RegExp("^[0-9-]+$");
 
 function validate(formData) {
 
@@ -118,12 +116,23 @@ function validatePhone(newCountryCode, newOperatorCode, newPhoneNumber, newComme
 
 }
 
-function validateAttachment() {
-    if (regexAttachmentNameField.test(key) && value !== "") {
-        let id = key.split(".")[1];
-        if (value.length > 100) {
-            let error = "Inserted attachment name is too long. Please, enter up to 100 digits.";
-            errorArray.push(error);
-        }
+function validateAttachment(newAttachmentName, newAttachmentLink) {
+    let errorAttachment = [];
+    //if any required field is empty, the row won't be saved
+    if (newAttachmentName.value === null || newAttachmentLink.value === null ||
+        newAttachmentName.value === "" || newAttachmentLink.value === "") {
+        let error = "Attachment name and attachment link are required!";
+        errorAttachment.push(error);
     }
+    if (newAttachmentName.value.length > 100) {
+        let error = "Inserted attachment name is too long. Please, enter up to 100 digits.";
+        errorAttachment.push(error);
+    }
+    if (errorAttachment.length !== 0) {
+        alert(errorAttachment.join("\n"));
+        return false;
+    } else {
+        return true;
+    }
+
 }

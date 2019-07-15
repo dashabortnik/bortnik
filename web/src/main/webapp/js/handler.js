@@ -23,13 +23,13 @@ window.addEventListener('load', () => {
         let pageSize = 10;
 
         let urlParams = new URLSearchParams(window.location.search);
-        if (urlParams!== null){
+        if (urlParams !== null) {
             let newPage = urlParams.get('page');
             let newPageSize = urlParams.get('pageSize');
-            if (newPage!=="" && newPage!== null){
+            if (newPage !== "" && newPage !== null) {
                 page = newPage;
             }
-            if (newPageSize!=="" && newPageSize!== null){
+            if (newPageSize !== "" && newPageSize !== null) {
                 pageSize = newPageSize;
             }
         }
@@ -43,8 +43,8 @@ window.addEventListener('popstate', function (event) {
 
 function displayMainPage(page, pageSize) {
     event.preventDefault();
-    let sizeArray = ["5","10","15","20"];
-    if(sizeArray.indexOf(pageSize) < 0){
+    let sizeArray = ["5", "10", "15", "20"];
+    if (sizeArray.indexOf(pageSize) < 0) {
         pageSize = sizeArray[1];
     }
     let link = "/brt/api/contacts/?page=" + page + "&pageSize=" + pageSize;
@@ -101,7 +101,7 @@ function displayMainPage(page, pageSize) {
             navContainer.insertBefore(li, nextBtnContainer);
         }
 
-        pageSizeSelect.onchange = function(){
+        pageSizeSelect.onchange = function () {
             page = 1;
             displayMainPage(page, pageSizeSelect.value);
         }
@@ -418,7 +418,7 @@ function submitForm(form) {
     }
 
     //VALIDATION!!!
-    if (validate(formData)){
+    if (validate(formData)) {
         let photoLink;
         let contactId;
 
@@ -465,9 +465,6 @@ function submitForm(form) {
     } else {
         alert("oops");
     }
-
-
-
 }
 
 function openEditForm() {
@@ -605,17 +602,17 @@ function submitEditForm(form, checkedId) {
 
         let userFileName = "attachment." + i + "." + "submittedFileName";
         //value will give fake path with filename
-        let submittedName = attachmentTable.rows[i].cells[2].childNodes[3].value;
+        let submittedName = attachmentTable.rows[i].cells[2].firstChild.value;
         formData.append(userFileName, submittedName);
 
-        let fileName = attachmentTable.rows[i].cells[2].childNodes[3].name;
-        let file = attachmentTable.rows[i].cells[2].childNodes[3].files[0];
+        let fileName = attachmentTable.rows[i].cells[2].firstChild.name;
+        let file = attachmentTable.rows[i].cells[2].firstChild.files[0];
         let fullFileName = "attachment." + i + "." + fileName;
         formData.append(fullFileName, file);
     }
 
     let photoLink;
-    let fetchLink = "/api/contacts/" + checkedId;
+    let fetchLink = "/brt/api/contacts/" + checkedId;
 
     const data = fetch(fetchLink, {
         method: 'POST',
@@ -672,7 +669,7 @@ function savePhone(newPhoneTable, modal) {
     let newPhoneType = document.getElementById("newPhoneType");
     let newComment = document.getElementById("newComment");
 
-    if(validatePhone(newCountryCode, newOperatorCode, newPhoneNumber, newComment)){
+    if (validatePhone(newCountryCode, newOperatorCode, newPhoneNumber, newComment)) {
         //create inputs for phoneTable
         let checkbox = document.createElement("input");
         checkbox.setAttribute("type", "checkbox");
@@ -726,10 +723,6 @@ function savePhone(newPhoneTable, modal) {
         //hide modal window
         modal.style.display = "none";
     }
-
-
-
-
 }
 
 function saveAttachment(newAttachmentTable, modal) {
@@ -737,42 +730,39 @@ function saveAttachment(newAttachmentTable, modal) {
     let newAttachmentName = document.getElementById("attachmentName");
     let newAttachmentLink = document.getElementById("attachmentLink");
 
-    //if any required field is empty, the row won't be saved
-    if (newAttachmentName.value === null || newAttachmentLink.value === null ||
-        newAttachmentName.value === "" || newAttachmentLink.value === "") {
-        return alert("Some fields are empty, can not save the attachment.");
+    if (validateAttachment(newAttachmentName, newAttachmentLink)) {
+
+        //create inputs for attachmentTable
+        let checkbox = document.createElement("input");
+        checkbox.setAttribute("type", "checkbox");
+        checkbox.setAttribute("class", "attachmentCheck");
+
+        //take table and insert a new row
+        let table = document.getElementById("attachmentTable");
+        //when index in insertRow is omitted it is -1 by default, so the row appends as the last in the table
+        let newRow = table.insertRow();
+        newRow.insertCell(0).appendChild(checkbox);
+        newRow.insertCell(1).appendChild(newAttachmentName);
+        newRow.insertCell(2).appendChild(newAttachmentLink);
+
+        //create new input fields for modal window, as the existing ones are appended to attachmentTable
+        let inputAttachmentName = document.createElement("input");
+        inputAttachmentName.setAttribute("type", "text");
+        inputAttachmentName.setAttribute("id", "attachmentName");
+        inputAttachmentName.setAttribute("name", "attachmentName");
+
+        let inputAttachmentLink = document.createElement("input");
+        inputAttachmentLink.setAttribute("type", "file");
+        inputAttachmentLink.setAttribute("id", "attachmentLink");
+        inputAttachmentLink.setAttribute("name", "attachmentLink");
+
+        //append empty input fields to modal window
+        document.getElementById("attachmentNameHolder").appendChild(inputAttachmentName);
+        document.getElementById("attachmentLinkHolder").appendChild(inputAttachmentLink);
+
+        //hide modal window
+        modal.style.display = "none";
     }
-
-    //create inputs for attachmentTable
-    let checkbox = document.createElement("input");
-    checkbox.setAttribute("type", "checkbox");
-    checkbox.setAttribute("class", "attachmentCheck");
-
-    //take table and insert a new row
-    let table = document.getElementById("attachmentTable");
-    //when index in insertRow is omitted it is -1 by default, so the row appends as the last in the table
-    let newRow = table.insertRow();
-    newRow.insertCell(0).appendChild(checkbox);
-    newRow.insertCell(1).appendChild(newAttachmentName);
-    newRow.insertCell(2).appendChild(newAttachmentLink);
-
-    //create new input fields for modal window, as the existing ones are appended to attachmentTable
-    let inputAttachmentName = document.createElement("input");
-    inputAttachmentName.setAttribute("type", "text");
-    inputAttachmentName.setAttribute("id", "attachmentName");
-    inputAttachmentName.setAttribute("name", "attachmentName");
-
-    let inputAttachmentLink = document.createElement("input");
-    inputAttachmentLink.setAttribute("type", "file");
-    inputAttachmentLink.setAttribute("id", "attachmentLink");
-    inputAttachmentLink.setAttribute("name", "attachmentLink");
-
-    //append empty input fields to modal window
-    document.getElementById("attachmentNameHolder").appendChild(inputAttachmentName);
-    document.getElementById("attachmentLinkHolder").appendChild(inputAttachmentLink);
-
-    //hide modal window
-    modal.style.display = "none";
 }
 
 function deleteContact() {

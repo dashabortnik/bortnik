@@ -22,24 +22,22 @@ public class GetImageForContactAction implements BaseAction {
         BufferedImage img = null;
 
         // if image was uploaded, DB will return its link in path
-        // if link is invalid, we get an Exception and assign "null" to path,
-        // the 2nd check allows to process both when there was no image ("null" in DB) and when the link was bad
-        // if image wasn't uploaded, DB will return "null" as a String
+        // if image wasn't uploaded, DB will return "null" as a String or null
 
-        if(!path.equals("null")){
+        if(path==null || "null".equals(path) || path.isEmpty()){
+            try {
+                img = ImageIO.read(getClass().getResource("/img/default.jpg"));
+
+                logger.info("Default image was retrieved successfully.");
+            } catch (IOException e) {
+                logger.error("Failed to read default image by given link: ", e);
+            }
+        } else {
             try {
                 img = ImageIO.read(new File(path));
                 logger.info("Requested image was retrieved successfully.");
             } catch (IOException e) {
-                path = "null";
                 logger.error("Failed to read the image by given link: ", e);
-            }
-        } else if (path.equals("null")){
-            try {
-                img = ImageIO.read(getClass().getResource("/img/default.jpg"));
-                logger.info("Default image was retrieved successfully.");
-            } catch (IOException e) {
-                logger.error("Failed to read default image by given link: ", e);
             }
         }
         response.setContentType("image/jpeg");
