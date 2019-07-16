@@ -896,13 +896,21 @@ function sendEmail() {
                 let container = document.getElementById("myDiv");
                 container.innerHTML = html;
                 history.pushState(null, "Display main page", "/brt/contacts");
-
             })
-
         }
-
     }).catch(function (err) {
         alert("Unable to render email page with data");
     })
+}
+
+function openSearchPage(){
+    fetch("/templates/searchTemplate.mst")
+        .then(response => response.text())
+        .then(res => {
+            Mustache.parse(res);
+            const html = Mustache.to_html(res);
+            document.getElementById("myDiv").innerHTML = "";
+            document.getElementById("myDiv").innerHTML = html;
+        })
 }
 

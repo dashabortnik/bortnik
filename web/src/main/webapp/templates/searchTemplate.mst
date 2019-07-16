@@ -1,0 +1,72 @@
+<!--Mustache template for the form of a new contact. Allows to fill in data, upload a picture and submit data.-->
+
+    <form  method="post" enctype="multipart/form-data;charset=UTF-8" accept-charset="UTF-8" id="contactInfo">
+
+        <table class="table table-bordered table-sm table-hover">
+            <tbody>
+            <tr>
+                <th class="bg-light">Surname</th>
+                <td><input type="text" name="surname"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Name</th>
+                <td><input type="text" name="name"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Patronymic</th>
+                <td><input type="text" name="patronymic"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Birthday (more than)</th>
+                <td><input type="date" name="birthday" min="1900-01-01"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Birthday (less than)</th>
+                <td><input type="date" name="birthday" min="1900-01-01"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Gender</th>
+                <td>
+                    <select name="gender" id="gender">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th class="bg-light">Nationality</th>
+                <td><input type="text" name="nationality"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Marital status</th>
+                <td>
+                    <select name="marital" id="marital">
+                        <option value="single">Single</option>
+                        <option value="married">Married</option>
+                        <option value="divorced">Divorced</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <th class="bg-light">Country</th>
+                <td><input type="text" name="country"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">City</th>
+                <td><input type="text" name="city"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Address</th>
+                <td><input type="text" name="street"></td>
+            </tr>
+            <tr>
+                <th class="bg-light">Postcode</th>
+                <td><input type="text" name="postcode"></td>
+            </tr>
+            </tbody>
+        </table>
+ </form>
+        <div class="d-flex justify-content-around flex-wrap">
+            <button type="submit" class="btn btn-success col-md-5" id="searchForContact">Search</button>
+            <button type="button" class="btn btn-secondary col-md-5" onclick="history.back()">Cancel</button>
+        </div>
