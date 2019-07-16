@@ -1,0 +1,1 @@
+happyBirthdayEmail() ::= "Dear Sir/Madam, <\n>Amazing people like you are a great source of inspiration to people like us. <\n>We are indeed grateful for the opportunity we have to work with you. <\n>On this memorable day of your life, we wish you to achieve all the wonderful things you have longed for in life. <\n>Happy birthday!<\n><\n> Yours sincerely, ContactList."

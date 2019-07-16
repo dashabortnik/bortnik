@@ -1,0 +1,1 @@
+happyNewYearEmail() ::= "Dear Sir/Madam, <\n>Amazing people like you are a great source of inspiration to people like us. <\n>We are indeed grateful for the opportunity we have to work with you. <\n>Happy New Year! <\n><\n>Yours sincerely, ContactList."

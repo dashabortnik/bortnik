@@ -469,4 +469,24 @@ public class ContactDaoImpl implements ContactDao {
         }
         return totalNumberOfContacts;
     }
+
+    @Override
+    public String readEmailById(int id){
+        String sql = "SELECT email FROM contact WHERE contact_id=?";
+        try (Connection connection = DatabaseUtil.getDataSource().getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ResultSet resultSet = ps.executeQuery();
+
+            while (resultSet.next()) {
+                String email = resultSet.getString(DB_EMAIL);
+                logger.info("Email from contact {} was fetched from database successfully.", id);
+                return email;
+            }
+
+        } catch (SQLException e) {
+            logger.error("Error with database query execution: ", e);
+        }
+        return null;
+    }
 }

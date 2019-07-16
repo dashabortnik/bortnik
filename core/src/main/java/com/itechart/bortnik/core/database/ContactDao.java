@@ -11,4 +11,5 @@ public interface ContactDao extends BaseEntityDao<Contact>{
     Contact readById(int id);
     List<Contact> readByBirthday();
     int countContacts();
+    String readEmailById(int id);
 }

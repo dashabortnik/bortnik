@@ -20,7 +20,9 @@ public class Controller {
     public static final String GET_FILE = "GETFILE";
     public static final String EDIT_CONTACT_FORM = "EDITCONTACTFORM";
     public static final String DELETE_CONTACT = "DELETECONTACT";
-    public static final String GET_ALL_EMAILS = "GETALLEMAILS";
+    public static final String SEND_EMAILS = "SENDEMAILS";
+    public static final String GET_EMAIL_ADDRESSES = "GETEMAILADDRESSES";
+    public static final String GET_EMAIL_TEMPLATE = "GETEMAILTEMPLATE";
 
     private Map<String, String> actions;
 
@@ -35,7 +37,9 @@ public class Controller {
         actions.put("DELETE_\\/*.*", DELETE_CONTACT);
         actions.put("DELETE_\\/\\d+", DELETE_CONTACT);
         actions.put("DELETE_\\/\\d+.*", DELETE_CONTACT);
-        actions.put("GET_\\/emails", GET_ALL_EMAILS);
+        actions.put("GET_\\/email", GET_EMAIL_ADDRESSES );
+        actions.put("GET_\\/template", GET_EMAIL_TEMPLATE );
+        actions.put("POST_\\/email", SEND_EMAILS );
         actions.put("GET_\\/*", GET_ALL_CONTACTS);
     }
 
@@ -83,7 +87,15 @@ public class Controller {
                 logger.info("DeleteContactAction is invoked.");
                 new DeleteContactAction().execute(request, response);
                 break;
-            case GET_ALL_EMAILS:
+            case GET_EMAIL_ADDRESSES:
+                logger.info("GetEmailByIdAction is invoked.");
+                new  GetEmailByIdAction().execute(request, response);
+                break;
+            case GET_EMAIL_TEMPLATE:
+                logger.info("GetEmailTemplateAction is invoked.");
+                new  GetEmailTemplateAction().execute(request, response);
+                break;
+            case SEND_EMAILS:
                 logger.info("SendEmailAction is invoked.");
                 new  SendEmailAction().execute(request, response);
                 break;

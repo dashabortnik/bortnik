@@ -111,4 +111,7 @@ public class ContactServiceImpl implements ContactService {
         return contactDaoImpl.countContacts();
     }
 
+    @Override
+    public String findEmailById(int id){ return contactDaoImpl.readEmailById(id); }
+
 }

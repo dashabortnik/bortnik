@@ -770,7 +770,7 @@ function deleteContact() {
     console.log("Current pathname is --- " + currentPath);
     var idArray = [];
     let tail = "";
-    if (new RegExp("^(\\/brt\\/contacts)$").test(currentPath)) {
+    if (new RegExp("^(\\/brt\\/contacts\\/)$").test(currentPath)) {
         //checkboxes are checked and delete button is pressed
         console.log("General case");
         tail = "/contacts";
@@ -818,4 +818,91 @@ function deleteCheckedRows(tableId) {
     }
 }
 
+function sendEmail() {
+
+    let idArray = [];
+    let checked = document.querySelectorAll(".check:checked");
+    console.log("CHECKED OBJECT---" + checked);
+    for (let i = 0; i < checked.length; i++) {
+        idArray.push(checked[i].id);
+    }
+
+    let emailList = "";
+
+    const data = fetch("/brt/api/contacts/email", {
+        method: 'GET',
+        headers: {'Content-Type': 'application/json', 'IdForEmails': idArray}
+    }).then(function (response) {
+        console.log("Received emails");
+        return response.json();
+    }).then(function (myJson) {
+        emailList = myJson.emailList;
+        console.log("EmailList:" + emailList);
+    })
+
+    const tmpl = fetch("/templates/sendEmailsTemplate.mst")
+        .then(response => response.text())
+
+    Promise.all([data, tmpl])
+        .then(response => {
+            let resolvedTemplate = response[1];
+            // Cache the template for future use
+            Mustache.parse(resolvedTemplate);
+            const html = Mustache.render(resolvedTemplate);
+            // Write out the rendered template
+            document.getElementById("myDiv").innerHTML = "";
+            return document.getElementById('myDiv').innerHTML = html;
+        }).then(function (res) {
+        let p = document.getElementById("sendEmailTo");
+        let node = document.createTextNode(emailList);
+        p.appendChild(node);
+        let templateSelect = document.getElementById("emailTemplate");
+        templateSelect.onchange = function () {
+            let tmplValue = templateSelect.value;
+            if (tmplValue!=="none") {
+                fetch("/brt/api/contacts/template", {
+                    method: 'GET',
+                    headers: {'Content-Type': 'application/json', 'template': templateSelect.value}
+                }).then(function (response) {
+                    console.log("Received email template");
+                    return response.text();
+                }).then(function (myText) {
+                    let emailTemplate = myText;
+                    emailTemplate = emailTemplate.replace(new RegExp('\\\\r\\\\n', 'g'), "\n");
+                    console.log("EmailTemplate:" + emailTemplate);
+                    document.getElementById("emailBody").value = emailTemplate;
+                })
+            } else {
+                document.getElementById("emailBody").value = "";
+            }
+            history.pushState(null, "Send email page", "/brt/contacts/email");
+        }
+        //submit email
+        let sendEmailBtn = document.getElementById("sendEmail");
+        sendEmailBtn.onclick = function () {
+            let formData = new FormData();
+            formData.append("emails", emailList);
+            formData.append("topic", document.getElementById("topic").value);
+            formData.append("body", document.getElementById("emailBody").value);
+
+            const data = fetch("/brt/api/contacts/email", {
+                method: 'POST',
+                body: formData,
+            }).then(function (response) {
+                return response.json();
+            }).then(function (myJson) {
+                let tmpl = document.getElementById("mainTableTemplate").innerHTML;
+                let html = Mustache.to_html(tmpl, myJson);
+                let container = document.getElementById("myDiv");
+                container.innerHTML = html;
+                history.pushState(null, "Display main page", "/brt/contacts");
+
+            })
+
+        }
+
+    }).catch(function (err) {
+        alert("Unable to render email page with data");
+    })
+}
 

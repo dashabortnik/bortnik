@@ -4,17 +4,17 @@ import com.itechart.bortnik.core.domain.Contact;
 
 import java.util.List;
 
-public class PaginationContactList {
+public class PaginationContactListDTO {
 
     private List<Contact> contactList;
     private int pageNumber;
     private int pageSize;
     private int totalSize;
 
-    public PaginationContactList(){
+    public PaginationContactListDTO(){
     }
 
-    public PaginationContactList(List<Contact> contactList, int pageNumber, int pageSize, int totalSize) {
+    public PaginationContactListDTO(List<Contact> contactList, int pageNumber, int pageSize, int totalSize) {
         this.contactList = contactList;
         this.pageNumber = pageNumber;
         this.pageSize = pageSize;
@@ -55,7 +55,7 @@ public class PaginationContactList {
 
     @Override
     public String toString() {
-        return "PaginationContactList{" +
+        return "PaginationContactListDTO{" +
                 "contactList=" + contactList +
                 ", pageNumber=" + pageNumber +
                 ", pageSize=" + pageSize +
