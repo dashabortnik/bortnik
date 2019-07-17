@@ -1,6 +1,6 @@
 <!--Mustache template for the form of a new contact. Allows to fill in data, upload a picture and submit data.-->
 
-    <form  method="post" enctype="multipart/form-data;charset=UTF-8" accept-charset="UTF-8" id="contactInfo">
+    <form  method="post" enctype="multipart/form-data;charset=UTF-8" accept-charset="UTF-8" id="searchContactInfo">
 
         <table class="table table-bordered table-sm table-hover">
             <tbody>
@@ -18,11 +18,11 @@
             </tr>
             <tr>
                 <th class="bg-light">Birthday (more than)</th>
-                <td><input type="date" name="birthday" min="1900-01-01"></td>
+                <td><input type="date" name="birthdayMoreThan" min="1900-01-01"></td>
             </tr>
             <tr>
                 <th class="bg-light">Birthday (less than)</th>
-                <td><input type="date" name="birthday" min="1900-01-01"></td>
+                <td><input type="date" name="birthdayLessThan" min="1900-01-01"></td>
             </tr>
             <tr>
                 <th class="bg-light">Gender</th>

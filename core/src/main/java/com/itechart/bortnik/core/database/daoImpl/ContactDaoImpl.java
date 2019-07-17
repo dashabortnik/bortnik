@@ -6,6 +6,7 @@ import com.itechart.bortnik.core.domain.Address;
 import com.itechart.bortnik.core.domain.Contact;
 import com.itechart.bortnik.core.domain.Gender;
 import com.itechart.bortnik.core.domain.Marital;
+import com.itechart.bortnik.core.domain.dto.SearchContactDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +35,9 @@ public class ContactDaoImpl implements ContactDao {
     private static final String DB_STREET = "street";
     private static final String DB_POSTCODE = "postcode";
     private static final String DB_ATTACHMENTLINK = "attachment_link";
+    private static final String DB_BIRTHDAY_MORE_THAN = "birthdayMoreThan";
+    private static final String DB_BIRTHDAY_LESS_THAN = "birthdayLessThan";
+
 
     public ContactDaoImpl() {
     }
@@ -119,54 +123,61 @@ public class ContactDaoImpl implements ContactDao {
     }
 
     // collects all search parameters from searchedContact submitted by user, puts not empty parameters into map params
-    private void collectSearchParams(Contact searchedContact, Map<String, Object> params) {
+    private Map<String, String> collectSearchParams(SearchContactDTO searchedContact, Map<String, String> params) {
         String surname = searchedContact.getSurname();
-        if (surname != null && surname.isEmpty()) {
+        if (surname != null && !surname.isEmpty()) {
             params.put(DB_SURNAME, surname);
         }
         String name = searchedContact.getName();
-        if (name != null && name.isEmpty()) {
+        if (name != null && !name.isEmpty()) {
             params.put(DB_NAME, name);
         }
         String patronymic = searchedContact.getPatronymic();
-        if (patronymic != null && patronymic.isEmpty()) {
+        if (patronymic != null && !patronymic.isEmpty()) {
             params.put(DB_PATRONYMIC, patronymic);
         }
-        Date birthday = searchedContact.getBirthday(); // MORE OR LESS? ADD FLAG?
-        if (birthday != null) {
-            params.put(DB_BIRTHDAY, birthday);
+        Date birthdayMoreThan = searchedContact.getBirthdayMoreThan();
+        if (birthdayMoreThan != null) {
+            params.put(DB_BIRTHDAY_MORE_THAN, birthdayMoreThan.toString());
+        }
+        Date birthdayLessThan = searchedContact.getBirthdayLessThan();
+        if (birthdayLessThan != null) {
+            params.put(DB_BIRTHDAY_LESS_THAN, birthdayLessThan.toString());
         }
         Gender gender = searchedContact.getGender();
         if (gender != null) {
-            params.put(DB_GENDER, gender);
+            params.put(DB_GENDER, gender.toString());
         }
         String nationality = searchedContact.getNationality();
-        if (nationality != null && nationality.isEmpty()) {
+        if (nationality != null && !nationality.isEmpty()) {
             params.put(DB_NATIONALITY, nationality);
         }
         Marital marital = searchedContact.getMaritalStatus();
         if (marital != null) {
-            params.put(DB_MARITAL, marital);
+            params.put(DB_MARITAL, marital.toString());
         }
         Address address = searchedContact.getAddress();
         if (address != null) {
             String country = address.getCountry();
-            if (country != null) {
+            if (country != null && !country.isEmpty()) {
                 params.put(DB_COUNTRY, country);
             }
             String city = address.getCity();
-            if (city != null) {
+            if (city != null && !city.isEmpty()) {
                 params.put(DB_CITY, city);
             }
             String street = address.getStreet();
-            if (street != null) {
+            if (street != null && !street.isEmpty()) {
                 params.put(DB_STREET, street);
             }
             String postcode = address.getPostcode();
-            if (postcode != null) {
+            if (postcode != null && !postcode.isEmpty()) {
                 params.put(DB_POSTCODE, postcode);
             }
         }
+        logger.debug("Search parameters map: " + Arrays.asList(params));
+        logger.debug("Search parameters extracted");
+        return params;
     }
 
     @Override
@@ -207,7 +218,7 @@ public class ContactDaoImpl implements ContactDao {
 
     // поиск по нескольким критериям
     @Override
-    public List<Contact> readByCriteria(Contact searchedContact) { // private methods
+    public List<Contact> readByCriteria(SearchContactDTO searchedContact) { // private methods
 
         List<Contact> contacts = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
@@ -215,44 +226,45 @@ public class ContactDaoImpl implements ContactDao {
 
         // collect all parameters from the search into a map
 
-        Map<String, Object> params = new HashMap<String, Object>();
+        Map<String, String> params = new HashMap<>();
         collectSearchParams(searchedContact, params);
+        logger.debug("Search parameters map from method: " + Arrays.asList(params));
 
         // put together dynamic query -- USE INSTR
 
-        Set<String> keys = params.keySet();
-        if (keys != null && !keys.isEmpty()) {
-            sql.append(" WHERE");
-            String andOp = "";
-            for (String key : keys) {
-                sql.append(andOp);
-                sql.append(" ");
-                sql.append(key);
-                sql.append("=? ");
-                andOp = " AND ";
-            }
-        }
+//        Set<String> keys = params.keySet();
+//        if (keys != null && !keys.isEmpty()) {
+//            sql.append(" WHERE");
+//            String andOp = "";
+//            for (String key : keys) {
+//                sql.append(andOp);
+//                sql.append(" ");
+//                sql.append(key);
+//                sql.append("=? ");
+//                andOp = " AND ";
+//            }
+//        }
 
         // execute query
 
-        try (Connection connection = DatabaseUtil.getDataSource().getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql.toString())) {
-
-            int position = 1;
-            for (String key : keys) {
-                ps.setObject(position, params.get(key)); // правильный ли порядок?
-                position++;
-            }
-
-            ResultSet resultSet = ps.executeQuery();
-
-            while (resultSet.next()) {
-                //Contact contact = assignValuesToContact(resultSet);
-                //contacts.add(contact);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try (Connection connection = DatabaseUtil.getDataSource().getConnection();
+//             PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+//
+//            int position = 1;
+//            for (String key : keys) {
+//                ps.setObject(position, params.get(key)); // правильный ли порядок?
+//                position++;
+//            }
+//
+//            ResultSet resultSet = ps.executeQuery();
+//
+//            while (resultSet.next()) {
+//                //Contact contact = assignValuesToContact(resultSet);
+//                //contacts.add(contact);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         return contacts;
 
     }

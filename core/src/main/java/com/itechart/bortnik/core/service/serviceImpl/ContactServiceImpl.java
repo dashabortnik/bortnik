@@ -10,6 +10,7 @@ import com.itechart.bortnik.core.domain.Attachment;
 import com.itechart.bortnik.core.domain.Contact;
 import com.itechart.bortnik.core.domain.Phone;
 import com.itechart.bortnik.core.domain.dto.FullContactDTO;
+import com.itechart.bortnik.core.domain.dto.SearchContactDTO;
 import com.itechart.bortnik.core.service.ContactService;
 
 import java.util.ArrayList;
@@ -88,7 +89,7 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public List<Contact> findContactsByCriteria(Contact search) {
+    public List<Contact> findContactsByCriteria(SearchContactDTO search) {
         return contactDaoImpl.readByCriteria(search);
     }
 

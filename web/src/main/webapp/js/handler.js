@@ -910,7 +910,29 @@ function openSearchPage(){
             Mustache.parse(res);
             const html = Mustache.to_html(res);
             document.getElementById("myDiv").innerHTML = "";
-            document.getElementById("myDiv").innerHTML = html;
-        })
+            return document.getElementById("myDiv").innerHTML = html;
+        }).then(function(res){
+        history.pushState(null, "Search contact page", "/brt/contacts/search");
+        let submitBtn = document.getElementById("searchForContact");
+        let form = document.getElementById("searchContactInfo");
+        submitBtn.onclick = function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            //submitSearchForm(form);
+            let formData = new FormData(form);
+            if(formData.entries().next.done){ //true if formData is empty
+                alert("Please, enter at least one search parameter!");
+            } else {
+                const data = fetch("/brt/api/contacts/search", {
+                    method: 'POST',
+                    body: formData,
+                }).then(function (response) {
+                    return response.json();
+                })
+            }
+        }
+    })
 }
+
+
 

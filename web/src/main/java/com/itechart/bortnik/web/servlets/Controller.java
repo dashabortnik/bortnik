@@ -23,6 +23,7 @@ public class Controller {
     public static final String SEND_EMAILS = "SENDEMAILS";
     public static final String GET_EMAIL_ADDRESSES = "GETEMAILADDRESSES";
     public static final String GET_EMAIL_TEMPLATE = "GETEMAILTEMPLATE";
+    public static final String SEARCH_FOR_CONTACTS = "SEARCHFORCONTACTS";
 
     private Map<String, String> actions;
 
@@ -41,6 +42,7 @@ public class Controller {
         actions.put("GET_\\/template", GET_EMAIL_TEMPLATE );
         actions.put("POST_\\/email", SEND_EMAILS );
         actions.put("GET_\\/*", GET_ALL_CONTACTS);
+        actions.put("POST_\\/search\\/?", SEARCH_FOR_CONTACTS);
     }
 
     //create Logger for current class
@@ -98,6 +100,10 @@ public class Controller {
             case SEND_EMAILS:
                 logger.info("SendEmailAction is invoked.");
                 new  SendEmailAction().execute(request, response);
+                break;
+            case SEARCH_FOR_CONTACTS:
+                logger.info("SearchForContactsAction is invoked.");
+                new  SearchForContactsAction().execute(request, response);
                 break;
             default:
                 logger.info("ShowAllContactsAction is invoked by default.");
