@@ -923,11 +923,17 @@ function openSearchPage(){
             if(formData.entries().next.done){ //true if formData is empty
                 alert("Please, enter at least one search parameter!");
             } else {
-                const data = fetch("/brt/api/contacts/search", {
+                const container = document.getElementById("myDiv");
+                const template = document.getElementById("mainTableTemplate").innerHTML;
+                const data = fetch("/brt/api/contacts/search/?page=1&pageSize=10", {
                     method: 'POST',
                     body: formData,
                 }).then(function (response) {
                     return response.json();
+                }).then(function (myJson) {
+                    const html = Mustache.to_html(template, myJson);
+                    container.innerHTML = html;
+                    return myJson;
                 })
             }
         }

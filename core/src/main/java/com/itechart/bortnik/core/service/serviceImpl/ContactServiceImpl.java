@@ -89,8 +89,8 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public List<Contact> findContactsByCriteria(SearchContactDTO search) {
-        return contactDaoImpl.readByCriteria(search);
+    public List<Contact> findContactsByCriteria(SearchContactDTO search, int offset, int limit) {
+        return contactDaoImpl.readByCriteria(search, offset, limit);
     }
 
     @Override

@@ -9,7 +9,7 @@ import java.util.List;
 public interface ContactService extends BaseEntityService<Contact, FullContactDTO>{
 
     List<Contact> findAllContacts(int offset, int limit);
-    List<Contact> findContactsByCriteria(SearchContactDTO search);
+    List<Contact> findContactsByCriteria(SearchContactDTO search, int offset, int limit);
     FullContactDTO findContactById(int id);
     List<Contact> findContactByBirthday();
     int countAllContacts();

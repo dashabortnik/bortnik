@@ -5,7 +5,7 @@ import com.itechart.bortnik.core.domain.Address;
 import com.itechart.bortnik.core.domain.Contact;
 import com.itechart.bortnik.core.domain.Gender;
 import com.itechart.bortnik.core.domain.Marital;
-import com.itechart.bortnik.core.domain.dto.FullContactDTO;
+import com.itechart.bortnik.core.domain.dto.PaginationContactListDTO;
 import com.itechart.bortnik.core.domain.dto.SearchContactDTO;
 import com.itechart.bortnik.core.service.ContactService;
 import com.itechart.bortnik.core.service.serviceImpl.ContactServiceImpl;
@@ -81,20 +81,29 @@ public class SearchForContactsAction implements BaseAction {
                     }
                     case "birthdayMoreThan": {
                         SimpleDateFormat dfShort = new SimpleDateFormat("yyyy-MM-dd");
-                        birthdayMoreThan = dfShort.parse(item.getString("UTF-8"));
-                        java.sql.Date sqlDate = new java.sql.Date(birthdayMoreThan.getTime());
-                        birthdayMoreThan = sqlDate;
+                        String date = item.getString("UTF-8");
+                        if(date!=null && !date.isEmpty()) {
+                            birthdayMoreThan = dfShort.parse(date);
+                            java.sql.Date sqlDate = new java.sql.Date(birthdayMoreThan.getTime());
+                            birthdayMoreThan = sqlDate;
+                        }
                         break;
                     }
                     case "birthdayLessThan": {
                         SimpleDateFormat dfShort = new SimpleDateFormat("yyyy-MM-dd");
-                        birthdayLessThan = dfShort.parse(item.getString("UTF-8"));
-                        java.sql.Date sqlDate = new java.sql.Date(birthdayLessThan.getTime());
-                        birthdayLessThan = sqlDate;
+                        String date = item.getString("UTF-8");
+                        if(date!=null && !date.isEmpty()) {
+                            birthdayLessThan = dfShort.parse(date);
+                            java.sql.Date sqlDate = new java.sql.Date(birthdayLessThan.getTime());
+                            birthdayLessThan = sqlDate;
+                        }
                         break;
                     }
                     case "gender": {
-                        gender = Gender.valueOf(item.getString("UTF-8").trim());
+                        String searchedGender = item.getString("UTF-8").trim();
+                        if (!searchedGender.equals("none")) {
+                            gender = Gender.valueOf(searchedGender);
+                        }
                         break;
                     }
                     case "nationality": {
@@ -102,7 +111,10 @@ public class SearchForContactsAction implements BaseAction {
                         break;
                     }
                     case "marital": {
-                        maritalStatus = Marital.valueOf(item.getString("UTF-8").trim());
+                        String searchedMarital = item.getString("UTF-8").trim();
+                        if (!searchedMarital.equals("none")) {
+                            maritalStatus = Marital.valueOf(searchedMarital);
+                        }
                         break;
                     }
                     case "country": {
@@ -125,7 +137,6 @@ public class SearchForContactsAction implements BaseAction {
                         continue cycle;
                     }
                 }
-
             }
         } catch (FileUploadException e) {
             e.printStackTrace();
@@ -137,19 +148,50 @@ public class SearchForContactsAction implements BaseAction {
                 gender, nationality, maritalStatus, new Address(0, country, city, street, postcode));
         logger.debug("Contact with search data: {}", searchContact);
 
+        int page = 1;
+        int pageSize = 10;
+
+        if (request.getParameterMap().containsKey("page")) {
+            page = Integer.valueOf(request.getParameter("page"));
+        }
+
+        if (request.getParameterMap().containsKey("pageSize")) {
+            int newPageSize = Integer.valueOf(request.getParameter("pageSize"));
+            switch (newPageSize){
+                case 5:
+                case 10:
+                case 15:
+                case 20:
+                    pageSize = newPageSize;
+                    break;
+            }
+        }
+
+        int totalNumberOfContacts = contactService.countAllContacts();
+        int maxPage = (int)Math.ceil((double)totalNumberOfContacts/pageSize);
+
+        if (page<=0 || page > maxPage){
+            page = 1;
+        }
+
+        int offset = (page-1)*pageSize; //limit = pageSize
+
         if (searchContact != null) {
-            List<Contact> foundContacts = contactService.findContactsByCriteria(searchContact);
+            List<Contact> foundContacts = contactService.findContactsByCriteria(searchContact, offset, pageSize);
             System.out.println("FOUND---" + foundContacts.toString());
-            //write the created contact into response
-//            response.setHeader("Content-Type", "application/json; charset=UTF-8");
-//            ObjectMapper mapper = new ObjectMapper();
-//            mapper.setDateFormat(df);
-//            try (PrintWriter out = response.getWriter()) {
-//                mapper.writeValue(out, fullContact);
-//                logger.info("Created contact sent to browser.");
-//            } catch (IOException e) {
-//                logger.error("Error with reading or writing the file: ", e);
-//            }
+            PaginationContactListDTO paginationContactListDTO = new PaginationContactListDTO(foundContacts, page, pageSize, maxPage);
+
+            response.setHeader("Content-Type", "application/json; charset=UTF-8");
+            SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.setDateFormat(df);
+
+            try (PrintWriter out = response.getWriter()){
+                mapper.writeValue(out, paginationContactListDTO);
+                logger.info("List of all contacts was sent to browser.");
+            } catch (IOException e) {
+                logger.error("Error with sending contacts to browser: ", e);
+            }
         } else {
             logger.warn("Unable to perform search without search parameters.");
         }

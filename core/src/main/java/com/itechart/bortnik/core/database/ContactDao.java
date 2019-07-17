@@ -8,7 +8,7 @@ import java.util.List;
 public interface ContactDao extends BaseEntityDao<Contact>{
 
     List<Contact> readAll(int offset, int limit);
-    List<Contact> readByCriteria(SearchContactDTO search);
+    List<Contact> readByCriteria(SearchContactDTO search, int offset, int limit);
     Contact readById(int id);
     List<Contact> readByBirthday();
     int countContacts();

@@ -38,7 +38,6 @@ public class ContactDaoImpl implements ContactDao {
     private static final String DB_BIRTHDAY_MORE_THAN = "birthdayMoreThan";
     private static final String DB_BIRTHDAY_LESS_THAN = "birthdayLessThan";
 
-
     public ContactDaoImpl() {
     }
 
@@ -123,7 +122,7 @@ public class ContactDaoImpl implements ContactDao {
     }
 
     // collects all search parameters from searchedContact submitted by user, puts not empty parameters into map params
-    private Map<String, String> collectSearchParams(SearchContactDTO searchedContact, Map<String, String> params) {
+    private Map<String, Object> collectSearchParams(SearchContactDTO searchedContact, Map<String, Object> params) {
         String surname = searchedContact.getSurname();
         if (surname != null && !surname.isEmpty()) {
             params.put(DB_SURNAME, surname);
@@ -138,15 +137,15 @@ public class ContactDaoImpl implements ContactDao {
         }
         Date birthdayMoreThan = searchedContact.getBirthdayMoreThan();
         if (birthdayMoreThan != null) {
-            params.put(DB_BIRTHDAY_MORE_THAN, birthdayMoreThan.toString());
+            params.put(DB_BIRTHDAY_MORE_THAN, birthdayMoreThan);
         }
         Date birthdayLessThan = searchedContact.getBirthdayLessThan();
         if (birthdayLessThan != null) {
-            params.put(DB_BIRTHDAY_LESS_THAN, birthdayLessThan.toString());
+            params.put(DB_BIRTHDAY_LESS_THAN, birthdayLessThan);
         }
         Gender gender = searchedContact.getGender();
         if (gender != null) {
-            params.put(DB_GENDER, gender.toString());
+            params.put(DB_GENDER, gender);
         }
         String nationality = searchedContact.getNationality();
         if (nationality != null && !nationality.isEmpty()) {
@@ -154,7 +153,7 @@ public class ContactDaoImpl implements ContactDao {
         }
         Marital marital = searchedContact.getMaritalStatus();
         if (marital != null) {
-            params.put(DB_MARITAL, marital.toString());
+            params.put(DB_MARITAL, marital);
         }
         Address address = searchedContact.getAddress();
         if (address != null) {
@@ -186,7 +185,7 @@ public class ContactDaoImpl implements ContactDao {
         String sql = "SELECT * FROM contact LEFT JOIN address ON contact.contact_id=address.contact_id LIMIT ?, ?";
 
         try (Connection connection = DatabaseUtil.getDataSource().getConnection();
-            PreparedStatement ps = connection.prepareStatement(sql)) {
+             PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setInt(1, offset);
             ps.setInt(2, limit);
             ResultSet resultSet = ps.executeQuery();
@@ -216,57 +215,84 @@ public class ContactDaoImpl implements ContactDao {
         return contacts;
     }
 
-    // поиск по нескольким критериям
+    // search by several criteria
     @Override
-    public List<Contact> readByCriteria(SearchContactDTO searchedContact) { // private methods
+    public List<Contact> readByCriteria(SearchContactDTO searchedContact, int offset, int limit) { // private methods
 
         List<Contact> contacts = new ArrayList<>();
         StringBuilder sql = new StringBuilder(
                 "SELECT * FROM contact LEFT JOIN address on contact.contact_id=address.contact_id ");
 
         // collect all parameters from the search into a map
-
-        Map<String, String> params = new HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         collectSearchParams(searchedContact, params);
         logger.debug("Search parameters map from method: " + Arrays.asList(params));
 
-        // put together dynamic query -- USE INSTR
+        // put together dynamic query
+        Map<Integer, String> orderedParams = new HashMap<>();
 
-//        Set<String> keys = params.keySet();
-//        if (keys != null && !keys.isEmpty()) {
-//            sql.append(" WHERE");
-//            String andOp = "";
-//            for (String key : keys) {
-//                sql.append(andOp);
-//                sql.append(" ");
-//                sql.append(key);
-//                sql.append("=? ");
-//                andOp = " AND ";
-//            }
-//        }
+        Set<String> keys = params.keySet();
+        int paramCounter = 0;
+        if (keys != null && !keys.isEmpty()) {
+            sql.append(" WHERE ");
+            String andOp = "";
+            for (String key : keys) {
+                sql.append(andOp);
+                if (key.equals("birthdayMoreThan")) {
+                    sql.append("birthday>=?");
+                } else if (key.equals("birthdayLessThan")) {
+                    sql.append("birthday<=?");
+                } else {
+                    sql.append("INSTR(");
+                    sql.append(key);
+                    sql.append(", ?)=1");
+                }
+                andOp = " AND ";
+                paramCounter++;
+                orderedParams.put(new Integer(paramCounter), params.get(key).toString());
+            }
+        }
+        sql.append(" LIMIT ?,?");
+        logger.debug("Constructed query: {}", sql.toString());
+        System.out.println("NEW MAP: " + Arrays.asList(orderedParams));
 
         // execute query
+        try (Connection connection = DatabaseUtil.getDataSource().getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            //fill in prepared statement with values
+            int i;
+            for (i = 1; i <= orderedParams.size(); i++) {
+                ps.setString(i, orderedParams.get(i));
+            }
+            int numOfArgs = paramCounter + 2;
+            ps.setInt(numOfArgs - 1, offset);
+            ps.setInt(numOfArgs, limit);
+            System.out.println(ps);
 
-//        try (Connection connection = DatabaseUtil.getDataSource().getConnection();
-//             PreparedStatement ps = connection.prepareStatement(sql.toString())) {
-//
-//            int position = 1;
-//            for (String key : keys) {
-//                ps.setObject(position, params.get(key)); // правильный ли порядок?
-//                position++;
-//            }
-//
-//            ResultSet resultSet = ps.executeQuery();
-//
-//            while (resultSet.next()) {
-//                //Contact contact = assignValuesToContact(resultSet);
-//                //contacts.add(contact);
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+            ResultSet resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                int contactId = resultSet.getInt(DB_CONTACTID);
+                String surname = resultSet.getString(DB_SURNAME);
+                String name = resultSet.getString(DB_NAME);
+                String patronymic = resultSet.getString(DB_PATRONYMIC);
+                Date birthday = resultSet.getDate(DB_BIRTHDAY);
+                Gender gender = Gender.valueOf(resultSet.getString(DB_GENDER).trim());
+                String nationality = resultSet.getString(DB_NATIONALITY);
+                Marital maritalStatus = Marital.valueOf(resultSet.getString(DB_MARITAL).trim());
+                String website = resultSet.getString(DB_WEBSITE);
+                String email = resultSet.getString(DB_EMAIL);
+                String workplace = resultSet.getString(DB_WORKPLACE);
+                String photoLink = resultSet.getString(DB_PHOTOLINK);
+                Address address = new Address(resultSet.getInt(DB_ADDRESSID), resultSet.getString(DB_COUNTRY),
+                        resultSet.getString(DB_CITY), resultSet.getString(DB_STREET), resultSet.getString(DB_POSTCODE));
+                contacts.add(new Contact(contactId, surname, name, patronymic, birthday, gender, nationality, maritalStatus, website,
+                        email, workplace, photoLink, address));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        System.out.println("FOUND CONTACTS: " + contacts.toString());
         return contacts;
-
     }
 
     @Override
@@ -483,7 +509,7 @@ public class ContactDaoImpl implements ContactDao {
     }
 
     @Override
-    public String readEmailById(int id){
+    public String readEmailById(int id) {
         String sql = "SELECT email FROM contact WHERE contact_id=?";
         try (Connection connection = DatabaseUtil.getDataSource().getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
