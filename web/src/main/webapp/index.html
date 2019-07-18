@@ -5,8 +5,6 @@
     <title>Contact List</title>
     <link rel="icon" href="/favicon.png"/>
     <link rel="stylesheet" href="/webjars/bootstrap/4.3.1/css/bootstrap.css"/>
-    <!--<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">-->
     <link rel="stylesheet" href="/style.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mustache.js/2.3.0/mustache.min.js" charset="utf-8"></script>
 </head>
@@ -41,6 +39,7 @@
 </nav>
 <!--empty div for page info-->
 <div id="myDiv"></div>
+<div id="searchedContact" class="hidden"></div>
 
 <footer id="sticky-footer" class="bg-dark text-white-50">
     <div class="container text-center">
@@ -73,10 +72,11 @@
                 <td class="align-middle text-center"><input type="checkbox" name="#" value="?" class="check"
                                                             id="{{id}}"></td>
                 <td class="align-middle">
-                    <a href="/brt/api/contacts/{{& id}}" onclick="displayContact(this.getAttribute('href'), retrieveImage);">
-                    {{surname}}
-                    {{name}}
-                    {{patronymic}}
+                    <a href="/brt/api/contacts/{{& id}}"
+                       onclick="displayContact(this.getAttribute('href'), retrieveImage);">
+                        {{surname}}
+                        {{name}}
+                        {{patronymic}}
                     </a>
                 </td>
                 <td class="align-middle">{{birthday}}</td>

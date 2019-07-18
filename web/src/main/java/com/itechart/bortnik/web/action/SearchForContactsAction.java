@@ -179,7 +179,7 @@ public class SearchForContactsAction implements BaseAction {
         if (searchContact != null) {
             List<Contact> foundContacts = contactService.findContactsByCriteria(searchContact, offset, pageSize);
             System.out.println("FOUND---" + foundContacts.toString());
-            PaginationContactListDTO paginationContactListDTO = new PaginationContactListDTO(foundContacts, page, pageSize, maxPage);
+            PaginationContactListDTO paginationContactListDTO = new PaginationContactListDTO(foundContacts, page, pageSize, maxPage, searchContact);
 
             response.setHeader("Content-Type", "application/json; charset=UTF-8");
             SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");

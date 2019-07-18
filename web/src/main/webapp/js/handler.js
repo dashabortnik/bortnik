@@ -17,6 +17,10 @@ window.addEventListener('load', () => {
     } else if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/new-form\\/*)$"))) {
         //display new contact form
         openContactForm();
+    } else
+        if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/search\\/?)$"))) {
+        //show search page
+        openSearchPage();
     } else {
         //display main page with default page number and pageSize
         let page = 1;
@@ -785,6 +789,9 @@ function deleteContact() {
         let array = currentPath.split("/");
         idArray.push(array[2]);
         tail = "/contacts/" + array[2];
+    } else {
+        alert("Please, choose contact(s) to delete.");
+        return false;
     }
     currentPath = "/brt/api" + tail;
     fetch(currentPath, {
@@ -820,11 +827,32 @@ function deleteCheckedRows(tableId) {
 
 function sendEmail() {
 
+    let currentPath = window.location.pathname;
+    console.log("Current pathname is --- " + currentPath);
     let idArray = [];
-    let checked = document.querySelectorAll(".check:checked");
-    console.log("CHECKED OBJECT---" + checked);
-    for (let i = 0; i < checked.length; i++) {
-        idArray.push(checked[i].id);
+
+    if (new RegExp("^(\\/brt\\/contacts\\/)$").test(currentPath)) {
+        //checkboxes are checked and delete button is pressed
+        console.log("General case");
+        let checked = document.querySelectorAll(".check:checked");
+        console.log("CHECKED OBJECT---" + checked);
+        for (let i = 0; i < checked.length; i++) {
+            idArray.push(checked[i].id);
+        }
+    } else if (new RegExp("^(\\/brt\\/contacts\\/\\d+.*)").test(currentPath)) {
+        //delete button pressed on the page of individual contact
+        console.log("Particular case");
+        let array = currentPath.split("/");
+        console.log(array.toString());
+        idArray.push(array[3]);
+    } else {
+        alert("Please, choose contact(s) to send emails to.");
+        return false;
+    }
+
+    if (idArray.length === 0){
+        alert("Please, choose contact(s) to send emails to.");
+        return false;
     }
 
     let emailList = "";
@@ -859,7 +887,7 @@ function sendEmail() {
         let templateSelect = document.getElementById("emailTemplate");
         templateSelect.onchange = function () {
             let tmplValue = templateSelect.value;
-            if (tmplValue!=="none") {
+            if (tmplValue !== "none") {
                 fetch("/brt/api/contacts/template", {
                     method: 'GET',
                     headers: {'Content-Type': 'application/json', 'template': templateSelect.value}
@@ -903,7 +931,7 @@ function sendEmail() {
     })
 }
 
-function openSearchPage(){
+function openSearchPage() {
     fetch("/templates/searchTemplate.mst")
         .then(response => response.text())
         .then(res => {
@@ -911,7 +939,7 @@ function openSearchPage(){
             const html = Mustache.to_html(res);
             document.getElementById("myDiv").innerHTML = "";
             return document.getElementById("myDiv").innerHTML = html;
-        }).then(function(res){
+        }).then(function (res) {
         history.pushState(null, "Search contact page", "/brt/contacts/search");
         let submitBtn = document.getElementById("searchForContact");
         let form = document.getElementById("searchContactInfo");
@@ -920,7 +948,7 @@ function openSearchPage(){
             e.stopPropagation();
             //submitSearchForm(form);
             let formData = new FormData(form);
-            if(formData.entries().next.done){ //true if formData is empty
+            if (formData.entries().next.done) { //true if formData is empty
                 alert("Please, enter at least one search parameter!");
             } else {
                 const container = document.getElementById("myDiv");
@@ -931,6 +959,8 @@ function openSearchPage(){
                 }).then(function (response) {
                     return response.json();
                 }).then(function (myJson) {
+                    let searched
+                    console.log((myJson.toString()));
                     const html = Mustache.to_html(template, myJson);
                     container.innerHTML = html;
                     return myJson;

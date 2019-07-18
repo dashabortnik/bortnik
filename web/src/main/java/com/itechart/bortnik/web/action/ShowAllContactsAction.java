@@ -59,7 +59,7 @@ public class ShowAllContactsAction implements BaseAction {
         int offset = (page-1)*pageSize; //limit = pageSize
         List<Contact> contactList = contactService.findAllContacts(offset, pageSize);
 
-        PaginationContactListDTO paginationContactListDTO = new PaginationContactListDTO(contactList, page, pageSize, maxPage);
+        PaginationContactListDTO paginationContactListDTO = new PaginationContactListDTO(contactList, page, pageSize, maxPage, null);
 
         response.setHeader("Content-Type", "application/json; charset=UTF-8");
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");

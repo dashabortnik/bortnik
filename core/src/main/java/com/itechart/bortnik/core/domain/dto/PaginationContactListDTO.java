@@ -10,15 +10,17 @@ public class PaginationContactListDTO {
     private int pageNumber;
     private int pageSize;
     private int totalSize;
+    private SearchContactDTO searchedContact;
 
     public PaginationContactListDTO(){
     }
 
-    public PaginationContactListDTO(List<Contact> contactList, int pageNumber, int pageSize, int totalSize) {
+    public PaginationContactListDTO(List<Contact> contactList, int pageNumber, int pageSize, int totalSize, SearchContactDTO searchedContact) {
         this.contactList = contactList;
         this.pageNumber = pageNumber;
         this.pageSize = pageSize;
         this.totalSize = totalSize;
+        this.searchedContact = searchedContact;
     }
 
     public List<Contact> getContactList() {
@@ -53,6 +55,14 @@ public class PaginationContactListDTO {
         this.totalSize = totalSize;
     }
 
+    public SearchContactDTO getSearchedContact() {
+        return searchedContact;
+    }
+
+    public void setSearchedContact(SearchContactDTO searchedContact) {
+        this.searchedContact = searchedContact;
+    }
+
     @Override
     public String toString() {
         return "PaginationContactListDTO{" +
@@ -60,6 +70,7 @@ public class PaginationContactListDTO {
                 ", pageNumber=" + pageNumber +
                 ", pageSize=" + pageSize +
                 ", totalSize=" + totalSize +
+                ", searchedContact=" + searchedContact +
                 '}';
     }
 }
