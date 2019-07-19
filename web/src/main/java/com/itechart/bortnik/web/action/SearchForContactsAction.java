@@ -167,7 +167,7 @@ public class SearchForContactsAction implements BaseAction {
             }
         }
 
-        int totalNumberOfContacts = contactService.countAllContacts();
+        int totalNumberOfContacts = contactService.countAllContacts(); //MISTAKE!!!
         int maxPage = (int)Math.ceil((double)totalNumberOfContacts/pageSize);
 
         if (page<=0 || page > maxPage){

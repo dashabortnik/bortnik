@@ -252,6 +252,8 @@ public class ContactDaoImpl implements ContactDao {
                 orderedParams.put(new Integer(paramCounter), params.get(key).toString());
             }
         }
+
+        //ADD SECOND QUERY
         sql.append(" LIMIT ?,?");
         logger.debug("Constructed query: {}", sql.toString());
         System.out.println("NEW MAP: " + Arrays.asList(orderedParams));

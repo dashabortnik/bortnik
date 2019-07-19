@@ -17,8 +17,24 @@ window.addEventListener('load', () => {
     } else if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/new-form\\/*)$"))) {
         //display new contact form
         openContactForm();
-    } else
-        if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/search\\/?)$"))) {
+    } else if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/search\\/?.*)$"))){
+        let page = 1;
+        let pageSize = 10;
+
+        let urlParams = new URLSearchParams(window.location.search);
+        if (urlParams !== null) {
+            let newPage = urlParams.get('page');
+            let newPageSize = urlParams.get('pageSize');
+            if (newPage !== "" && newPage !== null) {
+                page = newPage;
+            }
+            if (newPageSize !== "" && newPageSize !== null) {
+                pageSize = newPageSize;
+            }
+        }
+        displayFoundContacts(formData, page, pageSize);
+
+    } else if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/search\\/?)$"))) {
         //show search page
         openSearchPage();
     } else {
@@ -79,7 +95,6 @@ function displayMainPage(page, pageSize) {
             document.getElementById("nextBtnContainer").setAttribute("class", "page-item disabled");
             document.getElementById("btn_next").setAttribute("tabindex", "-1");
         }
-
 
         let pageSizeSelect = document.getElementById("pageSize");
         pageSizeSelect.value = pageSize;
@@ -951,24 +966,97 @@ function openSearchPage() {
             if (formData.entries().next.done) { //true if formData is empty
                 alert("Please, enter at least one search parameter!");
             } else {
-                const container = document.getElementById("myDiv");
-                const template = document.getElementById("mainTableTemplate").innerHTML;
-                const data = fetch("/brt/api/contacts/search/?page=1&pageSize=10", {
-                    method: 'POST',
-                    body: formData,
-                }).then(function (response) {
-                    return response.json();
-                }).then(function (myJson) {
-                    let searched
-                    console.log((myJson.toString()));
-                    const html = Mustache.to_html(template, myJson);
-                    container.innerHTML = html;
-                    return myJson;
-                })
+                displayFoundContacts(formData, 1, 10);
             }
         }
     })
 }
+
+
+function displayFoundContacts(formData, page, pageSize){
+    const container = document.getElementById("myDiv");
+    const template = document.getElementById("mainTableTemplate").innerHTML;
+
+    let sizeArray = ["5", "10", "15", "20"];
+    if (sizeArray.indexOf(pageSize) < 0) {
+        pageSize = sizeArray[1];
+    }
+
+    let link = "/brt/api/contacts/search/?page=" + page + "&pageSize=" + pageSize;
+    let historyLink = "/brt/contacts/search/?page=" + page + "&pageSize=" + pageSize;
+
+    const data = fetch(link, {
+        method: 'POST',
+        body: formData,
+    }).then(function (response) {
+        return response.json();
+    }).then(function (myJson) {
+        console.log((myJson.toString()));
+        const html = Mustache.to_html(template, myJson);
+        container.innerHTML = html;
+        history.pushState(null, "Display found contacts", historyLink);
+        return myJson;
+    }).then(function(myJson){
+        let navContainer = document.getElementById("navContainer");
+        let nextBtnContainer = document.getElementById("nextBtnContainer");
+        let maxPage = myJson.totalSize;
+
+
+        //let searchedContact = myJson.searchContact;
+        //document.getElementById("searchedContact").value = searchedContact;
+
+        if (+page <= 1) {
+            page = 1;
+            document.getElementById("prevBtnContainer").setAttribute("class", "page-item disabled");
+            document.getElementById("btn_prev").setAttribute("tabindex", "-1");
+        }
+        if (+page >= maxPage) {
+            page = maxPage;
+            document.getElementById("nextBtnContainer").setAttribute("class", "page-item disabled");
+            document.getElementById("btn_next").setAttribute("tabindex", "-1");
+        }
+
+        let pageSizeSelect = document.getElementById("pageSize");
+        pageSizeSelect.value = pageSize;
+        for (let i = 1; i <= maxPage; i++) {
+            let li = document.createElement('li');
+            let a = document.createElement('a');
+            if (i === +page) {
+                li.setAttribute("class", "page-item disabled");
+                a.setAttribute("class", "page-link active");
+                a.setAttribute("tabindex", "-1")
+            } else {
+                li.setAttribute("class", "page-item");
+                a.setAttribute("class", "page-link");
+            }
+            a.setAttribute("id", i.toString());
+            a.setAttribute("href", "");
+            a.onclick = function () {
+                displayFoundContacts(formData, this.id, pageSizeSelect.value);
+            }
+            let linkText = document.createTextNode(i.toString());
+            a.appendChild(linkText);
+            li.appendChild(a);
+            navContainer.insertBefore(li, nextBtnContainer);
+
+            pageSizeSelect.onchange = function () {
+                page = 1;
+                displayFoundContacts(formData, page, pageSizeSelect.value);
+            }
+
+            document.getElementById("btn_prev").onclick = function () {
+                displayFoundContacts(formData, +page - 1, document.getElementById("pageSize").value);
+            }
+
+            document.getElementById("btn_next").onclick = function () {
+                displayFoundContacts(formData, +page + 1, document.getElementById("pageSize").value);
+            }
+
+        }
+
+    })
+}
+
 
 
 
