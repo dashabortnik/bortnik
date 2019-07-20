@@ -17,29 +17,8 @@ window.addEventListener('load', () => {
     } else if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/new-form\\/*)$"))) {
         //display new contact form
         openContactForm();
-        // } else if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/search\\/\\?.*)$"))){
-
-        //     let page = 1;
-        //     let pageSize = 10;
-        //
-        //     let urlParams = new URLSearchParams(window.location.search);
-        //     if (urlParams !== null) {
-        //         let newPage = urlParams.get('page');
-        //         let newPageSize = urlParams.get('pageSize');
-        //         if (newPage !== "" && newPage !== null) {
-        //             page = newPage;
-        //         }
-        //         if (newPageSize !== "" && newPageSize !== null) {
-        //             pageSize = newPageSize;
-        //         }
-        //     }
-        //     displayFoundContacts(formData, page, pageSize);
-        //
     } else if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/search\\/?)$"))) {
-        let secret = document.getElementById("searchedContact").value;
-        console.log("SECRET---" + secret);
-        //show search page
-        //openSearchPage();
+            openSearchPage();
     } else {
         //display main page with default page number and pageSize
         let page = 1;
@@ -975,9 +954,8 @@ function openSearchPage() {
     })
 }
 
-
 function displayFoundContacts(formData, page, pageSize) {
-    const container = document.getElementById("myDiv");
+    event.preventDefault();
 
     const template = fetch("/templates/searchResultsTemplate.mst")
         .then(response => response.text());
@@ -997,7 +975,6 @@ function displayFoundContacts(formData, page, pageSize) {
     }).then(function (response) {
         return response.json();
     }).then(function (myJson) {
-        console.log("HERE");
         maxPage = myJson.totalSize;
         return myJson;
     })
@@ -1016,9 +993,6 @@ function displayFoundContacts(formData, page, pageSize) {
             history.pushState(null, "Display found contacts", historyLink);
             let navContainer = document.getElementById("navContainer");
             let nextBtnContainer = document.getElementById("nextBtnContainer");
-
-            //let searchedContact = myJson.searchContact;
-            document.getElementById("searchedContact").value = formData;
 
             if (+page <= 1) {
                 page = 1;

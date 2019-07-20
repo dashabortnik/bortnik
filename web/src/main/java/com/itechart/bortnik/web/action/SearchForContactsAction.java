@@ -169,7 +169,7 @@ public class SearchForContactsAction implements BaseAction {
 
         if (searchContact != null) {
 
-            int totalNumberOfContacts = contactService.countAllContactsByCriteria(searchContact); //MISTAKE!!!
+            int totalNumberOfContacts = contactService.countAllContactsByCriteria(searchContact);
             int maxPage = (int)Math.ceil((double)totalNumberOfContacts/pageSize);
 
             if (page<=0 || page > maxPage){
