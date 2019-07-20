@@ -253,8 +253,12 @@ public class ContactDaoImpl implements ContactDao {
             }
         }
 
+        String countAllQuery = sql.toString();
+
         //ADD SECOND QUERY
         sql.append(" LIMIT ?,?");
+        String getPaginatedContacts = sql.toString();
+
         logger.debug("Constructed query: {}", sql.toString());
         System.out.println("NEW MAP: " + Arrays.asList(orderedParams));
 
@@ -295,6 +299,63 @@ public class ContactDaoImpl implements ContactDao {
         }
         System.out.println("FOUND CONTACTS: " + contacts.toString());
         return contacts;
+    }
+
+    @Override
+    public int countContactsByCriteria(SearchContactDTO searchedContact) {
+
+        StringBuilder sql = new StringBuilder(
+                "SELECT COUNT(*) AS totalNumber FROM contact LEFT JOIN address on contact.contact_id=address.contact_id ");
+
+        // collect all parameters from the search into a map
+        Map<String, Object> params = new HashMap<>();
+        collectSearchParams(searchedContact, params);
+        logger.debug("Search parameters map from method: " + Arrays.asList(params));
+
+        // put together dynamic query
+        Map<Integer, String> orderedParams = new HashMap<>();
+
+        Set<String> keys = params.keySet();
+        int paramCounter = 0;
+        if (keys != null && !keys.isEmpty()) {
+            sql.append(" WHERE ");
+            String andOp = "";
+            for (String key : keys) {
+                sql.append(andOp);
+                if (key.equals("birthdayMoreThan")) {
+                    sql.append("birthday>=?");
+                } else if (key.equals("birthdayLessThan")) {
+                    sql.append("birthday<=?");
+                } else {
+                    sql.append("INSTR(");
+                    sql.append(key);
+                    sql.append(", ?)=1");
+                }
+                andOp = " AND ";
+                paramCounter++;
+                orderedParams.put(new Integer(paramCounter), params.get(key).toString());
+            }
+        }
+
+        int totalNumberOfContacts = 0;
+
+        try (Connection connection = DatabaseUtil.getDataSource().getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+            //fill in prepared statement with values
+            int i;
+            for (i = 1; i <= orderedParams.size(); i++) {
+                ps.setString(i, orderedParams.get(i));
+            }
+            System.out.println(ps);
+
+            ResultSet resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                totalNumberOfContacts = resultSet.getInt("totalNumber");
+            } return totalNumberOfContacts;
+        } catch (SQLException e) {
+            logger.error("Error with counting contacts by given criteria: ", e);
+        }
+        return totalNumberOfContacts;
     }
 
     @Override

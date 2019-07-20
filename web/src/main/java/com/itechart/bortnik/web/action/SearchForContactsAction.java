@@ -167,16 +167,17 @@ public class SearchForContactsAction implements BaseAction {
             }
         }
 
-        int totalNumberOfContacts = contactService.countAllContacts(); //MISTAKE!!!
-        int maxPage = (int)Math.ceil((double)totalNumberOfContacts/pageSize);
-
-        if (page<=0 || page > maxPage){
-            page = 1;
-        }
-
-        int offset = (page-1)*pageSize; //limit = pageSize
-
         if (searchContact != null) {
+
+            int totalNumberOfContacts = contactService.countAllContactsByCriteria(searchContact); //MISTAKE!!!
+            int maxPage = (int)Math.ceil((double)totalNumberOfContacts/pageSize);
+
+            if (page<=0 || page > maxPage){
+                page = 1;
+            }
+
+            int offset = (page-1)*pageSize; //limit = pageSize
+
             List<Contact> foundContacts = contactService.findContactsByCriteria(searchContact, offset, pageSize);
             System.out.println("FOUND---" + foundContacts.toString());
             PaginationContactListDTO paginationContactListDTO = new PaginationContactListDTO(foundContacts, page, pageSize, maxPage, searchContact);

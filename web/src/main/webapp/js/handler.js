@@ -17,26 +17,29 @@ window.addEventListener('load', () => {
     } else if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/new-form\\/*)$"))) {
         //display new contact form
         openContactForm();
-    } else if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/search\\/?.*)$"))){
-        let page = 1;
-        let pageSize = 10;
+        // } else if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/search\\/\\?.*)$"))){
 
-        let urlParams = new URLSearchParams(window.location.search);
-        if (urlParams !== null) {
-            let newPage = urlParams.get('page');
-            let newPageSize = urlParams.get('pageSize');
-            if (newPage !== "" && newPage !== null) {
-                page = newPage;
-            }
-            if (newPageSize !== "" && newPageSize !== null) {
-                pageSize = newPageSize;
-            }
-        }
-        displayFoundContacts(formData, page, pageSize);
-
+        //     let page = 1;
+        //     let pageSize = 10;
+        //
+        //     let urlParams = new URLSearchParams(window.location.search);
+        //     if (urlParams !== null) {
+        //         let newPage = urlParams.get('page');
+        //         let newPageSize = urlParams.get('pageSize');
+        //         if (newPage !== "" && newPage !== null) {
+        //             page = newPage;
+        //         }
+        //         if (newPageSize !== "" && newPageSize !== null) {
+        //             pageSize = newPageSize;
+        //         }
+        //     }
+        //     displayFoundContacts(formData, page, pageSize);
+        //
     } else if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/search\\/?)$"))) {
+        let secret = document.getElementById("searchedContact").value;
+        console.log("SECRET---" + secret);
         //show search page
-        openSearchPage();
+        //openSearchPage();
     } else {
         //display main page with default page number and pageSize
         let page = 1;
@@ -865,7 +868,7 @@ function sendEmail() {
         return false;
     }
 
-    if (idArray.length === 0){
+    if (idArray.length === 0) {
         alert("Please, choose contact(s) to send emails to.");
         return false;
     }
@@ -973,9 +976,11 @@ function openSearchPage() {
 }
 
 
-function displayFoundContacts(formData, page, pageSize){
+function displayFoundContacts(formData, page, pageSize) {
     const container = document.getElementById("myDiv");
-    const template = document.getElementById("mainTableTemplate").innerHTML;
+
+    const template = fetch("/templates/searchResultsTemplate.mst")
+        .then(response => response.text());
 
     let sizeArray = ["5", "10", "15", "20"];
     if (sizeArray.indexOf(pageSize) < 0) {
@@ -984,6 +989,7 @@ function displayFoundContacts(formData, page, pageSize){
 
     let link = "/brt/api/contacts/search/?page=" + page + "&pageSize=" + pageSize;
     let historyLink = "/brt/contacts/search/?page=" + page + "&pageSize=" + pageSize;
+    let maxPage;
 
     const data = fetch(link, {
         method: 'POST',
@@ -991,53 +997,63 @@ function displayFoundContacts(formData, page, pageSize){
     }).then(function (response) {
         return response.json();
     }).then(function (myJson) {
-        console.log((myJson.toString()));
-        const html = Mustache.to_html(template, myJson);
-        container.innerHTML = html;
-        history.pushState(null, "Display found contacts", historyLink);
+        console.log("HERE");
+        maxPage = myJson.totalSize;
         return myJson;
-    }).then(function(myJson){
-        let navContainer = document.getElementById("navContainer");
-        let nextBtnContainer = document.getElementById("nextBtnContainer");
-        let maxPage = myJson.totalSize;
+    })
 
+    return Promise.all([data, template])
+        .then(response => {
+            let resolvedData = response[0];
+            let resolvedTemplate = response[1];
+            // Cache the template for future use
+            Mustache.parse(resolvedTemplate);
+            const html = Mustache.to_html(resolvedTemplate, resolvedData);
+            // Write out the rendered template
+            document.getElementById("myDiv").innerHTML = "";
+            return document.getElementById('myDiv').innerHTML = html;
+        }).then(function () {
+            history.pushState(null, "Display found contacts", historyLink);
+            let navContainer = document.getElementById("navContainer");
+            let nextBtnContainer = document.getElementById("nextBtnContainer");
 
-        //let searchedContact = myJson.searchContact;
-        //document.getElementById("searchedContact").value = searchedContact;
+            //let searchedContact = myJson.searchContact;
+            document.getElementById("searchedContact").value = formData;
 
-        if (+page <= 1) {
-            page = 1;
-            document.getElementById("prevBtnContainer").setAttribute("class", "page-item disabled");
-            document.getElementById("btn_prev").setAttribute("tabindex", "-1");
-        }
-        if (+page >= maxPage) {
-            page = maxPage;
-            document.getElementById("nextBtnContainer").setAttribute("class", "page-item disabled");
-            document.getElementById("btn_next").setAttribute("tabindex", "-1");
-        }
-
-        let pageSizeSelect = document.getElementById("pageSize");
-        pageSizeSelect.value = pageSize;
-        for (let i = 1; i <= maxPage; i++) {
-            let li = document.createElement('li');
-            let a = document.createElement('a');
-            if (i === +page) {
-                li.setAttribute("class", "page-item disabled");
-                a.setAttribute("class", "page-link active");
-                a.setAttribute("tabindex", "-1")
-            } else {
-                li.setAttribute("class", "page-item");
-                a.setAttribute("class", "page-link");
+            if (+page <= 1) {
+                page = 1;
+                document.getElementById("prevBtnContainer").setAttribute("class", "page-item disabled");
+                document.getElementById("btn_prev").setAttribute("tabindex", "-1");
             }
-            a.setAttribute("id", i.toString());
-            a.setAttribute("href", "");
-            a.onclick = function () {
-                displayFoundContacts(formData, this.id, pageSizeSelect.value);
+            if (+page >= maxPage) {
+                page = maxPage;
+                document.getElementById("nextBtnContainer").setAttribute("class", "page-item disabled");
+                document.getElementById("btn_next").setAttribute("tabindex", "-1");
             }
-            let linkText = document.createTextNode(i.toString());
-            a.appendChild(linkText);
-            li.appendChild(a);
-            navContainer.insertBefore(li, nextBtnContainer);
+
+            let pageSizeSelect = document.getElementById("pageSize");
+            pageSizeSelect.value = pageSize;
+            for (let i = 1; i <= maxPage; i++) {
+                let li = document.createElement('li');
+                let a = document.createElement('a');
+                if (i === +page) {
+                    li.setAttribute("class", "page-item disabled");
+                    a.setAttribute("class", "page-link active");
+                    a.setAttribute("tabindex", "-1")
+                } else {
+                    li.setAttribute("class", "page-item");
+                    a.setAttribute("class", "page-link");
+                }
+                a.setAttribute("id", i.toString());
+                a.setAttribute("href", "");
+                a.onclick = function () {
+                    displayFoundContacts(formData, this.id, pageSizeSelect.value);
+                }
+                let linkText = document.createTextNode(i.toString());
+                a.appendChild(linkText);
+                li.appendChild(a);
+                navContainer.insertBefore(li, nextBtnContainer);
+            }
 
             pageSizeSelect.onchange = function () {
                 page = 1;
@@ -1052,9 +1068,11 @@ function displayFoundContacts(formData, page, pageSize){
                 displayFoundContacts(formData, +page + 1, document.getElementById("pageSize").value);
             }
 
-        }
 
-    })
+        }).catch(function (err) {
+            alert("Unable to render found contacts page");
+        })
+
 }
 
 

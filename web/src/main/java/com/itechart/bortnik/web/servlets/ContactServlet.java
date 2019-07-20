@@ -93,8 +93,8 @@ public class ContactServlet extends HttpServlet {
             System.out.println("NO MATCH");
             RequestDispatcher rd = request.getRequestDispatcher("/index.html");
             try {
+                logger.info("Forwarding request with URI {} to index.html.", requestUri);
                 rd.forward(request, response);
-                logger.info("Forward of request with URI {} to index.html was executed.", requestUri);
             } catch (ServletException e) {
                 logger.error("Servlet exception in request dispatcher: ", e);
             } catch (IOException e) {

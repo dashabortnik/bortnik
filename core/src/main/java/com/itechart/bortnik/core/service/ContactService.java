@@ -14,4 +14,5 @@ public interface ContactService extends BaseEntityService<Contact, FullContactDT
     List<Contact> findContactByBirthday();
     int countAllContacts();
     String findEmailById(int id);
+    int countAllContactsByCriteria(SearchContactDTO search);
 }

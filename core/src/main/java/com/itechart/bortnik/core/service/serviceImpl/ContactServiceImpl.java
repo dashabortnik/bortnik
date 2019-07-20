@@ -113,6 +113,11 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
+    public int countAllContactsByCriteria(SearchContactDTO search){
+        return contactDaoImpl.countContactsByCriteria(search);
+    }
+
+    @Override
     public String findEmailById(int id){ return contactDaoImpl.readEmailById(id); }
 
 }

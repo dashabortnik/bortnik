@@ -1,0 +1,59 @@
+<!--Displays a table with all contacts found by criteria.-->
+
+    <div class="table-responsive">
+        <table class="table table-sm table-bordered table-hover">
+            <thead class="bg-light">
+            <tr>
+                <th class="align-middle text-center">Check</th>
+                <th class="align-middle text-center">Full name</th>
+                <th class="align-middle text-center">Birthday</th>
+                <th class="align-middle text-center">Gender</th>
+                <th class="align-middle text-center">Marital status</th>
+                <th class="align-middle text-center">Nationality</th>
+                <th class="align-middle text-center">Address</th>
+                <th class="align-middle text-center">Workplace</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {{#contactList}}
+            <tr>
+                <td class="align-middle text-center"><input type="checkbox" name="#" value="?" class="check"
+                                                            id="{{id}}"></td>
+                <td class="align-middle">
+                    <a href="/brt/api/contacts/{{& id}}"
+                       onclick="displayContact(this.getAttribute('href'), retrieveImage);">
+                        {{surname}}
+                        {{name}}
+                        {{patronymic}}
+                    </a>
+                </td>
+                <td class="align-middle">{{birthday}}</td>
+                <td class="align-middle">{{gender}}</td>
+                <td class="align-middle">{{maritalStatus}}</td>
+                <td class="align-middle">{{nationality}}</td>
+                <td class="align-middle">{{address.country}}, {{address.city}}, {{address.street}}</td>
+                <td class="align-middle">{{workplace}}</td>
+            </tr>
+            {{/contactList}}
+            </tbody>
+        </table>
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center" id="navContainer">
+                <li class="page-item" id="prevBtnContainer">
+                    <a class="page-link" href="" id="btn_prev">Previous</a>
+                </li>
+                <li class="page-item" id="nextBtnContainer">
+                    <a class="page-link" href="" id="btn_next">Next</a>
+                </li>
+            </ul>
+        </nav>
+        <div class="d-flex justify-content-center mb-3" id="selectPageSize">Contacts per page:
+            <select name="pageSize" id="pageSize">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+            </select>
+        </div>
+    </div>
