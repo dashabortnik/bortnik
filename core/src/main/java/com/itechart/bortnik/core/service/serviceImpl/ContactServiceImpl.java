@@ -12,6 +12,7 @@ import com.itechart.bortnik.core.domain.Phone;
 import com.itechart.bortnik.core.domain.dto.FullContactDTO;
 import com.itechart.bortnik.core.domain.dto.SearchContactDTO;
 import com.itechart.bortnik.core.service.ContactService;
+import com.itechart.bortnik.core.validation.InputValidator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,26 +31,37 @@ public class ContactServiceImpl implements ContactService {
 
     @Override
     public FullContactDTO save(FullContactDTO entity) {
-        Contact insertedContact = contactDaoImpl.insert(entity.getContact());
-        //if contact insert failed, we'll get an empty contact, it this case we don't insert phones and attachments
-        if (insertedContact != null) {
-            int contactId = insertedContact.getId();
-            List<Phone> extractedPhones = entity.getPhoneList();
+        FullContactDTO insertedFullContactDTO = new FullContactDTO();
+
+        InputValidator inputValidator = new InputValidator();
+        List<String> validationErrorList = inputValidator.validateObject(entity);
+
+        if (validationErrorList.isEmpty()) {
+
+            Contact insertedContact = contactDaoImpl.insert(entity.getContact());
             List<Phone> insertedPhones = new ArrayList<>();
-            for (Phone phone : extractedPhones) {
-                phone.setContactId(contactId);
-                insertedPhones.add(phoneDaoImpl.insert(phone));
-            }
-            List<Attachment> extractedAttachments = entity.getAttachmentList();
             List<Attachment> insertedAttachments = new ArrayList<>();
-            for (Attachment attachment : extractedAttachments) {
-                attachment.setContactId(contactId);
-                insertedAttachments.add(attachmentDaoImpl.insert(attachment));
+            //if contact insert failed, we'll get an empty contact, it this case we don't insert phones and attachments
+            if (insertedContact != null) {
+                int contactId = insertedContact.getId();
+                List<Phone> extractedPhones = entity.getPhoneList();
+                for (Phone phone : extractedPhones) {
+                    phone.setContactId(contactId);
+                    insertedPhones.add(phoneDaoImpl.insert(phone));
+                }
+                List<Attachment> extractedAttachments = entity.getAttachmentList();
+                for (Attachment attachment : extractedAttachments) {
+                    attachment.setContactId(contactId);
+                    insertedAttachments.add(attachmentDaoImpl.insert(attachment));
+                }
+                insertedFullContactDTO.setContact(insertedContact);
+                insertedFullContactDTO.setPhoneList(insertedPhones);
+                insertedFullContactDTO.setAttachmentList(insertedAttachments);
+            } else {
+                insertedFullContactDTO.setErrorList(validationErrorList);
             }
-            return new FullContactDTO(insertedContact, insertedPhones, insertedAttachments);
-        } else {
-            return new FullContactDTO();
         }
+        return insertedFullContactDTO;
     }
 
     @Override
@@ -71,7 +83,7 @@ public class ContactServiceImpl implements ContactService {
                 attachment.setContactId(contactId);
                 insertedAttachments.add(attachmentDaoImpl.insert(attachment));
             }
-            return new FullContactDTO(insertedContact, insertedPhones, insertedAttachments);
+            return new FullContactDTO(insertedContact, insertedPhones, insertedAttachments, null);
         } else {
             return new FullContactDTO();
         }
@@ -98,7 +110,7 @@ public class ContactServiceImpl implements ContactService {
         Contact fetchedContact = contactDaoImpl.readById(id);
         List<Phone> phoneList = phoneDaoImpl.readAllById(id);
         List<Attachment> attachmentList = attachmentDaoImpl.readAllById(id);
-        FullContactDTO fullContact = new FullContactDTO(fetchedContact, phoneList, attachmentList);
+        FullContactDTO fullContact = new FullContactDTO(fetchedContact, phoneList, attachmentList, null);
         return fullContact;
     }
 

@@ -280,7 +280,7 @@ public class CreateContactAction implements BaseAction {
             logger.error("Error: ", e);
         }
         //create DTO object with contact, list of phones and list of attachments
-        FullContactDTO fullContactDTO = new FullContactDTO(receivedContact, phones, attachments);
+        FullContactDTO fullContactDTO = new FullContactDTO(receivedContact, phones, attachments, null);
         logger.debug("Contact from formData info: {}", fullContactDTO);
         if (fullContactDTO != null) {
             FullContactDTO fullContact = contactService.save(fullContactDTO);

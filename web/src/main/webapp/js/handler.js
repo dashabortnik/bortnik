@@ -418,7 +418,6 @@ function submitForm(form) {
         formData.append(fullFileName, file);
     }
 
-    //VALIDATION!!!
     if (validate(formData)) {
         let photoLink;
         let contactId;

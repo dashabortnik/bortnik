@@ -266,10 +266,10 @@ public class ContactDaoImpl implements ContactDao {
         try (Connection connection = DatabaseUtil.getDataSource().getConnection();
              PreparedStatement ps = connection.prepareStatement(sql.toString())) {
             //fill in prepared statement with values
-            int i;
-            for (i = 1; i <= orderedParams.size(); i++) {
+            for (int i = 1; i <= orderedParams.size(); i++) {
                 ps.setString(i, orderedParams.get(i));
             }
+            // adds
             int numOfArgs = paramCounter + 2;
             ps.setInt(numOfArgs - 1, offset);
             ps.setInt(numOfArgs, limit);

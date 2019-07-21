@@ -42,8 +42,7 @@ public class ContactServlet extends HttpServlet {
             Scheduler scheduler = new StdSchedulerFactory().getScheduler();
             scheduler.start();
             scheduler.scheduleJob(job, trigger);
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -67,12 +66,12 @@ public class ContactServlet extends HttpServlet {
         parseUrl(request, response);
     }
 
-    private void parseUrl(HttpServletRequest request, HttpServletResponse response){
+    private void parseUrl(HttpServletRequest request, HttpServletResponse response) {
 
         String requestUri = request.getRequestURI();
         System.out.println("REQUEST URI---" + requestUri);
 
-        if (requestUri.matches("\\/brt\\/api\\/contacts.*")){
+        if (requestUri.matches("\\/brt\\/api\\/contacts.*")) {
             System.out.println("MATCH");
             String[] urlArray = request.getRequestURI().split("contacts", 2);
             String urlPart = request.getMethod() + "_";
@@ -89,7 +88,7 @@ public class ContactServlet extends HttpServlet {
                 logger.error("Exception in parseUrl method from /api request: ", e);
             }
 
-        }else{
+        } else {
             System.out.println("NO MATCH");
             RequestDispatcher rd = request.getRequestDispatcher("/index.html");
             try {

@@ -1,0 +1,16 @@
+<h2>Invalid data in input! Unable to process.</h2>
+    <table class="table table-hover">
+        <thead class="bg-light">
+        <tr class="bg-light">
+            <th class="align-middle text-center">Error</th>
+        </tr>
+        </thead>
+        <tbody>
+        {{#errorList}}
+        <tr>
+            <td>{{.}}</td>
+        </tr>
+        {{/errorList}}
+        </tbody>
+    </table>
+<a class="text-decoration-none" href="/">Back to main page</a>
