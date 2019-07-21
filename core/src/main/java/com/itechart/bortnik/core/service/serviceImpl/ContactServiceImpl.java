@@ -13,7 +13,10 @@ import com.itechart.bortnik.core.domain.dto.FullContactDTO;
 import com.itechart.bortnik.core.domain.dto.SearchContactDTO;
 import com.itechart.bortnik.core.service.ContactService;
 import com.itechart.bortnik.core.validation.InputValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +31,9 @@ public class ContactServiceImpl implements ContactService {
         phoneDaoImpl = PhoneDaoImpl.getInstance();
         attachmentDaoImpl = AttachmentDaoImpl.getInstance();
     }
+
+    //create Logger for current class
+    Logger logger = LoggerFactory.getLogger(ContactServiceImpl.class);
 
     @Override
     public FullContactDTO save(FullContactDTO entity) {
@@ -57,8 +63,25 @@ public class ContactServiceImpl implements ContactService {
                 insertedFullContactDTO.setContact(insertedContact);
                 insertedFullContactDTO.setPhoneList(insertedPhones);
                 insertedFullContactDTO.setAttachmentList(insertedAttachments);
+            }
+        } else {
+            insertedFullContactDTO.setErrorList(validationErrorList);
+            //delete saved photo and attachments by links
+            String photoLink = entity.getContact().getPhotoLink();
+            File file = new File(photoLink);
+            if (file.delete()) { //if deleted, returns true
+                logger.info("Image of new contact was deleted.");
             } else {
-                insertedFullContactDTO.setErrorList(validationErrorList);
+                logger.warn("Deleting image of new contact failed.");
+            }
+            List<Attachment> attachments = entity.getAttachmentList();
+            for (Attachment attachment : attachments) {
+                File attach = new File(attachment.getLink());
+                if (attach.delete()) { //if deleted, returns true
+                    logger.info("Attachment of new contact was deleted.");
+                } else {
+                    logger.warn("Deleting attachment of new contact failed.");
+                }
             }
         }
         return insertedFullContactDTO;

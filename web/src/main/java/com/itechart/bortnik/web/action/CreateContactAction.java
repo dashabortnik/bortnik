@@ -281,9 +281,10 @@ public class CreateContactAction implements BaseAction {
         }
         //create DTO object with contact, list of phones and list of attachments
         FullContactDTO fullContactDTO = new FullContactDTO(receivedContact, phones, attachments, null);
-        logger.debug("Contact from formData info: {}", fullContactDTO);
+
         if (fullContactDTO != null) {
             FullContactDTO fullContact = contactService.save(fullContactDTO);
+            logger.debug("Saved contact info: {}", fullContactDTO);
             //write the created contact into response
             response.setHeader("Content-Type", "application/json; charset=UTF-8");
             ObjectMapper mapper = new ObjectMapper();

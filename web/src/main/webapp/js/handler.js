@@ -421,6 +421,9 @@ function submitForm(form) {
     if (validate(formData)) {
         let photoLink;
         let contactId;
+        let title;
+        let historyLink;
+        let tmpl = "";
 
         const data = fetch("/brt/api/contacts/", {
             method: 'POST',
@@ -428,42 +431,42 @@ function submitForm(form) {
         }).then(function (response) {
             return response.json();
         }).then(function (myJson) {
-            // ignore warning, it works: contact is a nested object with attributes
-            photoLink = myJson.contact.photoLink;
-            contactId = myJson.contact.id;
-            let list = myJson.attachmentList;
-            for (let i = 0; i < list.length; i++) {
-                myJson.attachmentList[i].realFileName = myJson.attachmentList[i].link.split("---", 2)[1];
-                console.log(myJson.attachmentList[i].realFileName);
+            if (myJson.errorList != null) {
+                tmpl = "/templates/errorPageTemplate.mst";
+                historyLink = "/brt/contacts/error";
+                title = "Error page";
+            } else {
+                // ignore warning, it works: contact is a nested object with attributes
+                tmpl = "/templates/contactTemplate.mst";
+                photoLink = myJson.contact.photoLink;
+                contactId = myJson.contact.id;
+                historyLink = "/brt/contacts/" + contactId;
+                title = "Contact page";
+                let list = myJson.attachmentList;
+                for (let i = 0; i < list.length; i++) {
+                    myJson.attachmentList[i].realFileName = myJson.attachmentList[i].link.split("---", 2)[1];
+                    console.log(myJson.attachmentList[i].realFileName);
+                }
             }
-            return myJson;
-        })
-
-        let tmpl = "/templates/contactTemplate.mst";
-        const template = fetch(tmpl).then(response => response.text());
-        let title = "Contact page";
-        let link = "/brt/contacts/" + contactId;
-
-        return Promise.all([data, template])
-            .then(response => {
-                let resolvedData = response[0];
-                let resolvedTemplate = response[1];
-                // Cache the template for future use
-                Mustache.parse(resolvedTemplate);
-                const html = Mustache.render(resolvedTemplate, resolvedData);
-                // Write out the rendered template
-                let container = document.getElementById("myDiv");
-                container.innerHTML = "";
-                return container.innerHTML = html;
-            }).then(function () {
-                retrieveImage(photoLink);
-                history.pushState(null, "Display created contact page", link);
-            }).catch(function (err) {
-                alert("Unable to render display contact page with new data");
-            })
-
+            let template = fetch(tmpl)
+                .then(function (response){
+                    return response.text();
+                }).then(function (myText){
+                    Mustache.parse(myText);
+                    const html = Mustache.render(myText, myJson);
+                    // Write out the rendered template
+                    let container = document.getElementById("myDiv");
+                    container.innerHTML = "";
+                    return container.innerHTML = html;
+                }).then(function (html){
+                    history.pushState(null, title, historyLink);
+                    if(title==="Contact page"){
+                        retrieveImage(photoLink);
+                    }
+                });
+        });
     } else {
-        alert("oops");
+        alert("Unable to render display contact page with new data");
     }
 }
 

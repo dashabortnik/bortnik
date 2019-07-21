@@ -8,11 +8,11 @@
         <table class="table table-bordered table-sm table-hover col-12 col-md-8">
             <tbody>
             <tr>
-                <th class="bg-light">Surname</th>
+                <th class="bg-light">Surname &Star;</th>
                 <td><input type="text" name="surname"></td>
             </tr>
             <tr>
-                <th class="bg-light">Name</th>
+                <th class="bg-light">Name &Star;</th>
                 <td><input type="text" name="name"></td>
             </tr>
             <tr>
@@ -20,7 +20,7 @@
                 <td><input type="text" name="patronymic"></td>
             </tr>
             <tr>
-                <th class="bg-light">Birthday</th>
+                <th class="bg-light">Birthday &Star;</th>
                 <td><input type="date" name="birthday" min="1900-01-01"></td>
             </tr>
             <tr>
@@ -51,7 +51,7 @@
                 <td><input type="url" name="website"></td>
             </tr>
             <tr>
-                <th class="bg-light">Email</th>
+                <th class="bg-light">Email &Star;</th>
                 <td><input type="email" name="email"></td>
             </tr>
             <tr>

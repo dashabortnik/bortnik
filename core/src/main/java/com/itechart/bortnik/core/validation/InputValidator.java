@@ -103,24 +103,33 @@ public class InputValidator {
         return validationErrorList;
     }
 
-    private void validateRequiredField(String field, List validationErrorList, String fieldName) {
+    private void validateRequiredField(String field, List<String> validationErrorList, String fieldName) {
         if (field == null || field.isEmpty()) {
-            validationErrorList.add("Required field is empty: " + fieldName.replace('_', ' '));
+            StringBuilder str = new StringBuilder("Required field is empty: ");
+            str.append(fieldName.replace('_', ' '));
+            validationErrorList.add(str.toString());
             logger.warn("On validation {} is empty.", fieldName);
         }
     }
 
-    private void validateFieldLength(String field, List validationErrorList, String fieldName) {
+    private void validateFieldLength(String field, List<String> validationErrorList, String fieldName) {
         int maxFieldLength = allowedFieldSizes.get(fieldName);
         if (field != null && field.length() > maxFieldLength) {
-            validationErrorList.add("Given field is too long: " + fieldName.replace('_', ' ') + ". Max length is " + maxFieldLength + " characters.");
+            StringBuilder str = new StringBuilder("Given field is too long: ");
+            str.append(fieldName.replace('_', ' '));
+            str.append(". Max length is ");
+            str.append(maxFieldLength);
+            str.append(" characters.");
+            validationErrorList.add(str.toString());
             logger.warn("Field {} is too long. Max allowed length is {} characters.", fieldName, maxFieldLength);
         }
     }
 
-    private void validateFieldByPattern(String field, List validationErrorList, String fieldName, String pattern) {
-        if (field != null && !field.matches(pattern)) {
-            validationErrorList.add("Illegal characters in field: " + fieldName.replace('_', ' '));
+    private void validateFieldByPattern(String field, List<String> validationErrorList, String fieldName, String pattern) {
+        if (field != null && !"".equals(field) &&!field.matches(pattern)) {
+            StringBuilder str = new StringBuilder("Illegal characters in field: ");
+            str.append(fieldName.replace('_', ' '));
+            validationErrorList.add(str.toString());
             logger.warn("Illegal characters in field {}.", fieldName);
         }
 

@@ -272,7 +272,7 @@ public class UpdateContactAction implements BaseAction{
         }
 
         //create DTO object with contact, list of phones and list of attachments
-        FullContactDTO fullContactDTO = new FullContactDTO(receivedContact, phones, attachments);
+        FullContactDTO fullContactDTO = new FullContactDTO(receivedContact, phones, attachments, null);
         logger.debug("Updated contact from formData info: {}", fullContactDTO);
 
         if (fullContactDTO != null) {
