@@ -18,7 +18,7 @@ window.addEventListener('load', () => {
         //display new contact form
         openContactForm();
     } else if (currentUri.match(new RegExp("^(\\/brt\\/contacts\\/search\\/?)$"))) {
-            openSearchPage();
+        openSearchPage();
     } else {
         //display main page with default page number and pageSize
         let page = 1;
@@ -37,7 +37,7 @@ window.addEventListener('load', () => {
         }
         displayMainPage(page, pageSize);
     }
-})
+});
 
 window.addEventListener('popstate', function (event) {
     location.reload();
