@@ -472,20 +472,20 @@ function submitForm(form) {
 
 function openEditForm() {
     //Check how many checkboxes are checked. Only 1 should be checked, alert if not 1.
-    var link;
-    var checkedId;
+    let link;
+    let checkedId;
     let path = window.location.pathname;
     let form = null;
 
-    var prom = Promise.resolve()
+    let prom = Promise.resolve()
         .then(function (res) {
-            if (path.match(new RegExp("\\/brt\\/api\\/contacts\\/\\d+"))) {
-                checkedId = path.split("/")[4];
+            if (path.match(new RegExp("\\/brt\\/contacts\\/\\d+"))) {
+                checkedId = path.split("/")[3];
                 console.log("ID---" + checkedId);
             } else {
-                var checked = document.querySelectorAll(".check:checked");
+                let checked = document.querySelectorAll(".check:checked");
                 console.log("CHECKED OBJECT---" + checked);
-                var checkedChecks = checked.length;
+                let checkedChecks = checked.length;
                 console.log("CHECKED quantity---" + checkedChecks);
                 console.log(checkedChecks + "boxes checked now");
                 if (checkedChecks !== 1) {
@@ -493,9 +493,9 @@ function openEditForm() {
                 } else {
                     checkedId = checked.item(0).id;
                 }
-                link = "/brt/api/contacts/" + checkedId + "/edit-form";
-                console.log("BUILT LINK:" + link);
             }
+            link = "/brt/api/contacts/" + checkedId + "/edit-form";
+            console.log("BUILT LINK:" + link);
         }).catch(function (err) {
             console.log(err.message);
         }).then(function () {
