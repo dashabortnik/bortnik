@@ -578,7 +578,7 @@ function openEditForm() {
     })
 }
 
-function submitEditForm(form, checkedId) {
+function submitEditForm(form, checkedId){
     event.preventDefault();
     event.stopPropagation();
     let formData = new FormData(form);
@@ -997,6 +997,7 @@ function displayFoundContacts(formData, page, pageSize) {
     let link = "/brt/api/contacts/search/?page=" + page + "&pageSize=" + pageSize;
     let historyLink = "/brt/contacts/search/?page=" + page + "&pageSize=" + pageSize;
     let maxPage;
+    let searchData;
 
     const data = fetch(link, {
         method: 'POST',
@@ -1005,6 +1006,7 @@ function displayFoundContacts(formData, page, pageSize) {
         return response.json();
     }).then(function (myJson) {
         maxPage = myJson.totalSize;
+        searchData = myJson.searchedContact;
         return myJson;
     })
 
@@ -1071,6 +1073,26 @@ function displayFoundContacts(formData, page, pageSize) {
                 displayFoundContacts(formData, +page + 1, document.getElementById("pageSize").value);
             }
 
+            let searchParamsText = "Search parameters: ";
+
+            for (let key in searchData){
+                if (searchData.hasOwnProperty(key) && searchData[key]!=="" &&
+                    searchData[key]!==null && searchData[key]!==0) {
+                    if(key==="address"){
+                        let address = searchData.address;
+                        for (let param in address){
+                            if(address[param]!=="" && address[param]!==null && address[param]!==0){
+                                searchParamsText += param + ": " + address[param] + "; ";
+                            }
+                        }
+                    } else {
+                        searchParamsText += key + ": " + searchData[key] + "; ";
+                    }
+                }
+
+            }
+            let textNode = document.createTextNode(searchParamsText);
+            document.getElementById("searchParameters").appendChild(textNode);
 
         }).catch(function (err) {
             alert("Unable to render found contacts page");

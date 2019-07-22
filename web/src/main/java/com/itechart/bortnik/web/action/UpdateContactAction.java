@@ -66,6 +66,7 @@ public class UpdateContactAction implements BaseAction{
         String postcode = null;
         String photoLink = null;
         List<Phone> phones = new ArrayList<Phone>();
+        int phoneId = 0;
         String countryCode = null;
         String operatorCode = null;
         String phoneNumber = null;
@@ -73,6 +74,7 @@ public class UpdateContactAction implements BaseAction{
         String comment = null;
         int phoneCounter = 1;
         List<Attachment> attachments = new ArrayList<Attachment>();
+        int attachmentId = 0;
         String attachmentName = null;
         String attachmentLink = null;
         String submittedFileName = null;
@@ -102,6 +104,9 @@ public class UpdateContactAction implements BaseAction{
                     while (checkAgain == 1) {
                         if (itemNumber == phoneCounter) {
                             switch (itemName) {
+                                case "phoneId":
+                                    phoneId = Integer.valueOf(item.getString("UTF-8"));
+                                    break;
                                 case "countryCode":
                                     countryCode = item.getString("UTF-8");
                                     break;
@@ -120,6 +125,7 @@ public class UpdateContactAction implements BaseAction{
                                         Phone phone = new Phone(0, countryCode, operatorCode,
                                                 phoneNumber, phoneType, comment, 0);
                                         phones.add(phone);
+                                        phoneId = 0;
                                         countryCode = null;
                                         operatorCode = null;
                                         phoneNumber = null;
@@ -135,6 +141,7 @@ public class UpdateContactAction implements BaseAction{
                                 Phone phone = new Phone(0, countryCode, operatorCode,
                                         phoneNumber, phoneType, comment, 0);
                                 phones.add(phone);
+                                phoneId = 0;
                                 countryCode = null;
                                 operatorCode = null;
                                 phoneNumber = null;
@@ -154,6 +161,9 @@ public class UpdateContactAction implements BaseAction{
                     /*parse values depending on item name, all fields are required;
                     a new attachment is created when link is reached*/
                     switch (itemName) {
+                        case "attachmentId":
+                            attachmentId = Integer.valueOf(item.getString("UTF-8"));
+                            break;
                         case "attachmentName":
                             attachmentName = item.getString("UTF-8");
                             break;
