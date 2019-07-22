@@ -63,63 +63,70 @@ function displayMainPage(page, pageSize) {
         container.innerHTML = html;
         return myJson;
     }).then(function (myJson) {
-        let navContainer = document.getElementById("navContainer");
-        let nextBtnContainer = document.getElementById("nextBtnContainer");
-        let maxPage = myJson.totalSize;
-
-        if (+page <= 1) {
-            page = 1;
-            document.getElementById("prevBtnContainer").setAttribute("class", "page-item disabled");
-            document.getElementById("btn_prev").setAttribute("tabindex", "-1");
-        }
-        if (+page >= maxPage) {
-            page = maxPage;
-            document.getElementById("nextBtnContainer").setAttribute("class", "page-item disabled");
-            document.getElementById("btn_next").setAttribute("tabindex", "-1");
-        }
-
-        let pageSizeSelect = document.getElementById("pageSize");
-        pageSizeSelect.value = pageSize;
-        for (let i = 1; i <= maxPage; i++) {
-            let li = document.createElement('li');
-            let a = document.createElement('a');
-            if (i === +page) {
-                li.setAttribute("class", "page-item disabled");
-                a.setAttribute("class", "page-link active");
-                a.setAttribute("tabindex", "-1")
-            } else {
-                li.setAttribute("class", "page-item");
-                a.setAttribute("class", "page-link");
-            }
-            a.setAttribute("id", i.toString());
-            a.setAttribute("href", "");
-            a.onclick = function () {
-                displayMainPage(this.id, pageSizeSelect.value);
-            }
-            let linkText = document.createTextNode(i.toString());
-            a.appendChild(linkText);
-            li.appendChild(a);
-            navContainer.insertBefore(li, nextBtnContainer);
-        }
-
-        pageSizeSelect.onchange = function () {
-            page = 1;
-            displayMainPage(page, pageSizeSelect.value);
-        }
-
-        document.getElementById("btn_prev").onclick = function () {
-            displayMainPage(+page - 1, document.getElementById("pageSize").value);
-        }
-
-        document.getElementById("btn_next").onclick = function () {
-            displayMainPage(+page + 1, document.getElementById("pageSize").value);
-        }
-
+        addPagination(myJson);
         let historyLink = "/brt/contacts/?page=" + page + "&pageSize=" + pageSize;
         history.pushState(null, "Display main page", historyLink);
     }).catch(function (err) {
         alert("Unable to load main page.");
     });
+}
+
+function addPagination(myJson){
+    let page = myJson.pageNumber;
+    let maxPage = myJson.totalSize;
+    let pageSize = myJson.pageSize;
+
+    let navContainer = document.getElementById("navContainer");
+    let nextBtnContainer = document.getElementById("nextBtnContainer");
+
+
+    if (+page <= 1) {
+        page = 1;
+        document.getElementById("prevBtnContainer").setAttribute("class", "page-item disabled");
+        document.getElementById("btn_prev").setAttribute("tabindex", "-1");
+    }
+    if (+page >= maxPage) {
+        page = maxPage;
+        document.getElementById("nextBtnContainer").setAttribute("class", "page-item disabled");
+        document.getElementById("btn_next").setAttribute("tabindex", "-1");
+    }
+
+    let pageSizeSelect = document.getElementById("pageSize");
+    pageSizeSelect.value = pageSize;
+    for (let i = 1; i <= maxPage; i++) {
+        let li = document.createElement('li');
+        let a = document.createElement('a');
+        if (i === +page) {
+            li.setAttribute("class", "page-item disabled");
+            a.setAttribute("class", "page-link active");
+            a.setAttribute("tabindex", "-1")
+        } else {
+            li.setAttribute("class", "page-item");
+            a.setAttribute("class", "page-link");
+        }
+        a.setAttribute("id", i.toString());
+        a.setAttribute("href", "");
+        a.onclick = function () {
+            displayMainPage(this.id, pageSizeSelect.value);
+        }
+        let linkText = document.createTextNode(i.toString());
+        a.appendChild(linkText);
+        li.appendChild(a);
+        navContainer.insertBefore(li, nextBtnContainer);
+    }
+
+    pageSizeSelect.onchange = function () {
+        page = 1;
+        displayMainPage(page, pageSizeSelect.value);
+    }
+
+    document.getElementById("btn_prev").onclick = function () {
+        displayMainPage(+page - 1, document.getElementById("pageSize").value);
+    }
+
+    document.getElementById("btn_next").onclick = function () {
+        displayMainPage(+page + 1, document.getElementById("pageSize").value);
+    }
 }
 
 function navigate(link, callback) {
@@ -837,11 +844,13 @@ function deleteContact() {
         return response.json();
     }).then(function (myJson) {
         console.log("Received reply:" + myJson);
-        var tmpl = document.getElementById("mainTableTemplate").innerHTML;
-        var html = Mustache.to_html(tmpl, myJson);
-        var container = document.getElementById("myDiv");
-        container.innerHTML = html;
+        let tmpl = document.getElementById("mainTableTemplate").innerHTML;
+        let html = Mustache.to_html(tmpl, myJson);
+        document.getElementById("myDiv").innerHTML = html;
         history.pushState(null, "Display main page", "/brt/contacts");
+        return myJson;
+    }).then (function(myJson){
+        addPagination(myJson);
     })
 }
 

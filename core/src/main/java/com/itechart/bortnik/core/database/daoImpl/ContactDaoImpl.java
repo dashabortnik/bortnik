@@ -11,6 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.*;
 import java.util.Date;
@@ -351,7 +354,8 @@ public class ContactDaoImpl implements ContactDao {
             ResultSet resultSet = ps.executeQuery();
             while (resultSet.next()) {
                 totalNumberOfContacts = resultSet.getInt("totalNumber");
-            } return totalNumberOfContacts;
+            }
+            return totalNumberOfContacts;
         } catch (SQLException e) {
             logger.error("Error with counting contacts by given criteria: ", e);
         }
@@ -526,11 +530,15 @@ public class ContactDaoImpl implements ContactDao {
             ResultSet resultSetPhoto = psgetPhoto.executeQuery();
             while (resultSetPhoto.next()) {
                 String photoLink = resultSetPhoto.getString(DB_PHOTOLINK);
-                File file = new File(photoLink);
-                if (file.delete()) { //if deleted, returns true
-                    logger.info("Image of contact {} was deleted.", id);
+                if (photoLink != null && !photoLink.isEmpty()) {
+                    //File file = new File(photoLink);
+                    if (Files.deleteIfExists(Paths.get(photoLink))) { //if deleted, returns true
+                        logger.info("Image of contact {} was deleted.", id);
+                    } else {
+                        logger.warn("Deleting image of contact {} failed.", id);
+                    }
                 } else {
-                    logger.warn("Deleting image of contact {} failed.", id);
+                    logger.info("Contact {} had no image to delete.", id);
                 }
             }
             //retrieve attachment links and delete corresponding files
@@ -538,11 +546,15 @@ public class ContactDaoImpl implements ContactDao {
             ResultSet resultSetAttachments = psGetAttachments.executeQuery();
             while (resultSetAttachments.next()) {
                 String attachmentLink = resultSetAttachments.getString(DB_ATTACHMENTLINK);
-                File file = new File(attachmentLink);
-                if (file.delete()) { //if deleted, returns true
-                    logger.info("Attachment of contact {} was deleted.", id);
+                if (attachmentLink != null && !attachmentLink.isEmpty()) {
+                    //File file = new File(attachmentLink);
+                    if (Files.deleteIfExists(Paths.get(attachmentLink))) { //if deleted, returns true
+                        logger.info("Attachment of contact {} was deleted.", id);
+                    } else {
+                        logger.warn("Deleting attachment of contact {} failed.", id);
+                    }
                 } else {
-                    logger.warn("Deleting attachment of contact {} failed.", id);
+                    logger.info("Contact {} had no attachment to delete or attachment link was empty.", id);
                 }
             }
             //delete requested contact
@@ -551,6 +563,8 @@ public class ContactDaoImpl implements ContactDao {
             logger.info("Delete of contact with id {} executed.", id);
         } catch (SQLException e) {
             logger.error("Error with deleting contact: ", e);
+        } catch (IOException e) {
+            logger.error("Error when trying to delete files of contact {}.", id, e);
         }
     }
 
