@@ -76,12 +76,14 @@ public class CreateContactAction implements BaseAction {
         String attachmentName = null;
         String attachmentLink = null;
         String submittedFileName = null;
+        String commentary = null;
+        int attachmentCounter = 1;
 
         Properties props = new Properties();
         //compose message and fetch properties for smtp server and emails
-        try(InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("saveFiles.properties")){
+        try (InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("saveFiles.properties")) {
             props.load(input);
-         }catch (FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             logger.error("SaveFiles property file was not found: ", e);
         } catch (IOException e) {
             logger.error("Error with access to saveFiles properties: ", e);
@@ -156,45 +158,75 @@ public class CreateContactAction implements BaseAction {
                         }
                     }
                 } else if (fieldName.matches("attachment.*")) {
+
+                    //flag that shows if the same fieldName should be checked again
+                    int checkAgain = 1;
                     //parse fieldName to find ordinal number of the attachment and item name(attachment.1.attachmentName)
                     String[] fieldNameParts = fieldName.split("\\.");
                     int itemNumber = Integer.parseInt(fieldNameParts[1]);
                     String itemName = fieldNameParts[2];
                     /*parse values depending on item name, all fields are required;
                     a new attachment is created when link is reached*/
-                    switch (itemName) {
-                        case "attachmentName":
-                            attachmentName = item.getString("UTF-8");
-                            break;
-                        case "submittedFileName":
-                            String fakeName = item.getString("UTF-8");
-                            if (fakeName.contains("fakepath")) {
-                                // update the file-path text using regex
-                                submittedFileName = fakeName.replace("C:\\fakepath\\", "");
-                            } else {
-                                submittedFileName = fakeName;
+                    while (checkAgain == 1) {
+                        if (itemNumber == attachmentCounter) {
+                            switch (itemName) {
+                                case "attachmentName":
+                                    attachmentName = item.getString("UTF-8");
+                                    break;
+                                case "submittedFileName":
+                                    String fakeName = item.getString("UTF-8");
+                                    if (fakeName.contains("fakepath")) {
+                                        // update the file-path text using regex
+                                        submittedFileName = fakeName.replace("C:\\fakepath\\", "");
+                                    } else {
+                                        submittedFileName = fakeName;
+                                    }
+                                    break;
+                                case "commentary":
+                                    commentary = item.getString("UTF-8");
+                                    break;
+                                case "attachmentLink":
+                                    if (item.getSize() != 0) {
+                                        // No file was been selected, or it was an empty file.
+                                        String path = props.getProperty("saveDirectory") + File.separator +
+                                                "file" + File.separator + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1)
+                                                + "---" + submittedFileName;
+                                        File uploadedFile = new File(path);
+                                        item.write(uploadedFile);
+                                        attachmentLink = uploadedFile.getAbsolutePath();
+                                        if (attachmentName != null && !attachmentName.equals("") && attachmentLink != null &&
+                                                !attachmentLink.equals("")) {
+                                            Attachment attachment = new Attachment(0, attachmentName, attachmentLink,
+                                                    new java.sql.Date(new Date().getTime()), commentary, 0);
+                                            attachments.add(attachment);
+                                            attachmentName = null;
+                                            attachmentLink = null;
+                                            submittedFileName = null;
+                                            commentary = null;
+                                        }
+                                    } else {
+                                        logger.warn("No file selected or empty file.");
+                                    }
+                                    break;
+
                             }
-                            break;
-                        case "attachmentLink":
-                            String path = props.getProperty("saveDirectory") + File.separator +
-                                    "file" + File.separator + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1)
-                                    + "---" + submittedFileName;
-                            File uploadedFile = new File(path);
-                            item.write(uploadedFile);
-                            attachmentLink = uploadedFile.getAbsolutePath();
-                            //create attachment and add it to the list
+                            checkAgain = 0;
+                            continue cycle;
+                        } else {
                             if (attachmentName != null && !attachmentName.equals("") && attachmentLink != null &&
                                     !attachmentLink.equals("")) {
                                 Attachment attachment = new Attachment(0, attachmentName, attachmentLink,
-                                        new java.sql.Date(new Date().getTime()), 0);
+                                        new java.sql.Date(new Date().getTime()), commentary, 0);
                                 attachments.add(attachment);
                                 attachmentName = null;
                                 attachmentLink = null;
                                 submittedFileName = null;
-                            } else {
-                                logger.warn("Problem with new attachment. Name or link are empty.");
+                                commentary = null;
                             }
-                            break;
+                            //when the itemNumber has changed, counter+1 and the field should be checked again
+                            attachmentCounter++;
+                            checkAgain = 1;
+                        }
                     }
                 } else if (item.isFormField()) {
                     switch (item.getFieldName()) {
@@ -262,11 +294,13 @@ public class CreateContactAction implements BaseAction {
                         }
                     }
                 } else {
-                    String path = props.getProperty("saveDirectory") + File.separator + "img"
-                            + File.separator + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1) + ".jpg";
-                    File uploadedFile = new File(path);
-                    item.write(uploadedFile);
-                    photoLink = uploadedFile.getAbsolutePath();
+                    if (item.getSize() != 0) {
+                        String path = props.getProperty("saveDirectory") + File.separator + "img"
+                                + File.separator + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1) + ".jpg";
+                        File uploadedFile = new File(path);
+                        item.write(uploadedFile);
+                        photoLink = uploadedFile.getAbsolutePath();
+                    }
                 }
             }
             receivedContact = new Contact(0, surname, name, patronymic, birthday, gender, nationality, maritalStatus, website,

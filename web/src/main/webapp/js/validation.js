@@ -116,7 +116,7 @@ function validatePhone(newCountryCode, newOperatorCode, newPhoneNumber, newComme
 
 }
 
-function validateAttachment(newAttachmentName, newAttachmentLink) {
+function validateAttachment(newAttachmentName, newCommentary, newAttachmentLink) {
     let errorAttachment = [];
     //if any required field is empty, the row won't be saved
     if (newAttachmentName.value === null || newAttachmentLink.value === null ||
@@ -126,6 +126,10 @@ function validateAttachment(newAttachmentName, newAttachmentLink) {
     }
     if (newAttachmentName.value.length > 100) {
         let error = "Inserted attachment name is too long. Please, enter up to 100 digits.";
+        errorAttachment.push(error);
+    }
+    if (newCommentary.value.length > 50) {
+        let error = "Inserted attachment commentary is too long. Please, enter up to 50 digits.";
         errorAttachment.push(error);
     }
     if (errorAttachment.length !== 0) {

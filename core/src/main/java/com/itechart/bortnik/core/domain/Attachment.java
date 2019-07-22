@@ -8,17 +8,19 @@ public class Attachment extends BaseEntity{
     private String name;
     private String link;
     private Date uploadDate;
+    private String commentary;
     private int contactId;
 
     public Attachment(int id) {
         super(id);
     }
 
-    public Attachment(int id, String name, String link, Date uploadDate, int contactId) {
+    public Attachment(int id, String name, String link, Date uploadDate, String commentary, int contactId) {
         super(id);
         this.name = name;
         this.link = link;
         this.uploadDate = uploadDate;
+        this.commentary = commentary;
         this.contactId = contactId;
     }
 
@@ -54,20 +56,12 @@ public class Attachment extends BaseEntity{
         this.link = link;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Attachment that = (Attachment) o;
-        return contactId == that.contactId &&
-                Objects.equals(name, that.name) &&
-                Objects.equals(link, that.link) &&
-                Objects.equals(uploadDate, that.uploadDate);
+    public String getCommentary() {
+        return commentary;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, link, uploadDate, contactId);
+    public void setCommentary(String commentary) {
+        this.commentary = commentary;
     }
 
     @Override
@@ -76,6 +70,7 @@ public class Attachment extends BaseEntity{
                 "name='" + name + '\'' +
                 ", link='" + link + '\'' +
                 ", uploadDate=" + uploadDate +
+                ", commentary='" + commentary + '\'' +
                 ", contactId=" + contactId +
                 '}';
     }

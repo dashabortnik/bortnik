@@ -407,13 +407,18 @@ function submitForm(form) {
         let fullName = "attachment." + i + "." + name;
         formData.append(fullName, value);
 
+        let commentName = attachmentTable.rows[i].cells[2].firstChild.name;
+        let commentValue = attachmentTable.rows[i].cells[2].firstChild.value;
+        let fullCommentName = "attachment." + i + "." + commentName;
+        formData.append(fullCommentName, commentValue);
+
         let userFileName = "attachment." + i + "." + "submittedFileName";
         //value will give fake path with filename
-        let submittedName = attachmentTable.rows[i].cells[2].firstChild.value;
+        let submittedName = attachmentTable.rows[i].cells[3].firstChild.value;
         formData.append(userFileName, submittedName);
 
-        let fileName = attachmentTable.rows[i].cells[2].firstChild.name;
-        let file = attachmentTable.rows[i].cells[2].firstChild.files[0];
+        let fileName = attachmentTable.rows[i].cells[3].firstChild.name;
+        let file = attachmentTable.rows[i].cells[3].firstChild.files[0];
         let fullFileName = "attachment." + i + "." + fileName;
         formData.append(fullFileName, file);
     }
@@ -616,30 +621,25 @@ function submitEditForm(form, checkedId){
         formData.append(fullName, value);
         console.log(fullName + "---" + value);
 
-        let userFileName = "attachment." + i + "." + "submittedFileName";
-        //value will give fake path with filename
-        let submittedName = attachmentTable.rows[i].cells[2].getElementsByTagName("input")[0].value;
-        formData.append(userFileName, submittedName);
-        console.log(userFileName + "---" + submittedName);
+        let commentName = attachmentTable.rows[i].cells[2].firstChild.name;
+        let commentValue = attachmentTable.rows[i].cells[2].firstChild.value;
+        let fullCommentName = "attachment." + i + "." + commentName;
+        formData.append(fullCommentName, commentValue);
 
-        let fileName = attachmentTable.rows[i].cells[2].getElementsByTagName("input")[0].name;
-        let file;
-        // if(!!fileName){
-            file = attachmentTable.rows[i].cells[2].getElementsByTagName("input")[0].files[0];
-        // } else {
-        //     file = null;
-        // }
-        let fullFileName = "attachment." + i + "." + fileName;
-        formData.append(fullFileName, file);
-        console.log(fullFileName+ "---" + file);
+        if(attachmentId==="") {
+            let userFileName = "attachment." + i + "." + "submittedFileName";
+            //value will give fake path with filename
+            let submittedName = attachmentTable.rows[i].cells[3].getElementsByTagName("input")[0].value;
+            formData.append(userFileName, submittedName);
+            console.log(userFileName + "---" + submittedName);
+
+            let fileName = attachmentTable.rows[i].cells[3].getElementsByTagName("input")[0].name;
+            let file = attachmentTable.rows[i].cells[3].getElementsByTagName("input")[0].files[0];
+            let fullFileName = "attachment." + i + "." + fileName;
+            formData.append(fullFileName, file);
+            console.log(fullFileName + "---" + file);
+        }
     }
-
-    // for(let pair of formData.entries()) {
-    //     console.log(pair[0]+ ', '+ pair[1]);
-    //     if(pair[1]===undefined ){
-    //         formData.set(pair[0], null);
-    //     }
-    // }
 
     let photoLink;
     let fetchLink = "/brt/api/contacts/" + checkedId;
@@ -758,9 +758,10 @@ function savePhone(newPhoneTable, modal) {
 function saveAttachment(newAttachmentTable, modal) {
     //get filled in values from popup window
     let newAttachmentName = document.getElementById("attachmentName");
+    let newCommentary = document.getElementById("commentary");
     let newAttachmentLink = document.getElementById("attachmentLink");
 
-    if (validateAttachment(newAttachmentName, newAttachmentLink)) {
+    if (validateAttachment(newAttachmentName, newCommentary, newAttachmentLink)) {
 
         //create inputs for attachmentTable
         let checkbox = document.createElement("input");
@@ -773,13 +774,19 @@ function saveAttachment(newAttachmentTable, modal) {
         let newRow = table.insertRow();
         newRow.insertCell(0).appendChild(checkbox);
         newRow.insertCell(1).appendChild(newAttachmentName);
-        newRow.insertCell(2).appendChild(newAttachmentLink);
+        newRow.insertCell(2).appendChild(newCommentary);
+        newRow.insertCell(3).appendChild(newAttachmentLink);
 
         //create new input fields for modal window, as the existing ones are appended to attachmentTable
         let inputAttachmentName = document.createElement("input");
         inputAttachmentName.setAttribute("type", "text");
         inputAttachmentName.setAttribute("id", "attachmentName");
         inputAttachmentName.setAttribute("name", "attachmentName");
+
+        let inputCommentary = document.createElement("input");
+        inputCommentary.setAttribute("type", "text");
+        inputCommentary.setAttribute("id", "commentary");
+        inputCommentary.setAttribute("name", "commentary");
 
         let inputAttachmentLink = document.createElement("input");
         inputAttachmentLink.setAttribute("type", "file");
@@ -788,6 +795,7 @@ function saveAttachment(newAttachmentTable, modal) {
 
         //append empty input fields to modal window
         document.getElementById("attachmentNameHolder").appendChild(inputAttachmentName);
+        document.getElementById("commentaryHolder").appendChild(inputCommentary);
         document.getElementById("attachmentLinkHolder").appendChild(inputAttachmentLink);
 
         //hide modal window

@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS `bortnik_db`.`attachment` (
  `attachment_name` VARCHAR(100) NOT NULL,
  `attachment_link` VARCHAR(255) NOT NULL,
  `upload_date` DATE NOT NULL,
+ `commentary` VARCHAR(50) DEFAULT NULL,
  `contact_id` INT(11) UNSIGNED NOT NULL,
  PRIMARY KEY (`attachment_id`),
  KEY `contact_id` (`contact_id`),

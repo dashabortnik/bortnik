@@ -63,6 +63,6 @@ VALUES ('+375', '33','3455654', 'mobile', NULL, (SELECT contact_id FROM contact 
 
 /*insert attachment*/
 INSERT INTO attachment (attachment_name, attachment_link, upload_date, contact_id) 
-VALUES ('passport', 'https://clck.ru/GP4ri', CURDATE(), (SELECT contact_id FROM contact WHERE surname = 'Petrov' AND name = 'Ivan'));
+VALUES ('passport', 'https://clck.ru/GP4ri', CURDATE(), NULL, (SELECT contact_id FROM contact WHERE surname = 'Petrov' AND name = 'Ivan'));
 
 

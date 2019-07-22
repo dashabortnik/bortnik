@@ -19,15 +19,14 @@ import org.slf4j.LoggerFactory;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.file.FileSystems;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class UpdateContactAction implements BaseAction{
@@ -78,6 +77,18 @@ public class UpdateContactAction implements BaseAction{
         String attachmentName = null;
         String attachmentLink = null;
         String submittedFileName = null;
+        String commentary = null;
+        int attachmentCounter = 1;
+
+        Properties props = new Properties();
+        //compose message and fetch properties for smtp server and emails
+        try (InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("saveFiles.properties")) {
+            props.load(input);
+        } catch (FileNotFoundException e) {
+            logger.error("SaveFiles property file was not found: ", e);
+        } catch (IOException e) {
+            logger.error("Error with access to saveFiles properties: ", e);
+        }
 
         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy");
         List<FileItem> items = null;
@@ -183,11 +194,14 @@ public class UpdateContactAction implements BaseAction{
                             File uploadedFile = new File(path);
                             item.write(uploadedFile);
                             attachmentLink = uploadedFile.getAbsolutePath();
+                            break;
+                        case "commentary":
+                            commentary = item.getString("UTF-8");
                             //create attachment and add it to the list
                             if (attachmentName != null && !attachmentName.equals("") && attachmentLink != null &&
                                     !attachmentLink.equals("")) {
                                 Attachment attachment = new Attachment(0, attachmentName, attachmentLink,
-                                        new java.sql.Date(new Date().getTime()), 0);
+                                        new java.sql.Date(new Date().getTime()), commentary,  0);
                                 attachments.add(attachment);
                                 attachmentName = null;
                                 attachmentLink = null;

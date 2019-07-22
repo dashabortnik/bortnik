@@ -156,6 +156,10 @@
                                 <td id="attachmentNameHolder"><input type="text" name="attachmentName" id="attachmentName"></td>
                             </tr>
                             <tr>
+                                <th class="align-middle text-center">Commentary</th>
+                                <td id="commentaryHolder"><input type="text" name="commentary" id="commentary"></td>
+                            </tr>
+                            <tr>
                                  <th class="align-middle text-center">Attachment link</th>
                                  <td id="attachmentLinkHolder">
                                     <input type="file" name="attachmentLink" id="attachmentLink">
@@ -174,6 +178,7 @@
                 <tr class="bg-light">
                     <th class="align-middle text-center">Check</th>
                     <th class="align-middle text-center">Attachment</th>
+                    <th class="align-middle text-center">Commentary</th>
                     <th class="align-middle text-center">Download link</th>
                 </tr>
                 </thead>
@@ -183,9 +188,9 @@
                     <td><input type="checkbox" name="#" value="?" class="check"
                                id="{{& id}}"></td>
                     <td><input type="text" name="attachmentName" value="{{name}}"> <p>{{uploadDate}}</p></td>
+                    <td><input type="text" name="commentary" value="{{commentary}}"></td>
                     <td>
                         <button type="button" class="btn btn-secondary col-md-5"  value="{{& link}}" onclick="downloadFile(this.value)">Download: "{{& realFileName}}"</button>
-                        <input type="file" name="attachmentLink" id="attachmentLink">
                     </td>
                 </tr>
                 {{/attachmentList}}

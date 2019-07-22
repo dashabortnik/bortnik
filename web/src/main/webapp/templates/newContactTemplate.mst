@@ -146,6 +146,10 @@
                             <td id="attachmentNameHolder"><input type="text" name="attachmentName" id="attachmentName"></td>
                         </tr>
                         <tr>
+                            <th class="align-middle text-center">Commentary</th>
+                            <td id="commentaryHolder"><input type="text" name="commentary" id="commentary"></td>
+                        </tr>
+                        <tr>
                             <th class="align-middle text-center">Attachment link</th>
                             <td id="attachmentLinkHolder">
                                 <input type="file" name="attachmentLink" id="attachmentLink">
@@ -164,6 +168,7 @@
                 <tr class="bg-light">
                     <th class="align-middle text-center">Check</th>
                     <th class="align-middle text-center">Attachment name</th>
+                    <th class="align-middle text-center">Commentary</th>
                     <th class="align-middle text-center">Attachment link</th>
                 </tr>
             </thead>

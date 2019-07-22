@@ -41,9 +41,10 @@ public class AttachmentDaoImpl implements AttachmentDao {
                 String name = resultSet.getString("attachment_name");
                 String link = resultSet.getString("attachment_link");
                 Date uploadDate = resultSet.getDate("upload_date");
+                String commentary = resultSet.getString("commentary");
                 int contactId = resultSet.getInt("contact_id");
                 //create attachment from extracted data
-                Attachment attach = new Attachment(attachmentId, name, link, uploadDate, contactId);
+                Attachment attach = new Attachment(attachmentId, name, link, uploadDate, commentary, contactId);
                 attachments.add(attach);
             }
             logger.info("Attachments were fetched successfully.");
@@ -55,13 +56,14 @@ public class AttachmentDaoImpl implements AttachmentDao {
 
     @Override
     public Attachment insert(Attachment attachment) {
-        String sql = "INSERT INTO attachment (attachment_name, attachment_link, upload_date, contact_id) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO attachment (attachment_name, attachment_link, upload_date, commentary, contact_id) VALUES (?, ?, ?, ?, ?)";
         try (Connection connection = DatabaseUtil.getDataSource().getConnection();
              PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, attachment.getName());
             ps.setString(2, attachment.getLink());
             ps.setObject(3, attachment.getUploadDate());
-            ps.setInt(4, attachment.getContactId());
+            ps.setString(4, attachment.getCommentary());
+            ps.setInt(5, attachment.getContactId());
             ps.execute();
             ResultSet generatedKeys = ps.getGeneratedKeys();
             if (generatedKeys.next()) {
@@ -76,13 +78,14 @@ public class AttachmentDaoImpl implements AttachmentDao {
 
     @Override
     public Attachment update(Attachment attachment) {
-        String sql = "UPDATE attachment SET attachment_name=?, attachment_link=?, upload_date=? WHERE contact_id = ?";
+        String sql = "UPDATE attachment SET attachment_name=?, attachment_link=?, upload_date=? , commentary=? WHERE contact_id = ?";
         try (Connection connection = DatabaseUtil.getDataSource().getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, attachment.getName());
             ps.setString(2, attachment.getLink());
             ps.setObject(3, attachment.getUploadDate());
-            ps.setInt(4, attachment.getContactId());
+            ps.setString(4, attachment.getCommentary());
+            ps.setInt(5, attachment.getContactId());
             ps.execute();
             logger.info("Attachment was updated successfully.");
         } catch (SQLException e) {
