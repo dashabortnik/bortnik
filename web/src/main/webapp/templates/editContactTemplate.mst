@@ -133,7 +133,7 @@
             {{#phoneList}}
             <tr>
                 <td><input type="checkbox" name="#" value="?" class="check"
-                           id="{{phoneId}}"></td>
+                           id="{{& id}}"></td>
                 <td><input type="text" name="countryCode" value="{{countryCode}}"></td>
                 <td><input type="text" name="operatorCode" value="{{operatorCode}}"></td>
                 <td><input type="text" name="phoneNumber" value="{{phoneNumber}}"></td>
@@ -181,7 +181,7 @@
                 {{#attachmentList}}
                 <tr>
                     <td><input type="checkbox" name="#" value="?" class="check"
-                               id="{{attachmentId}}"></td>
+                               id="{{& id}}"></td>
                     <td><input type="text" name="attachmentName" value="{{name}}"> <p>{{uploadDate}}</p></td>
                     <td>
                         <button type="button" class="btn btn-secondary col-md-5"  value="{{& link}}" onclick="downloadFile(this.value)">Download: "{{& realFileName}}"</button>

@@ -586,6 +586,12 @@ function submitEditForm(form, checkedId) {
     //append phones to formData
     let phoneTable = document.getElementById("phoneTable");
     for (let i = 1; i < phoneTable.rows.length; i++) {
+
+        //save phone id
+        let phoneId = phoneTable.rows[i].cells[0].firstChild.id;
+        let phoneIdName = "phone." + i + ".id";
+        formData.append(phoneIdName, phoneId);
+
         for (let j = 1; j < phoneTable.rows[i].cells.length; j++) {
             let name = phoneTable.rows[i].cells[j].firstChild.name;
             let value = phoneTable.rows[i].cells[j].firstChild.value;
@@ -598,21 +604,42 @@ function submitEditForm(form, checkedId) {
     //append attachments to formData
     let attachmentTable = document.getElementById("attachmentTable");
     for (let i = 1; i < attachmentTable.rows.length; i++) {
+
+        //save attachment id
+        let attachmentId = attachmentTable.rows[i].cells[0].firstChild.id;
+        let attachmentIdName = "attachment." + i + ".id";
+        formData.append(attachmentIdName, attachmentId);
+
         let name = attachmentTable.rows[i].cells[1].firstChild.name;
         let value = attachmentTable.rows[i].cells[1].firstChild.value;
         let fullName = "attachment." + i + "." + name;
         formData.append(fullName, value);
+        console.log(fullName + "---" + value);
 
         let userFileName = "attachment." + i + "." + "submittedFileName";
         //value will give fake path with filename
-        let submittedName = attachmentTable.rows[i].cells[2].firstChild.value;
+        let submittedName = attachmentTable.rows[i].cells[2].getElementsByTagName("input")[0].value;
         formData.append(userFileName, submittedName);
+        console.log(userFileName + "---" + submittedName);
 
-        let fileName = attachmentTable.rows[i].cells[2].firstChild.name;
-        let file = attachmentTable.rows[i].cells[2].firstChild.files[0];
+        let fileName = attachmentTable.rows[i].cells[2].getElementsByTagName("input")[0].name;
+        let file;
+        // if(!!fileName){
+            file = attachmentTable.rows[i].cells[2].getElementsByTagName("input")[0].files[0];
+        // } else {
+        //     file = null;
+        // }
         let fullFileName = "attachment." + i + "." + fileName;
         formData.append(fullFileName, file);
+        console.log(fullFileName+ "---" + file);
     }
+
+    // for(let pair of formData.entries()) {
+    //     console.log(pair[0]+ ', '+ pair[1]);
+    //     if(pair[1]===undefined ){
+    //         formData.set(pair[0], null);
+    //     }
+    // }
 
     let photoLink;
     let fetchLink = "/brt/api/contacts/" + checkedId;
