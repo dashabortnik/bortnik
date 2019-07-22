@@ -813,8 +813,9 @@ function deleteContact() {
         //delete button pressed on the page of individual contact
         console.log("Particular case");
         let array = currentPath.split("/");
-        idArray.push(array[2]);
-        tail = "/contacts/" + array[2];
+        console.log("SPLIT ARRAY: " + array.toString());
+        idArray.push(array[3]);
+        tail = "/contacts/" + array[3];
     } else {
         alert("Please, choose contact(s) to delete.");
         return false;
@@ -1089,7 +1090,6 @@ function displayFoundContacts(formData, page, pageSize) {
                         searchParamsText += key + ": " + searchData[key] + "; ";
                     }
                 }
-
             }
             let textNode = document.createTextNode(searchParamsText);
             document.getElementById("searchParameters").appendChild(textNode);
