@@ -1,10 +1,10 @@
 <!--Edit contact template - every field has a default value taken from db and user can edit them-->
 
-    <form enctype="multipart/form-data" method="post" id="editedContact">
-        <span class="rounded float-right col-6 col-md-4 text-center">
+     <span class="rounded float-right col-6 col-md-4 text-center">
         <img src="" class="img-fluid img-thumbnail avatar">
-        <input type="file" name="photoLink">
+        <input type="file" name="photoLink" id="photoLink">
     </span>
+     <form enctype="multipart/form-data" method="post" id="editedContact">
         <table class="table table-bordered table-sm table-hover col-12 col-md-8">
             <tbody>
             <tr>

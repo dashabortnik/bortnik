@@ -67,7 +67,8 @@ public class Attachment extends BaseEntity{
     @Override
     public String toString() {
         return "Attachment{" +
-                "name='" + name + '\'' +
+                "id='" + this.getId() + '\''+
+                ", name='" + name + '\'' +
                 ", link='" + link + '\'' +
                 ", uploadDate=" + uploadDate +
                 ", commentary='" + commentary + '\'' +

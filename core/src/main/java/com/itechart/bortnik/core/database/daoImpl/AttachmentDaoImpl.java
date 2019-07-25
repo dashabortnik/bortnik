@@ -6,6 +6,9 @@ import com.itechart.bortnik.core.domain.Attachment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -78,14 +81,12 @@ public class AttachmentDaoImpl implements AttachmentDao {
 
     @Override
     public Attachment update(Attachment attachment) {
-        String sql = "UPDATE attachment SET attachment_name=?, attachment_link=?, upload_date=? , commentary=? WHERE contact_id = ?";
+        String sql = "UPDATE attachment SET attachment_name=?, commentary=? WHERE contact_id = ?";
         try (Connection connection = DatabaseUtil.getDataSource().getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, attachment.getName());
-            ps.setString(2, attachment.getLink());
-            ps.setObject(3, attachment.getUploadDate());
-            ps.setString(4, attachment.getCommentary());
-            ps.setInt(5, attachment.getContactId());
+            ps.setString(2, attachment.getCommentary());
+            ps.setInt(3, attachment.getContactId());
             ps.execute();
             logger.info("Attachment was updated successfully.");
         } catch (SQLException e) {
@@ -96,14 +97,34 @@ public class AttachmentDaoImpl implements AttachmentDao {
 
     @Override
     public void delete(int id) {
+        String selectSql = "SELECT attachment_link FROM attachment WHERE attachment_id = ?";
         String sql = "DELETE FROM attachment WHERE attachment_id=?";
-        try (Connection connection = DatabaseUtil.getDataSource().getConnection();
-             PreparedStatement ps = connection.prepareStatement(sql)) {
+        try(Connection connection = DatabaseUtil.getDataSource().getConnection();
+            PreparedStatement psSelect = connection.prepareStatement(selectSql);
+            PreparedStatement ps = connection.prepareStatement(sql)){
+            //delete file from disk
+            psSelect.setInt(1, id);
+            ResultSet resultSet = psSelect.executeQuery();
+            while (resultSet.next()) {
+                String link = resultSet.getString("attachment_link");
+                if (link != null && !link.isEmpty()) {
+                    if (Files.deleteIfExists(Paths.get(link))) { //if deleted, returns true
+                        logger.info("Attachment file of contact {} was deleted from storage.", id);
+                    } else {
+                        logger.warn("Deleting attachment file of contact {} from storage failed.", id);
+                    }
+                } else {
+                    logger.info("Contact {} had no attachment file to delete or attachment link was empty.", id);
+                }
+            }
+            //delete attachment from database
             ps.setInt(1, id);
             ps.execute();
-            logger.info("Attachment with id {} was deleted successfully.", id);
+            logger.info("Attachment with id {} was deleted successfully from database.", id);
         } catch (SQLException e) {
-            logger.error("Error with deleting attachment: ", e);
+            logger.error("Error with deleting attachment from database: ", e);
+        } catch (IOException e) {
+            logger.error("Error with deleting attachment file from storage: ", e);
         }
     }
 }

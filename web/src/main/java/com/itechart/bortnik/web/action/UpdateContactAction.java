@@ -29,13 +29,13 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ThreadLocalRandom;
 
-public class UpdateContactAction implements BaseAction{
+public class UpdateContactAction implements BaseAction {
 
     private ContactService contactService;
     private PhoneService phoneService;
     private AttachmentService attachmentService;
 
-    public UpdateContactAction(){
+    public UpdateContactAction() {
         contactService = new ContactServiceImpl();
         phoneService = new PhoneServiceImpl();
         attachmentService = new AttachmentServiceImpl();
@@ -46,6 +46,10 @@ public class UpdateContactAction implements BaseAction{
 
     @Override
     public void execute(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+
+        String requestUri = request.getRequestURI();
+        String contactId = requestUri.split("/")[4];
+        int updateContactWithId = Integer.valueOf(contactId);
 
         //create empty objects and variables for parsing
         Contact receivedContact = null;
@@ -115,8 +119,11 @@ public class UpdateContactAction implements BaseAction{
                     while (checkAgain == 1) {
                         if (itemNumber == phoneCounter) {
                             switch (itemName) {
-                                case "phoneId":
-                                    phoneId = Integer.valueOf(item.getString("UTF-8"));
+                                case "id":
+                                    String newId = item.getString("UTF-8");
+                                    if (newId!=null && !newId.isEmpty()) {
+                                        phoneId = Integer.valueOf(newId);
+                                    }
                                     break;
                                 case "countryCode":
                                     countryCode = item.getString("UTF-8");
@@ -133,8 +140,8 @@ public class UpdateContactAction implements BaseAction{
                                 case "comment":
                                     comment = item.getString("UTF-8");
                                     if (countryCode != null && operatorCode != null && phoneNumber != null && phoneType != null) {
-                                        Phone phone = new Phone(0, countryCode, operatorCode,
-                                                phoneNumber, phoneType, comment, 0);
+                                        Phone phone = new Phone(phoneId, countryCode, operatorCode,
+                                                phoneNumber, phoneType, comment, updateContactWithId);
                                         phones.add(phone);
                                         phoneId = 0;
                                         countryCode = null;
@@ -150,7 +157,7 @@ public class UpdateContactAction implements BaseAction{
                         } else {
                             if (countryCode != null && operatorCode != null && phoneNumber != null && phoneType != null) {
                                 Phone phone = new Phone(0, countryCode, operatorCode,
-                                        phoneNumber, phoneType, comment, 0);
+                                        phoneNumber, phoneType, comment, updateContactWithId);
                                 phones.add(phone);
                                 phoneId = 0;
                                 countryCode = null;
@@ -172,11 +179,17 @@ public class UpdateContactAction implements BaseAction{
                     /*parse values depending on item name, all fields are required;
                     a new attachment is created when link is reached*/
                     switch (itemName) {
-                        case "attachmentId":
-                            attachmentId = Integer.valueOf(item.getString("UTF-8"));
+                        case "id":
+                            String newId = item.getString("UTF-8");
+                            if (newId!=null && !newId.isEmpty()) {
+                                attachmentId = Integer.valueOf(newId);
+                            }
                             break;
                         case "attachmentName":
                             attachmentName = item.getString("UTF-8");
+                            break;
+                        case "commentary":
+                            commentary = item.getString("UTF-8");
                             break;
                         case "submittedFileName":
                             String fakeName = item.getString("UTF-8");
@@ -188,26 +201,27 @@ public class UpdateContactAction implements BaseAction{
                             }
                             break;
                         case "attachmentLink":
-                            String path = FileSystems.getDefault().getPath("").toAbsolutePath() + File.separator +
-                                    "file" + File.separator + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1)
-                                    + "---" + submittedFileName;
-                            File uploadedFile = new File(path);
-                            item.write(uploadedFile);
-                            attachmentLink = uploadedFile.getAbsolutePath();
-                            break;
-                        case "commentary":
-                            commentary = item.getString("UTF-8");
+                            if(submittedFileName!=null) {
+                                String path = props.getProperty("saveDirectory") + File.separator +
+                                        "file" + File.separator + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1)
+                                        + "---" + submittedFileName;
+                                File uploadedFile = new File(path);
+                                item.write(uploadedFile);
+                                attachmentLink = uploadedFile.getAbsolutePath();
+                            }
+
                             //create attachment and add it to the list
-                            if (attachmentName != null && !attachmentName.equals("") && attachmentLink != null &&
-                                    !attachmentLink.equals("")) {
-                                Attachment attachment = new Attachment(0, attachmentName, attachmentLink,
-                                        new java.sql.Date(new Date().getTime()), commentary,  0);
+                            if (attachmentName != null && !attachmentName.equals("")) {
+                                Attachment attachment = new Attachment(attachmentId, attachmentName, attachmentLink,
+                                        new java.sql.Date(new Date().getTime()), commentary, updateContactWithId);
                                 attachments.add(attachment);
+                                attachmentId = 0;
                                 attachmentName = null;
-                                attachmentLink = null;
+                                commentary = null;
                                 submittedFileName = null;
+                                attachmentLink = null;
                             } else {
-                                logger.warn("Problem with new attachment. Name or link are empty.");
+                                logger.warn("Problem with new attachment. Name is empty.");
                             }
                             break;
                     }
@@ -277,14 +291,14 @@ public class UpdateContactAction implements BaseAction{
                         }
                     }
                 } else {
-                    String path = FileSystems.getDefault().getPath("").toAbsolutePath() + File.separator + "img"
+                    String path = props.getProperty("saveDirectory") + File.separator + "img"
                             + File.separator + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1) + ".jpg";
                     File uploadedFile = new File(path);
                     item.write(uploadedFile);
                     photoLink = uploadedFile.getAbsolutePath();
                 }
             }
-            receivedContact = new Contact(0, surname, name, patronymic, birthday, gender, nationality, maritalStatus, website,
+            receivedContact = new Contact(updateContactWithId, surname, name, patronymic, birthday, gender, nationality, maritalStatus, website,
                     email, workplace, photoLink, new Address(0, country, city, street, postcode));
 
         } catch (FileUploadException e) {
@@ -300,7 +314,7 @@ public class UpdateContactAction implements BaseAction{
         logger.debug("Updated contact from formData info: {}", fullContactDTO);
 
         if (fullContactDTO != null) {
-            FullContactDTO fullContact = contactService.save(fullContactDTO);
+            FullContactDTO fullContact = contactService.update(fullContactDTO);
             //write the created contact into response
             response.setHeader("Content-Type", "application/json; charset=UTF-8");
             ObjectMapper mapper = new ObjectMapper();

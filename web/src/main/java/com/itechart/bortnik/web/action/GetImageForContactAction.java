@@ -37,12 +37,14 @@ public class GetImageForContactAction implements BaseAction {
                 img = ImageIO.read(new File(path));
                 logger.info("Requested image was retrieved successfully.");
             } catch (IOException e) {
-                img = ImageIO.read(getClass().getResource("/img/default.jpg"));
                 logger.error("Failed to read the image by given link: ", e);
             }
         }
         response.setContentType("image/jpeg");
         try (OutputStream out = response.getOutputStream()) {
+            if (img==null){
+                ImageIO.read(getClass().getResource("/img/default.jpg"));
+            }
             ImageIO.write(img, "jpg", out);
             logger.info("Retrieved image was sent to browser");
         } catch (IOException e){

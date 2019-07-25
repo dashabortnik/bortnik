@@ -419,29 +419,27 @@ public class ContactDaoImpl implements ContactDao {
 
     @Override
     public Contact update(Contact contact) {
-//        String sql = "UPDATE contact SET surname=?, name=?, patronymic=?, birthday=?, gender=?, nationality=?, marital_status=?, website=?, email=?, workplace=?, photo_link=? WHERE contact_id = ?";
-//        String sqlAddress = "UPDATE address SET country=?, city=?, street=?, postcode=? WHERE contact_id = ?";
-//        String deleteSql = "DELETE FROM contact WHERE contact_id = ?";
-
-        String sql = "INSERT INTO contact (surname, name, patronymic, birthday, gender, nationality, marital_status, website, email, workplace, photo_link) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        String sqlAddress = "INSERT INTO address (country, city, street, postcode, contact_id) VALUES (?, ?, ?, ?, ?)";
+        String newPhotoLink = contact.getPhotoLink();
+        String sql;
 
         Connection connection = null;
-//        PreparedStatement psDelete = null;
         PreparedStatement ps = null;
         PreparedStatement psAddress = null;
+
+        if (newPhotoLink!=null && !newPhotoLink.isEmpty()){
+            sql = "UPDATE contact SET surname=?, name=?, patronymic=?, birthday=?, gender=?, nationality=?, marital_status=?, website=?, email=?, workplace=?, photo_link=? WHERE contact_id = ?";
+        } else {
+            sql = "UPDATE contact SET surname=?, name=?, patronymic=?, birthday=?, gender=?, nationality=?, marital_status=?, website=?, email=?, workplace=? WHERE contact_id = ?";
+        }
+        String sqlAddress = "UPDATE address SET country=?, city=?, street=?, postcode=? WHERE contact_id = ?";
+
         try {
             connection = DatabaseUtil.getDataSource().getConnection();
-//            psDelete = connection.prepareStatement(deleteSql);
             ps = connection.prepareStatement(sql);
             psAddress = connection.prepareStatement(sqlAddress);
             connection.setAutoCommit(false);
             logger.debug("Update of contact - begin transaction. {}", contact.getId());
 
-//            psDelete.setInt(1, contact.getId());
-//            ps.execute();
-            delete(contact.getId());
-            logger.info("Delete of contact with id {} executed.", contact.getId());
             //update the contact
             ps.setString(1, contact.getSurname());
             ps.setString(2, contact.getName());
@@ -463,7 +461,14 @@ public class ContactDaoImpl implements ContactDao {
             ps.setString(8, contact.getWebsite());
             ps.setString(9, contact.getEmail());
             ps.setString(10, contact.getWorkplace());
-            ps.setString(11, contact.getPhotoLink());
+
+            if (newPhotoLink!=null && !newPhotoLink.isEmpty()){
+                ps.setString(11, contact.getPhotoLink());
+                ps.setInt(12, contact.getId());
+            } else {
+                ps.setInt(11, contact.getId());
+            }
+
             ps.execute();
             //update the address
             psAddress.setString(1, contact.getAddress().getCountry());
@@ -474,23 +479,16 @@ public class ContactDaoImpl implements ContactDao {
             psAddress.execute();
             connection.commit();
             logger.debug("Update of contact - end transaction.");
-            return contact;
         } catch (SQLException e) {
             try {
                 logger.error("Error with updating contact: ", e);
                 connection.rollback();
+                contact = null;
             } catch (SQLException ex) {
                 logger.error("Error with updating contact: ", ex);
             }
 
         } finally {
-//            if (psDelete != null) {
-//                try {
-//                    psDelete.close();
-//                } catch (SQLException e) {
-//                    logger.error("Error with closing delete prepared statement: ", e);
-//                }
-//            }
             if (ps != null) {
                 try {
                     ps.close();
@@ -513,7 +511,9 @@ public class ContactDaoImpl implements ContactDao {
                 }
             }
         }
-        return null;
+        String photoLink = readPhotoLinkById(contact.getId());
+        contact.setPhotoLink(photoLink);
+        return contact;
     }
 
     @Override
@@ -604,4 +604,25 @@ public class ContactDaoImpl implements ContactDao {
         }
         return null;
     }
+
+    public String readPhotoLinkById(int id) {
+        String sql = "SELECT photo_link FROM contact WHERE contact_id=?";
+        String photoLink = null;
+        try (Connection connection = DatabaseUtil.getDataSource().getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            ResultSet resultSet = ps.executeQuery();
+
+            while (resultSet.next()) {
+                photoLink = resultSet.getString(DB_PHOTOLINK);
+                logger.info("Photolink from contact {} was fetched from database successfully.", id);
+                return photoLink;
+            }
+        } catch (SQLException e) {
+            logger.error("Error with database query execution: ", e);
+        }
+        return photoLink;
+    }
+
+
 }

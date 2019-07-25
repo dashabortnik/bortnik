@@ -593,7 +593,11 @@ function openEditForm() {
 function submitEditForm(form, checkedId){
     event.preventDefault();
     event.stopPropagation();
+
     let formData = new FormData(form);
+
+    let newImage = document.getElementById("photoLink").files[0];;
+    formData.append("photoLink", newImage);
 
     //append phones to formData
     let phoneTable = document.getElementById("phoneTable");
@@ -645,11 +649,15 @@ function submitEditForm(form, checkedId){
             let fullFileName = "attachment." + i + "." + fileName;
             formData.append(fullFileName, file);
             console.log(fullFileName + "---" + file);
+        } else {
+            let fullFileName = "attachment." + i + ".attachmentLink";
+            formData.append(fullFileName, null);
         }
     }
 
-    let photoLink;
+    let photoLink = null;
     let fetchLink = "/brt/api/contacts/" + checkedId;
+    let historyLink = "/brt/contacts/" + checkedId;
 
     const data = fetch(fetchLink, {
         method: 'POST',
@@ -677,14 +685,14 @@ function submitEditForm(form, checkedId){
             let resolvedTemplate = response[1];
             // Cache the template for future use
             Mustache.parse(resolvedTemplate);
-            const html = Mustache.render(resolvedTemplate, resolvedData);
+            const html = Mustache.to_html(resolvedTemplate, resolvedData);
             // Write out the rendered template
             let container = document.getElementById("myDiv");
             container.innerHTML = "";
             return container.innerHTML = html;
         }).then(function () {
             retrieveImage(photoLink);
-            history.pushState(null, "Display contact after edit page", fetchLink);
+            history.pushState(null, "Display contact after edit page", historyLink);
         }).catch(function (err) {
             alert("Unable to update contact with new data");
         })

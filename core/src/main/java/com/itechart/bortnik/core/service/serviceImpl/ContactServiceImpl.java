@@ -13,6 +13,7 @@ import com.itechart.bortnik.core.domain.dto.FullContactDTO;
 import com.itechart.bortnik.core.domain.dto.SearchContactDTO;
 import com.itechart.bortnik.core.service.ContactService;
 import com.itechart.bortnik.core.validation.InputValidator;
+import com.mchange.v1.util.ListUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -89,28 +90,88 @@ public class ContactServiceImpl implements ContactService {
 
     @Override
     public FullContactDTO update(FullContactDTO entity) {
-
-        Contact insertedContact = contactDaoImpl.update(entity.getContact());
+        FullContactDTO updatedFullContactDTO = new FullContactDTO();
+        Contact updatedContact = contactDaoImpl.update(entity.getContact());
         //if contact insert failed, we'll get an empty contact, it this case we don't insert phones and attachments
-        if (insertedContact != null) {
-            int contactId = insertedContact.getId();
+        if (updatedContact != null) {
+            int contactId = updatedContact.getId();
+            //get phoneList for update and extract all non-zero ids
             List<Phone> extractedPhones = entity.getPhoneList();
-            List<Phone> insertedPhones = new ArrayList<>();
+            List<Integer> extractedNewPhoneId = new ArrayList<>();
             for (Phone phone : extractedPhones) {
-                phone.setContactId(contactId);
-                insertedPhones.add(phoneDaoImpl.insert(phone));
+                int id = phone.getId();
+                if (id != 0) {
+                    extractedNewPhoneId.add(id);
+                }
             }
-            List<Attachment> extractedAttachments = entity.getAttachmentList();
-            List<Attachment> insertedAttachments = new ArrayList<>();
-            for (Attachment attachment : extractedAttachments) {
-                attachment.setContactId(contactId);
-                insertedAttachments.add(attachmentDaoImpl.insert(attachment));
+            //get existing phones and extract their ids
+            List<Phone> currentPhones = phoneDaoImpl.readAllById(contactId);
+            List<Integer> currentPhoneId = new ArrayList<>();
+            for (Phone phone : currentPhones) {
+                currentPhoneId.add(phone.getId());
             }
-            return new FullContactDTO(insertedContact, insertedPhones, insertedAttachments, null);
-        } else {
-            return new FullContactDTO();
-        }
+            //subtract id arrays to find out if user deleted any phones
+            if (currentPhoneId != null && !currentPhoneId.isEmpty()) {
 
+                if(extractedNewPhoneId != null && !extractedNewPhoneId.isEmpty()){
+                    currentPhoneId.removeAll(extractedNewPhoneId);
+                }
+                for (Integer id : currentPhoneId) {
+                    phoneDaoImpl.delete(id);
+                }
+            }
+            //update existing or insert new phones
+            List<Phone> updatedPhones = new ArrayList<>();
+            for (Phone phone : extractedPhones) {
+                int phoneId = phone.getId();
+                if (phoneId == 0) {
+                    updatedPhones.add(phoneDaoImpl.insert(phone));
+                } else {
+                    updatedPhones.add(phoneDaoImpl.update(phone));
+                }
+
+            }
+            //get atachmentList for update and extract all non-zero ids
+            List<Attachment> extractedAttachments = entity.getAttachmentList();
+            List<Integer> extractedNewAttachmentId = new ArrayList<>();
+            for (Attachment attachment : extractedAttachments) {
+                int id = attachment.getId();
+                if (id != 0) {
+                    extractedNewAttachmentId.add(id);
+                }
+            }
+            //get existing attachments and extract their ids
+            List<Attachment> currentAttachments = attachmentDaoImpl.readAllById(contactId);
+            List<Integer> currentAttachmentId = new ArrayList<>();
+            for (Attachment attachment : currentAttachments) {
+                currentAttachmentId.add(attachment.getId());
+            }
+            //subtract id arrays to find out if user deleted any attachments
+            if (currentAttachmentId != null && !currentAttachmentId.isEmpty()) {
+                //if user deleted all existing attachments, we need to delete every attach from currentAttachmentId
+                if(extractedNewAttachmentId != null && !extractedNewAttachmentId.isEmpty()){
+                    currentAttachmentId.removeAll(extractedNewAttachmentId);
+                }
+                for (Integer id : currentAttachmentId) {
+                    attachmentDaoImpl.delete(id);
+                }
+            }
+            //update existing or insert new phones
+            List<Attachment> updatedAttachments = new ArrayList<>();
+            for (Attachment attachment : extractedAttachments) {
+                int attachmentId = attachment.getId();
+                if (attachmentId == 0) {
+                    updatedAttachments.add(attachmentDaoImpl.insert(attachment));
+                } else {
+                    updatedAttachments.add(attachmentDaoImpl.update(attachment));
+                }
+            }
+            updatedFullContactDTO.setContact(updatedContact);
+            updatedFullContactDTO.setPhoneList(updatedPhones);
+            updatedFullContactDTO.setAttachmentList(updatedAttachments);
+            //errorList stays null
+        }
+        return updatedFullContactDTO;
     }
 
     @Override
@@ -143,16 +204,18 @@ public class ContactServiceImpl implements ContactService {
     }
 
     @Override
-    public int countAllContacts(){
+    public int countAllContacts() {
         return contactDaoImpl.countContacts();
     }
 
     @Override
-    public int countAllContactsByCriteria(SearchContactDTO search){
+    public int countAllContactsByCriteria(SearchContactDTO search) {
         return contactDaoImpl.countContactsByCriteria(search);
     }
 
     @Override
-    public String findEmailById(int id){ return contactDaoImpl.readEmailById(id); }
+    public String findEmailById(int id) {
+        return contactDaoImpl.readEmailById(id);
+    }
 
 }

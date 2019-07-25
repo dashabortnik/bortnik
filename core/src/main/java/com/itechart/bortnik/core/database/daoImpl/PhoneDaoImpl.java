@@ -75,27 +75,33 @@ public class PhoneDaoImpl implements PhoneDao {
             if (generatedKeys.next()) {
                 phone.setId(generatedKeys.getInt(1));
             }
+            logger.info("Phone for contact {} was inserted successfully.", phone.getId());
         } catch (SQLException e) {
+            phone = null;
             logger.error("Error with inserting phone into database: ", e);
         }
-        logger.info("Phone for contact {} was inserted successfully.", phone.getId());
         return phone;
     }
 
     @Override
     public Phone update(Phone phone) {
-        String sql = "UPDATE phone SET country_code=?, operator_code=?, phone_number=?, phone_type=?, comment=? WHERE contact_id = ?";
+        String sql = "UPDATE phone SET country_code=?, operator_code=?, phone_number=?, phone_type=?, comment=? WHERE phone_id = ?";
         try (Connection connection = DatabaseUtil.getDataSource().getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
             ps.setString(1, phone.getCountryCode());
             ps.setString(2, phone.getOperatorCode());
             ps.setString(3, phone.getPhoneNumber());
-            ps.setObject(4, phone.getPhoneType());
+            if (PhoneType.home.toString().equals(phone.getPhoneType().toString().trim())) {
+                ps.setObject(4, 1);
+            } else {
+                ps.setObject(4, 2);
+            }
             ps.setString(5, phone.getComment());
-            ps.setInt(6, phone.getContactId());
+            ps.setInt(6, phone.getId());
             ps.execute();
             logger.info("Phone was updated successfully.");
         } catch (SQLException e) {
+            phone = null;
             logger.error("Error with updating phone: ", e);
         }
         return phone;
