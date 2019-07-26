@@ -478,7 +478,7 @@ function submitForm(form) {
                 });
         });
     } else {
-        alert("Unable to render display contact page with new data");
+       console.log("Unable to render display contact page with new data: validation error.");
     }
 }
 

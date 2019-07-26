@@ -87,7 +87,7 @@
             <td>{{name}}, {{uploadDate}}</td>
             <td>{{commentary}}</td>
             <td>
-                <button type="button" class="btn btn-secondary col-md-5"  value="{{& link}}" onclick="downloadFile(this.value)">Download: "{{& realFileName}}"</button>
+                <button type="button" class="btn btn-secondary download-button"  value="{{& link}}" onclick="downloadFile(this.value)">Download: "{{& realFileName}}"</button>
             </td>
         </tr>
         {{/attachmentList}}

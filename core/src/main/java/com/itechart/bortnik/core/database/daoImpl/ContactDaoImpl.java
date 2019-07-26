@@ -428,6 +428,21 @@ public class ContactDaoImpl implements ContactDao {
 
         if (newPhotoLink!=null && !newPhotoLink.isEmpty()){
             sql = "UPDATE contact SET surname=?, name=?, patronymic=?, birthday=?, gender=?, nationality=?, marital_status=?, website=?, email=?, workplace=?, photo_link=? WHERE contact_id = ?";
+            //if user updated picture, previous one should be deleted from the disk
+            String oldPhotoLink = readPhotoLinkById(contact.getId());
+            if (oldPhotoLink != null && !oldPhotoLink.isEmpty()) {
+                try {
+                    if (Files.deleteIfExists(Paths.get(oldPhotoLink))) { //if deleted, returns true
+                        logger.info("Old photo of contact {} was deleted from storage.", contact.getId());
+                    } else {
+                        logger.warn("Deleting old photo of contact {} from storage failed.", contact.getId());
+                    }
+                } catch (IOException e) {
+                    logger.error("Error while deleting old photo of contact {} from storage: ", contact.getId(), e);
+                }
+            } else {
+                logger.info("Contact {} had no old photo to delete or photo link was empty.", contact.getId());
+            }
         } else {
             sql = "UPDATE contact SET surname=?, name=?, patronymic=?, birthday=?, gender=?, nationality=?, marital_status=?, website=?, email=?, workplace=? WHERE contact_id = ?";
         }
@@ -438,7 +453,7 @@ public class ContactDaoImpl implements ContactDao {
             ps = connection.prepareStatement(sql);
             psAddress = connection.prepareStatement(sqlAddress);
             connection.setAutoCommit(false);
-            logger.debug("Update of contact - begin transaction. {}", contact.getId());
+            logger.debug("Update of contact {} - begin transaction.", contact.getId());
 
             //update the contact
             ps.setString(1, contact.getSurname());
