@@ -315,6 +315,7 @@ public class UpdateContactAction implements BaseAction {
 
         if (fullContactDTO != null) {
             FullContactDTO fullContact = contactService.update(fullContactDTO);
+            logger.debug("Ready to send updated contact to browser: {}", fullContact.toString());
             //write the created contact into response
             response.setHeader("Content-Type", "application/json; charset=UTF-8");
             ObjectMapper mapper = new ObjectMapper();

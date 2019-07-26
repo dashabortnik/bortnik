@@ -89,6 +89,7 @@ public class AttachmentDaoImpl implements AttachmentDao {
             ps.setInt(3, attachment.getContactId());
             ps.execute();
             logger.info("Attachment was updated successfully.");
+            readLinkAndDateByAttachmentId(attachment);
         } catch (SQLException e) {
             logger.error("Error with updating attachment: ", e);
         }
@@ -125,6 +126,26 @@ public class AttachmentDaoImpl implements AttachmentDao {
             logger.error("Error with deleting attachment from database: ", e);
         } catch (IOException e) {
             logger.error("Error with deleting attachment file from storage: ", e);
+        }
+    }
+
+    private void readLinkAndDateByAttachmentId(Attachment attachment){
+        String link = "";
+        Date uploadDate = null;
+        String sql = "SELECT attachment_link, upload_date FROM attachment WHERE attachment_id = ?";
+        try (Connection connection = DatabaseUtil.getDataSource().getConnection();
+             PreparedStatement ps = connection.prepareStatement(sql)) {
+            ps.setInt(1, attachment.getId());
+            ResultSet resultSet = ps.executeQuery();
+            while (resultSet.next()) {
+                link = resultSet.getString("attachment_link");
+                uploadDate = resultSet.getDate("upload_date");
+            }
+            attachment.setLink(link);
+            attachment.setUploadDate(uploadDate);
+            logger.info("Link and date for attachment {} were fetched successfully.", attachment.getId());
+        } catch (Exception e) {
+            logger.error("Error with fetching link and date for attachment {} from database: ", attachment.getId(), e);
         }
     }
 }

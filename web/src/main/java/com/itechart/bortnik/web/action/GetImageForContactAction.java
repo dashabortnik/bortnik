@@ -27,7 +27,6 @@ public class GetImageForContactAction implements BaseAction {
         if(path==null || "null".equals(path) || path.isEmpty()){
             try {
                 img = ImageIO.read(getClass().getResource("/img/default.jpg"));
-
                 logger.info("Default image was retrieved successfully.");
             } catch (IOException e) {
                 logger.error("Failed to read default image by given link: ", e);
@@ -43,7 +42,7 @@ public class GetImageForContactAction implements BaseAction {
         response.setContentType("image/jpeg");
         try (OutputStream out = response.getOutputStream()) {
             if (img==null){
-                ImageIO.read(getClass().getResource("/img/default.jpg"));
+                img = ImageIO.read(getClass().getResource("/img/default.jpg"));
             }
             ImageIO.write(img, "jpg", out);
             logger.info("Retrieved image was sent to browser");

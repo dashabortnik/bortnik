@@ -823,7 +823,8 @@ function deleteContact() {
     console.log("Current pathname is --- " + currentPath);
     var idArray = [];
     let tail = "";
-    if (new RegExp("^(\\/brt\\/contacts\\/)$").test(currentPath)) {
+    if (new RegExp("^(\\/brt\\/contacts\\/)$").test(currentPath) ||
+        new RegExp("^(\\/brt\\/contacts\\/search\\/.*)").test(currentPath)) {
         //checkboxes are checked and delete button is pressed
         console.log("General case");
         tail = "/contacts";
@@ -883,7 +884,8 @@ function sendEmail() {
     console.log("Current pathname is --- " + currentPath);
     let idArray = [];
 
-    if (new RegExp("^(\\/brt\\/contacts\\/)$").test(currentPath)) {
+    if (new RegExp("^(\\/brt\\/contacts\\/)$").test(currentPath) ||
+        new RegExp("^(\\/brt\\/contacts\\/search\\/.*)").test(currentPath) ) {
         //checkboxes are checked and delete button is pressed
         console.log("General case");
         let checked = document.querySelectorAll(".check:checked");
