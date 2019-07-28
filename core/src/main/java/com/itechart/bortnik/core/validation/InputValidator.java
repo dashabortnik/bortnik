@@ -98,7 +98,7 @@ public class InputValidator {
         for (Attachment attachment : attachmentList) {
             //check length of data in attachment fields
             validateFieldLength(attachment.getName(), validationErrorList, DB_ATTACHMENTNAME);
-            validateFieldLength(attachment.getLink(), validationErrorList, DB_ATTACHMENTLINK);
+            //validateFieldLength(attachment.getLink(), validationErrorList, DB_ATTACHMENTLINK);
         }
         return validationErrorList;
     }

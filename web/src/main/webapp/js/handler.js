@@ -71,7 +71,7 @@ function displayMainPage(page, pageSize) {
     });
 }
 
-function addPagination(myJson){
+function addPagination(myJson) {
     let page = myJson.pageNumber;
     let maxPage = myJson.totalSize;
     let pageSize = myJson.pageSize;
@@ -461,24 +461,24 @@ function submitForm(form) {
                 }
             }
             let template = fetch(tmpl)
-                .then(function (response){
+                .then(function (response) {
                     return response.text();
-                }).then(function (myText){
+                }).then(function (myText) {
                     Mustache.parse(myText);
                     const html = Mustache.render(myText, myJson);
                     // Write out the rendered template
                     let container = document.getElementById("myDiv");
                     container.innerHTML = "";
                     return container.innerHTML = html;
-                }).then(function (html){
+                }).then(function (html) {
                     history.pushState(null, title, historyLink);
-                    if(title==="Contact page"){
+                    if (title === "Contact page") {
                         retrieveImage(photoLink);
                     }
                 });
         });
     } else {
-       console.log("Unable to render display contact page with new data: validation error.");
+        console.log("Unable to render display contact page with new data: validation error.");
     }
 }
 
@@ -489,30 +489,31 @@ function openEditForm() {
     let path = window.location.pathname;
     let form = null;
 
-    let prom = Promise.resolve()
-        .then(function (res) {
-            if (path.match(new RegExp("\\/brt\\/contacts\\/\\d+"))) {
-                checkedId = path.split("/")[3];
-                console.log("ID---" + checkedId);
+    let prom = new Promise(function (resolve, reject) {
+        if (path.match(new RegExp("\\/brt\\/contacts\\/\\d+"))) {
+            checkedId = path.split("/")[3];
+            console.log("ID---" + checkedId);
+        } else {
+            let checked = document.querySelectorAll(".check:checked");
+            console.log("CHECKED OBJECT---" + checked);
+            let checkedChecks = checked.length;
+            console.log("CHECKED quantity---" + checkedChecks);
+            console.log(checkedChecks + "boxes checked now");
+            if (checkedChecks !== 1) {
+                alert("You can edit only one contact at a time! Please, check only one checkbox.");
+                return Promise.reject("No contacts chosen for edit.");
             } else {
-                let checked = document.querySelectorAll(".check:checked");
-                console.log("CHECKED OBJECT---" + checked);
-                let checkedChecks = checked.length;
-                console.log("CHECKED quantity---" + checkedChecks);
-                console.log(checkedChecks + "boxes checked now");
-                if (checkedChecks !== 1) {
-                    return alert("You can edit only one contact at a time! Please, check only one checkbox.");
-                } else {
-                    checkedId = checked.item(0).id;
-                }
+                checkedId = checked.item(0).id;
+                resolve(checkedId);
             }
-            link = "/brt/api/contacts/" + checkedId + "/edit-form";
-            console.log("BUILT LINK:" + link);
-        }).catch(function (err) {
-            console.log(err.message);
-        }).then(function () {
-            return navigate(link, retrieveImage);
-        })
+        }
+        link = "/brt/api/contacts/" + checkedId + "/edit-form";
+        console.log("BUILT LINK:" + link);
+    }).then(function () {
+        return navigate(link, retrieveImage);
+    }).catch(function (err) {
+        console.log(err.message);
+    })
     prom.then(function () {
         form = document.getElementById("editedContact");
 
@@ -590,13 +591,13 @@ function openEditForm() {
     })
 }
 
-function submitEditForm(form, checkedId){
+function submitEditForm(form, checkedId) {
     event.preventDefault();
     event.stopPropagation();
 
     let formData = new FormData(form);
 
-    let newImage = document.getElementById("photoLink").files[0];;
+    let newImage = document.getElementById("photoLink").files[0];
     formData.append("photoLink", newImage);
 
     //append phones to formData
@@ -637,7 +638,7 @@ function submitEditForm(form, checkedId){
         let fullCommentName = "attachment." + i + "." + commentName;
         formData.append(fullCommentName, commentValue);
 
-        if(attachmentId==="") {
+        if (attachmentId === "") {
             let userFileName = "attachment." + i + "." + "submittedFileName";
             //value will give fake path with filename
             let submittedName = attachmentTable.rows[i].cells[3].getElementsByTagName("input")[0].value;
@@ -655,47 +656,55 @@ function submitEditForm(form, checkedId){
         }
     }
 
-    let photoLink = null;
-    let fetchLink = "/brt/api/contacts/" + checkedId;
-    let historyLink = "/brt/contacts/" + checkedId;
+    if (validate(formData)) {
 
-    const data = fetch(fetchLink, {
-        method: 'POST',
-        body: formData,
-    }).then(function (response) {
-        return response.json();
-    }).then(function (myJson) {
-        // ignore warning, it works: contact is a nested object with attributes
-        photoLink = myJson.contact.photoLink;
-        let list = myJson.attachmentList;
-        for (let i = 0; i < list.length; i++) {
-            myJson.attachmentList[i].realFileName = myJson.attachmentList[i].link.split("---", 2)[1];
-            console.log(myJson.attachmentList[i].realFileName);
-        }
-        return myJson;
-    })
+        let photoLink = null;
+        let fetchLink = "/brt/api/contacts/" + checkedId;
+        let historyLink;
+        let title;
+        let tmpl = "";
 
-    let tmpl = "/templates/contactTemplate.mst";
-    const template = fetch(tmpl).then(response => response.text());
-    let title = "Contact page";
+        const data = fetch(fetchLink, {
+            method: 'POST',
+            body: formData,
+        }).then(function (response) {
+            return response.json();
+        }).then(function (myJson) {
+            if (myJson.errorList != null) {
+                tmpl = "/templates/errorPageTemplate.mst";
+                historyLink = "/brt/contacts/error";
+                title = "Error page";
+            } else {
+                tmpl = "/templates/contactTemplate.mst";
+                title = "Contact page";
+                historyLink = "/brt/contacts/" + checkedId;
+                photoLink = myJson.contact.photoLink;
+                let list = myJson.attachmentList;
+                for (let i = 0; i < list.length; i++) {
+                    myJson.attachmentList[i].realFileName = myJson.attachmentList[i].link.split("---", 2)[1];
+                    console.log(myJson.attachmentList[i].realFileName);
+                }
+            }
 
-    return Promise.all([data, template])
-        .then(response => {
-            let resolvedData = response[0];
-            let resolvedTemplate = response[1];
-            // Cache the template for future use
-            Mustache.parse(resolvedTemplate);
-            const html = Mustache.to_html(resolvedTemplate, resolvedData);
-            // Write out the rendered template
-            let container = document.getElementById("myDiv");
-            container.innerHTML = "";
-            return container.innerHTML = html;
-        }).then(function () {
-            retrieveImage(photoLink);
-            history.pushState(null, "Display contact after edit page", historyLink);
-        }).catch(function (err) {
-            alert("Unable to update contact with new data");
-        })
+            let template = fetch(tmpl)
+                .then(function (response) {
+                    return response.text();
+                }).then(function (myText) {
+                    Mustache.parse(myText);
+                    const html = Mustache.render(myText, myJson);
+                    let container = document.getElementById("myDiv");
+                    container.innerHTML = "";
+                    return container.innerHTML = html;
+                }).then(function (html) {
+                    history.pushState(null, title, historyLink);
+                    if (title === "Contact page") {
+                        retrieveImage(photoLink);
+                    }
+                });
+        });
+    } else {
+        console.log("Unable to update contact with new data: validation error.");
+    }
 }
 
 function resetTable(tableName, modalWindow) {
@@ -833,6 +842,10 @@ function deleteContact() {
         for (let i = 0; i < checked.length; i++) {
             idArray.push(checked[i].id);
         }
+        if (idArray.length === 0) {
+            alert("No contacts selected. Please, choose contact(s) to delete.");
+            return false;
+        }
     } else if (new RegExp("^(\\/brt\\/contacts\\/\\d+.*)").test(currentPath)) {
         //delete button pressed on the page of individual contact
         console.log("Particular case");
@@ -856,9 +869,10 @@ function deleteContact() {
         let tmpl = document.getElementById("mainTableTemplate").innerHTML;
         let html = Mustache.to_html(tmpl, myJson);
         document.getElementById("myDiv").innerHTML = html;
-        history.pushState(null, "Display main page", "/brt/contacts");
+        let historyLink = "/brt/contacts/?page=1&pageSize=10";
+        history.pushState(null, "Display main page", historyLink);
         return myJson;
-    }).then (function(myJson){
+    }).then(function (myJson) {
         addPagination(myJson);
     })
 }
@@ -885,7 +899,7 @@ function sendEmail() {
     let idArray = [];
 
     if (new RegExp("^(\\/brt\\/contacts\\/)$").test(currentPath) ||
-        new RegExp("^(\\/brt\\/contacts\\/search\\/.*)").test(currentPath) ) {
+        new RegExp("^(\\/brt\\/contacts\\/search\\/.*)").test(currentPath)) {
         //checkboxes are checked and delete button is pressed
         console.log("General case");
         let checked = document.querySelectorAll(".check:checked");
@@ -1103,13 +1117,13 @@ function displayFoundContacts(formData, page, pageSize) {
 
             let searchParamsText = "Search parameters: ";
 
-            for (let key in searchData){
-                if (searchData.hasOwnProperty(key) && searchData[key]!=="" &&
-                    searchData[key]!==null && searchData[key]!==0) {
-                    if(key==="address"){
+            for (let key in searchData) {
+                if (searchData.hasOwnProperty(key) && searchData[key] !== "" &&
+                    searchData[key] !== null && searchData[key] !== 0) {
+                    if (key === "address") {
                         let address = searchData.address;
-                        for (let param in address){
-                            if(address[param]!=="" && address[param]!==null && address[param]!==0){
+                        for (let param in address) {
+                            if (address[param] !== "" && address[param] !== null && address[param] !== 0) {
                                 searchParamsText += param + ": " + address[param] + "; ";
                             }
                         }

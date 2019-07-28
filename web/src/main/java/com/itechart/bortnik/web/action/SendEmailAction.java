@@ -80,8 +80,9 @@ public class SendEmailAction implements BaseAction {
                     });
             MimeMessage message = new MimeMessage(session);
             message.addRecipients(Message.RecipientType.CC, InternetAddress.parse(emails));
-            message.setSubject(topic);
-            message.setText(body);
+            message.setHeader("Content-Type", "text/plain; charset=UTF-8");
+            message.setSubject(topic, "UTF-8");
+            message.setText(body, "UTF-8");
             //send message
             Transport.send(message);
             logger.info("Email to requested contacts was sent.");

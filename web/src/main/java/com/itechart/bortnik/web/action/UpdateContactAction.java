@@ -315,19 +315,19 @@ public class UpdateContactAction implements BaseAction {
 
         if (fullContactDTO != null) {
             FullContactDTO fullContact = contactService.update(fullContactDTO);
-            logger.debug("Ready to send updated contact to browser: {}", fullContact.toString());
+            logger.debug("Ready to send updated contact to browser: {}", fullContact);
             //write the created contact into response
             response.setHeader("Content-Type", "application/json; charset=UTF-8");
             ObjectMapper mapper = new ObjectMapper();
             mapper.setDateFormat(df);
             try (PrintWriter out = response.getWriter()) {
                 mapper.writeValue(out, fullContact);
-                logger.info("Created contact sent to browser.");
+                logger.info("Updated contact sent to browser.");
             } catch (IOException e) {
                 logger.error("Error with reading or writing the file: ", e);
             }
         } else {
-            logger.warn("Unable to add new contact to DB. The received contact is empty.");
+            logger.warn("Unable to update contact.");
         }
     }
 }

@@ -18,6 +18,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,19 +72,34 @@ public class ContactServiceImpl implements ContactService {
             insertedFullContactDTO.setErrorList(validationErrorList);
             //delete saved photo and attachments by links
             String photoLink = entity.getContact().getPhotoLink();
-            File file = new File(photoLink);
-            if (file.delete()) { //if deleted, returns true
-                logger.info("Image of new contact was deleted.");
+            if (photoLink != null && !photoLink.isEmpty()) {
+                try {
+                    if (Files.deleteIfExists(Paths.get(photoLink))) { //if deleted, returns true
+                        logger.info("Photo of new contact was deleted from storage.");
+                    } else {
+                        logger.warn("Deleting photo of new contact from storage failed.");
+                    }
+                } catch (IOException e) {
+                    logger.error("Error on deleting photo of new contact.");
+                }
             } else {
-                logger.warn("Deleting image of new contact failed.");
+                logger.warn("New contact had no photo to delete or link was empty.");
             }
             List<Attachment> attachments = entity.getAttachmentList();
             for (Attachment attachment : attachments) {
-                File attach = new File(attachment.getLink());
-                if (attach.delete()) { //if deleted, returns true
-                    logger.info("Attachment of new contact was deleted.");
+                String attachmentLink = attachment.getLink();
+                if (attachmentLink != null && !attachmentLink.isEmpty()) {
+                    try {
+                        if (Files.deleteIfExists(Paths.get(attachmentLink))) { //if deleted, returns true
+                            logger.info("Attachment of new contact was deleted from storage.");
+                        } else {
+                            logger.warn("Deleting attachment of new contact from storage failed.");
+                        }
+                    } catch (IOException e) {
+                        logger.error("Error on deleting attachment of new contact.");
+                    }
                 } else {
-                    logger.warn("Deleting attachment of new contact failed.");
+                    logger.warn("New contact had no attachment to delete or link was empty.");
                 }
             }
         }
@@ -91,85 +109,111 @@ public class ContactServiceImpl implements ContactService {
     @Override
     public FullContactDTO update(FullContactDTO entity) {
         FullContactDTO updatedFullContactDTO = new FullContactDTO();
-        Contact updatedContact = contactDaoImpl.update(entity.getContact());
-        //if contact insert failed, we'll get an empty contact, it this case we don't insert phones and attachments
-        if (updatedContact != null) {
-            int contactId = updatedContact.getId();
-            //get phoneList for update and extract all non-zero ids
-            List<Phone> extractedPhones = entity.getPhoneList();
-            List<Integer> extractedNewPhoneId = new ArrayList<>();
-            for (Phone phone : extractedPhones) {
-                int id = phone.getId();
-                if (id != 0) {
-                    extractedNewPhoneId.add(id);
-                }
-            }
-            //get existing phones and extract their ids
-            List<Phone> currentPhones = phoneDaoImpl.readAllById(contactId);
-            List<Integer> currentPhoneId = new ArrayList<>();
-            for (Phone phone : currentPhones) {
-                currentPhoneId.add(phone.getId());
-            }
-            //subtract id arrays to find out if user deleted any phones
-            if (currentPhoneId != null && !currentPhoneId.isEmpty()) {
 
-                if(extractedNewPhoneId != null && !extractedNewPhoneId.isEmpty()){
-                    currentPhoneId.removeAll(extractedNewPhoneId);
-                }
-                for (Integer id : currentPhoneId) {
-                    phoneDaoImpl.delete(id);
-                }
-            }
-            //update existing or insert new phones
-            List<Phone> updatedPhones = new ArrayList<>();
-            for (Phone phone : extractedPhones) {
-                int phoneId = phone.getId();
-                if (phoneId == 0) {
-                    updatedPhones.add(phoneDaoImpl.insert(phone));
-                } else {
-                    updatedPhones.add(phoneDaoImpl.update(phone));
-                }
+        InputValidator inputValidator = new InputValidator();
+        List<String> validationErrorList = inputValidator.validateObject(entity);
 
-            }
-            //get atachmentList for update and extract all non-zero ids
-            List<Attachment> extractedAttachments = entity.getAttachmentList();
-            List<Integer> extractedNewAttachmentId = new ArrayList<>();
-            for (Attachment attachment : extractedAttachments) {
-                int id = attachment.getId();
-                if (id != 0) {
-                    extractedNewAttachmentId.add(id);
+        if (validationErrorList.isEmpty()) {
+
+            Contact updatedContact = contactDaoImpl.update(entity.getContact());
+            if (updatedContact != null) {
+                int contactId = updatedContact.getId();
+                //get phoneList for update and extract all non-zero ids
+                List<Phone> extractedPhones = entity.getPhoneList();
+                List<Integer> extractedNewPhoneId = new ArrayList<>();
+                for (Phone phone : extractedPhones) {
+                    int id = phone.getId();
+                    if (id != 0) {
+                        extractedNewPhoneId.add(id);
+                    }
                 }
-            }
-            //get existing attachments and extract their ids
-            List<Attachment> currentAttachments = attachmentDaoImpl.readAllById(contactId);
-            List<Integer> currentAttachmentId = new ArrayList<>();
-            for (Attachment attachment : currentAttachments) {
-                currentAttachmentId.add(attachment.getId());
-            }
-            //subtract id arrays to find out if user deleted any attachments
-            if (currentAttachmentId != null && !currentAttachmentId.isEmpty()) {
-                //if user deleted all existing attachments, we need to delete every attach from currentAttachmentId
-                if(extractedNewAttachmentId != null && !extractedNewAttachmentId.isEmpty()){
-                    currentAttachmentId.removeAll(extractedNewAttachmentId);
+                //get existing phones and extract their ids
+                List<Phone> currentPhones = phoneDaoImpl.readAllById(contactId);
+                List<Integer> currentPhoneId = new ArrayList<>();
+                for (Phone phone : currentPhones) {
+                    currentPhoneId.add(phone.getId());
                 }
-                for (Integer id : currentAttachmentId) {
-                    attachmentDaoImpl.delete(id);
+                //subtract id arrays to find out if user deleted any phones
+                if (currentPhoneId != null && !currentPhoneId.isEmpty()) {
+
+                    if (extractedNewPhoneId != null && !extractedNewPhoneId.isEmpty()) {
+                        currentPhoneId.removeAll(extractedNewPhoneId);
+                    }
+                    for (Integer id : currentPhoneId) {
+                        phoneDaoImpl.delete(id);
+                    }
                 }
+                //update existing or insert new phones
+                List<Phone> updatedPhones = new ArrayList<>();
+                for (Phone phone : extractedPhones) {
+                    int phoneId = phone.getId();
+                    if (phoneId == 0) {
+                        updatedPhones.add(phoneDaoImpl.insert(phone));
+                    } else {
+                        updatedPhones.add(phoneDaoImpl.update(phone));
+                    }
+
+                }
+                //get atachmentList for update and extract all non-zero ids
+                List<Attachment> extractedAttachments = entity.getAttachmentList();
+                List<Integer> extractedNewAttachmentId = new ArrayList<>();
+                for (Attachment attachment : extractedAttachments) {
+                    int id = attachment.getId();
+                    if (id != 0) {
+                        extractedNewAttachmentId.add(id);
+                    }
+                }
+                //get existing attachments and extract their ids
+                List<Attachment> currentAttachments = attachmentDaoImpl.readAllById(contactId);
+                List<Integer> currentAttachmentId = new ArrayList<>();
+                for (Attachment attachment : currentAttachments) {
+                    currentAttachmentId.add(attachment.getId());
+                }
+                //subtract id arrays to find out if user deleted any attachments
+                if (currentAttachmentId != null && !currentAttachmentId.isEmpty()) {
+                    //if user deleted all existing attachments, we need to delete every attach from currentAttachmentId
+                    if (extractedNewAttachmentId != null && !extractedNewAttachmentId.isEmpty()) {
+                        currentAttachmentId.removeAll(extractedNewAttachmentId);
+                    }
+                    for (Integer id : currentAttachmentId) {
+                        attachmentDaoImpl.delete(id);
+                    }
+                }
+                //update existing or insert new phones
+                List<Attachment> updatedAttachments = new ArrayList<>();
+                for (Attachment attachment : extractedAttachments) {
+                    int attachmentId = attachment.getId();
+                    if (attachmentId == 0) {
+                        updatedAttachments.add(attachmentDaoImpl.insert(attachment));
+                    } else {
+                        updatedAttachments.add(attachmentDaoImpl.update(attachment));
+                    }
+                }
+                updatedFullContactDTO.setContact(updatedContact);
+                updatedFullContactDTO.setPhoneList(updatedPhones);
+                updatedFullContactDTO.setAttachmentList(updatedAttachments);
+                //errorList stays null
             }
-            //update existing or insert new phones
-            List<Attachment> updatedAttachments = new ArrayList<>();
-            for (Attachment attachment : extractedAttachments) {
-                int attachmentId = attachment.getId();
-                if (attachmentId == 0) {
-                    updatedAttachments.add(attachmentDaoImpl.insert(attachment));
+        } else {
+            updatedFullContactDTO.setErrorList(validationErrorList);
+            //what happens with photo
+            List<Attachment> attachments = entity.getAttachmentList();
+            for (Attachment attachment : attachments) {
+                String link = attachment.getLink();
+                if (link != null && !link.isEmpty()) {
+                    try {
+                        if (Files.deleteIfExists(Paths.get(link))) { //if deleted, returns true
+                            logger.info("Attachment file of new contact was deleted from storage.");
+                        } else {
+                            logger.warn("Deleting attachment file of new contact from storage failed.");
+                        }
+                    } catch (IOException e) {
+                        logger.error("Error on deleting attachment of new contact.");
+                    }
                 } else {
-                    updatedAttachments.add(attachmentDaoImpl.update(attachment));
+                    logger.warn("New contact had no attachment file to delete or attachment link was empty.");
                 }
             }
-            updatedFullContactDTO.setContact(updatedContact);
-            updatedFullContactDTO.setPhoneList(updatedPhones);
-            updatedFullContactDTO.setAttachmentList(updatedAttachments);
-            //errorList stays null
         }
         return updatedFullContactDTO;
     }

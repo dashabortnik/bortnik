@@ -185,7 +185,7 @@ public class ContactDaoImpl implements ContactDao {
     @Override
     public List<Contact> readAll(int offset, int limit) {
         List<Contact> contacts = new ArrayList<>();
-        String sql = "SELECT * FROM contact LEFT JOIN address ON contact.contact_id=address.contact_id LIMIT ?, ?";
+        String sql = "SELECT * FROM contact LEFT JOIN address ON contact.contact_id=address.contact_id ORDER BY surname ASC LIMIT ?, ?";
 
         try (Connection connection = DatabaseUtil.getDataSource().getConnection();
              PreparedStatement ps = connection.prepareStatement(sql)) {
@@ -259,7 +259,7 @@ public class ContactDaoImpl implements ContactDao {
         String countAllQuery = sql.toString();
 
         //ADD SECOND QUERY
-        sql.append(" LIMIT ?,?");
+        sql.append(" ORDER BY surname ASC LIMIT ?,?");
         String getPaginatedContacts = sql.toString();
 
         logger.debug("Constructed query: {}", sql.toString());
