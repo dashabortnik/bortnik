@@ -84,3 +84,7 @@ h4 {
 .download-button{
     width: 100%;
 }
+
+.clickable {
+    cursor: pointer;
+}
