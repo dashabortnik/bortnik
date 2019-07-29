@@ -61,8 +61,4 @@ VALUES ('+7', '903','5467667', 'mobile', NULL, (SELECT contact_id FROM contact W
 INSERT INTO phone (country_code, operator_code, phone_number, phone_type, COMMENT, contact_id) 
 VALUES ('+375', '33','3455654', 'mobile', NULL, (SELECT contact_id FROM contact WHERE surname = 'Zinina' AND name = 'Karina'));
 
-/*insert attachment*/
-INSERT INTO attachment (attachment_name, attachment_link, upload_date, contact_id) 
-VALUES ('passport', 'https://clck.ru/GP4ri', CURDATE(), NULL, (SELECT contact_id FROM contact WHERE surname = 'Petrov' AND name = 'Ivan'));
-
 
