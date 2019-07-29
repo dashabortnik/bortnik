@@ -78,7 +78,7 @@ function addPagination(myJson) {
 
     let totalNumber = myJson.totalQuantity;
     let totalQuantity = "Number of contacts: " + totalNumber;
-    let totalQuantityNode =  document.createTextNode(totalQuantity);
+    let totalQuantityNode = document.createTextNode(totalQuantity);
     document.getElementById("totalNumberOfContacts").appendChild(totalQuantityNode);
 
     let navContainer = document.getElementById("navContainer");
@@ -997,7 +997,10 @@ function sendEmail() {
                 let html = Mustache.to_html(tmpl, myJson);
                 let container = document.getElementById("myDiv");
                 container.innerHTML = html;
-                history.pushState(null, "Display main page", "/brt/contacts");
+                history.pushState(null, "Display main page", "/brt/contacts/?page=1&pageSize=10");
+                return myJson;
+            }).then(function (myJson) {
+                addPagination(myJson);
             })
         }
     }).catch(function (err) {
@@ -1144,7 +1147,7 @@ function displayFoundContacts(formData, page, pageSize) {
             let textNode = document.createTextNode(searchParamsText);
             document.getElementById("searchParameters").appendChild(textNode);
             let totalQuantity = "Number of contacts: " + totalNumber;
-            let totalQuantityNode =  document.createTextNode(totalQuantity);
+            let totalQuantityNode = document.createTextNode(totalQuantity);
             document.getElementById("totalNumberOfContacts").appendChild(totalQuantityNode);
 
         }).catch(function (err) {

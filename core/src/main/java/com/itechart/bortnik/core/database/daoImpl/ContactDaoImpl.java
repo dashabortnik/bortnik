@@ -453,7 +453,7 @@ public class ContactDaoImpl implements ContactDao {
             ps = connection.prepareStatement(sql);
             psAddress = connection.prepareStatement(sqlAddress);
             connection.setAutoCommit(false);
-            logger.debug("Update of contact {} - begin transaction.", contact.getId());
+           logger.debug("Update of contact {} - begin transaction.", contact.getId());
 
             //update the contact
             ps.setString(1, contact.getSurname());

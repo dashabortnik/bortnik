@@ -121,7 +121,7 @@ public class UpdateContactAction implements BaseAction {
                             switch (itemName) {
                                 case "id":
                                     String newId = item.getString("UTF-8");
-                                    if (newId!=null && !newId.isEmpty()) {
+                                    if (newId != null && !newId.isEmpty()) {
                                         phoneId = Integer.valueOf(newId);
                                     }
                                     break;
@@ -181,7 +181,7 @@ public class UpdateContactAction implements BaseAction {
                     switch (itemName) {
                         case "id":
                             String newId = item.getString("UTF-8");
-                            if (newId!=null && !newId.isEmpty()) {
+                            if (newId != null && !newId.isEmpty()) {
                                 attachmentId = Integer.valueOf(newId);
                             }
                             break;
@@ -201,10 +201,24 @@ public class UpdateContactAction implements BaseAction {
                             }
                             break;
                         case "attachmentLink":
-                            if(submittedFileName!=null) {
-                                String path = props.getProperty("saveDirectory") + File.separator +
-                                        "file" + File.separator + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1)
+                            if (submittedFileName != null) {
+                                StringBuilder directory = new StringBuilder(props.getProperty("saveDirectory"));
+                                directory.append(File.separator);
+                                directory.append("file");
+                                directory.append(File.separator);
+                                String directoryPath = directory.toString();
+
+                                File directoryFile = new File(directoryPath);
+                                if (!directoryFile.exists()) {
+                                    directoryFile.mkdirs();
+                                }
+
+                                String path = directoryPath + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1)
                                         + "---" + submittedFileName;
+
+//                                String path = props.getProperty("saveDirectory") + File.separator +
+//                                        "file" + File.separator + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1)
+//                                        + "---" + submittedFileName;
                                 File uploadedFile = new File(path);
                                 item.write(uploadedFile);
                                 attachmentLink = uploadedFile.getAbsolutePath();
@@ -291,43 +305,58 @@ public class UpdateContactAction implements BaseAction {
                         }
                     }
                 } else {
-                    String path = props.getProperty("saveDirectory") + File.separator + "img"
-                            + File.separator + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1) + ".jpg";
-                    File uploadedFile = new File(path);
-                    item.write(uploadedFile);
-                    photoLink = uploadedFile.getAbsolutePath();
+                    if (item.getSize() != 0) {
+                        StringBuilder directory = new StringBuilder(props.getProperty("saveDirectory"));
+                        directory.append(File.separator);
+                        directory.append("img");
+                        directory.append(File.separator);
+                        String directoryPath = directory.toString();
+
+                        File directoryFile = new File(directoryPath);
+                        if (!directoryFile.exists()) {
+                            directoryFile.mkdirs();
+                        }
+
+                        String path = directoryPath + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1) + ".jpg";
+
+//                    String path = props.getProperty("saveDirectory") + File.separator + "img"
+//                            + File.separator + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1) + ".jpg";
+                        File uploadedFile = new File(path);
+                        item.write(uploadedFile);
+                        photoLink = uploadedFile.getAbsolutePath();
+                    }
                 }
             }
             receivedContact = new Contact(updateContactWithId, surname, name, patronymic, birthday, gender, nationality, maritalStatus, website,
                     email, workplace, photoLink, new Address(0, country, city, street, postcode));
 
-        } catch (FileUploadException e) {
-            logger.error("Error with file upload: ", e);
-        } catch (ParseException e) {
-            logger.error("Error with file parsing: ", e);
-        } catch (Exception e) {
-            logger.error("Error: ", e);
-        }
 
-        //create DTO object with contact, list of phones and list of attachments
-        FullContactDTO fullContactDTO = new FullContactDTO(receivedContact, phones, attachments, null);
-        logger.debug("Updated contact from formData info: {}", fullContactDTO);
+            //create DTO object with contact, list of phones and list of attachments
+            FullContactDTO fullContactDTO = new FullContactDTO(receivedContact, phones, attachments, null);
+            logger.debug("Updated contact from formData info: {}", fullContactDTO);
 
-        if (fullContactDTO != null) {
-            FullContactDTO fullContact = contactService.update(fullContactDTO);
-            logger.debug("Ready to send updated contact to browser: {}", fullContact);
-            //write the created contact into response
-            response.setHeader("Content-Type", "application/json; charset=UTF-8");
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.setDateFormat(df);
-            try (PrintWriter out = response.getWriter()) {
-                mapper.writeValue(out, fullContact);
-                logger.info("Updated contact sent to browser.");
-            } catch (IOException e) {
-                logger.error("Error with reading or writing the file: ", e);
+            if (fullContactDTO != null) {
+                FullContactDTO fullContact = contactService.update(fullContactDTO);
+                logger.debug("Ready to send updated contact to browser: {}", fullContact);
+                //write the created contact into response
+                response.setHeader("Content-Type", "application/json; charset=UTF-8");
+                ObjectMapper mapper = new ObjectMapper();
+                mapper.setDateFormat(df);
+                try (PrintWriter out = response.getWriter()) {
+                    mapper.writeValue(out, fullContact);
+                    logger.info("Updated contact sent to browser.");
+                } catch (IOException e) {
+                    logger.error("Error with reading or writing the file: ", e);
+                }
+            } else {
+                logger.warn("Unable to update contact.");
             }
-        } else {
-            logger.warn("Unable to update contact.");
+        } catch (FileUploadException e) {
+            e.printStackTrace();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

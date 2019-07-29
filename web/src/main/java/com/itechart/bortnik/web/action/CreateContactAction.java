@@ -186,11 +186,27 @@ public class CreateContactAction implements BaseAction {
                                     commentary = item.getString("UTF-8");
                                     break;
                                 case "attachmentLink":
-                                    if (item.getSize() != 0) {
-                                        // No file was been selected, or it was an empty file.
-                                        String path = props.getProperty("saveDirectory") + File.separator +
-                                                "file" + File.separator + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1)
-                                                + "---" + submittedFileName;
+                                   // if (item.getSize() != 0) {
+                                        // No file was selected, or it was an empty file.
+
+                                        if (item.getSize() != 0) {
+                                            StringBuilder directory = new StringBuilder(props.getProperty("saveDirectory"));
+                                            directory.append(File.separator);
+                                            directory.append("file");
+                                            directory.append(File.separator);
+                                            String directoryPath = directory.toString();
+
+                                            File directoryFile = new File(directoryPath);
+                                            if (! directoryFile.exists()){
+                                                directoryFile.mkdirs();
+                                            }
+
+                                            String path = directoryPath + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1)
+                                                    + "---" + submittedFileName;
+
+//                                        String path = props.getProperty("saveDirectory") + File.separator +
+//                                                "file" + File.separator + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1)
+//                                                + "---" + submittedFileName;
                                         File uploadedFile = new File(path);
                                         item.write(uploadedFile);
                                         attachmentLink = uploadedFile.getAbsolutePath();
@@ -295,8 +311,21 @@ public class CreateContactAction implements BaseAction {
                     }
                 } else {
                     if (item.getSize() != 0) {
-                        String path = props.getProperty("saveDirectory") + File.separator + "img"
-                                + File.separator + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1) + ".jpg";
+                        StringBuilder directory = new StringBuilder(props.getProperty("saveDirectory"));
+                        directory.append(File.separator);
+                        directory.append("img");
+                        directory.append(File.separator);
+                        String directoryPath = directory.toString();
+
+                        File directoryFile = new File(directoryPath);
+                        if (! directoryFile.exists()){
+                            directoryFile.mkdirs();
+                        }
+
+                        String path = directoryPath + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1) + ".jpg";
+
+//                        String path = props.getProperty("saveDirectory") + File.separator + "img"
+//                                + File.separator + ThreadLocalRandom.current().nextInt(1, 2147483646 + 1) + ".jpg";
                         File uploadedFile = new File(path);
                         item.write(uploadedFile);
                         photoLink = uploadedFile.getAbsolutePath();
