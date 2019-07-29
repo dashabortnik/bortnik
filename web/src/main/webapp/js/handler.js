@@ -494,10 +494,11 @@ function openEditForm() {
     let path = window.location.pathname;
     let form = null;
 
-    let prom = new Promise(function (resolve, reject) {
+    let prom = new Promise(function (resolve) {
         if (path.match(new RegExp("\\/brt\\/contacts\\/\\d+"))) {
             checkedId = path.split("/")[3];
             console.log("ID---" + checkedId);
+            resolve(checkedId);
         } else {
             let checked = document.querySelectorAll(".check:checked");
             console.log("CHECKED OBJECT---" + checked);
