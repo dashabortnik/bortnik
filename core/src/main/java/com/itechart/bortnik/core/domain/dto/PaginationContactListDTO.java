@@ -10,16 +10,18 @@ public class PaginationContactListDTO {
     private int pageNumber;
     private int pageSize;
     private int totalSize;
+    private int totalQuantity;
     private SearchContactDTO searchedContact;
 
     public PaginationContactListDTO(){
     }
 
-    public PaginationContactListDTO(List<Contact> contactList, int pageNumber, int pageSize, int totalSize, SearchContactDTO searchedContact) {
+    public PaginationContactListDTO(List<Contact> contactList, int pageNumber, int pageSize, int totalSize, int totalQuantity, SearchContactDTO searchedContact) {
         this.contactList = contactList;
         this.pageNumber = pageNumber;
         this.pageSize = pageSize;
         this.totalSize = totalSize;
+        this.totalQuantity = totalQuantity;
         this.searchedContact = searchedContact;
     }
 
@@ -55,6 +57,14 @@ public class PaginationContactListDTO {
         this.totalSize = totalSize;
     }
 
+    public int getTotalQuantity() {
+        return totalQuantity;
+    }
+
+    public void setTotalQuantity(int totalQuantity) {
+        this.totalQuantity = totalQuantity;
+    }
+
     public SearchContactDTO getSearchedContact() {
         return searchedContact;
     }
@@ -70,6 +80,7 @@ public class PaginationContactListDTO {
                 ", pageNumber=" + pageNumber +
                 ", pageSize=" + pageSize +
                 ", totalSize=" + totalSize +
+                ", totalQuantity=" + totalQuantity +
                 ", searchedContact=" + searchedContact +
                 '}';
     }

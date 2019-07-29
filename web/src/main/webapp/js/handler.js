@@ -76,6 +76,11 @@ function addPagination(myJson) {
     let maxPage = myJson.totalSize;
     let pageSize = myJson.pageSize;
 
+    let totalNumber = myJson.totalQuantity;
+    let totalQuantity = "Number of contacts: " + totalNumber;
+    let totalQuantityNode =  document.createTextNode(totalQuantity);
+    document.getElementById("totalNumberOfContacts").appendChild(totalQuantityNode);
+
     let navContainer = document.getElementById("navContainer");
     let nextBtnContainer = document.getElementById("nextBtnContainer");
 
@@ -1040,6 +1045,7 @@ function displayFoundContacts(formData, page, pageSize) {
     let historyLink = "/brt/contacts/search/?page=" + page + "&pageSize=" + pageSize;
     let maxPage;
     let searchData;
+    let totalNumber;
 
     const data = fetch(link, {
         method: 'POST',
@@ -1049,6 +1055,7 @@ function displayFoundContacts(formData, page, pageSize) {
     }).then(function (myJson) {
         maxPage = myJson.totalSize;
         searchData = myJson.searchedContact;
+        totalNumber = myJson.totalQuantity;
         return myJson;
     })
 
@@ -1132,8 +1139,12 @@ function displayFoundContacts(formData, page, pageSize) {
                     }
                 }
             }
+
             let textNode = document.createTextNode(searchParamsText);
             document.getElementById("searchParameters").appendChild(textNode);
+            let totalQuantity = "Number of contacts: " + totalNumber;
+            let totalQuantityNode =  document.createTextNode(totalQuantity);
+            document.getElementById("totalNumberOfContacts").appendChild(totalQuantityNode);
 
         }).catch(function (err) {
             alert("Unable to render found contacts page");
